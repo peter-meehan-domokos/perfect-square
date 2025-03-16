@@ -522,7 +522,6 @@ export default function quadrantsBarChart() {
                     })
             
             quadrantContainerG.exit().call(remove);
-
             //handlers and helpers
         }
 

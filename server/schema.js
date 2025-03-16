@@ -43,11 +43,14 @@ const RootQueryType = new GraphQLObjectType({
                         key,
                         data:JSON.stringify(getRehabDataForVisuals(24))
                     }
-                }else{
+                }
+                if(key === "generic_data_500"){
                     return { 
                         key,
                         data:JSON.stringify(createMockDataForVisuals(500)) 
                     }
+                }else {
+                    
                 }
             }
         }

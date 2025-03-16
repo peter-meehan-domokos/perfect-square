@@ -54,14 +54,27 @@ export const quadrantsBarChartLayout = (data, settings={}) => {
             value:Math.round(d3.mean(q.values.map(v => v.value)))
         }))
         const datapointSummaryValue = d3.mean(quadrantsWithSummaryValues.map(q => q.value));
+        const allValues = datapoint.quadrantsData
+            .map(q => q.values)
+            .reduce((arr1, arr2) => ([...arr1, ...arr2]))
+            .map(v => v.value);
+
+        const datapointStdDev = d3.deviation(allValues)
         return {
             ...datapoint,
             quadrantsData:quadrantsWithSummaryValues,
-            value:Math.round(datapointSummaryValue)
+            info:{
+                value:Math.round(datapointSummaryValue),
+                stdDev:Number(datapointStdDev.toFixed(1))
+            }
         }
     });
 
-    const datapointsOrderedBySummaryValue = sortAscending(datapointsWithSummaryValues, v => v.value)
+    const stdDevMin = d3.min(datapointsWithSummaryValues.map(d => d.info.stdDev));
+    const stdDevMax = d3.max(datapointsWithSummaryValues.map(d => d.info.stdDev));
+    const stdDevRange = stdDevMax - stdDevMin;
+
+    const datapointsOrderedBySummaryValue = sortAscending(datapointsWithSummaryValues, v => v.info.value)
         .map((d,i) => ({ ...d, position:i + 1 }));
     
     const datapointsWithSummaryValuesAndPosition = datapointsWithSummaryValues.map(d => ({ 
@@ -69,5 +82,11 @@ export const quadrantsBarChartLayout = (data, settings={}) => {
         position:datapointsOrderedBySummaryValue.find(datapoint => datapoint.key === d.key).position
     }));
 
-    return datapointsWithSummaryValuesAndPosition;
+    return {
+        measures, 
+        datapoints: datapointsWithSummaryValuesAndPosition,
+        info:{
+            stdDevMin, stdDevMax, stdDevRange
+        }
+    }
 }

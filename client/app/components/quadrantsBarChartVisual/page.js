@@ -42,8 +42,8 @@ const calculateChartSizesAndGridLayout = (container, nrItems, _containerMargin={
   //nrRows and cols
   const { nrCols, nrRows } = !nrItems ? { nrCols:1, nrRows:1 } : calcNrColsAndRows(contentsWidth, contentsHeight, nrItems);
   //dimns for single chart
-  const chartWidth = contentsWidth / nrCols;
-  const chartHeight = contentsHeight / nrRows;
+  const chartWidth = 0.35 * contentsWidth / nrCols;
+  const chartHeight = 0.35 * contentsHeight / nrRows;
   const chartMarginValues = typeof _chartMargin === "function" ? _chartMargin(chartWidth, chartHeight) : _chartMargin;
   const chartMargin = { ...defaultMargin, ...chartMarginValues }
 
@@ -58,7 +58,7 @@ const chart = quadrantsBarChart();
 const chartKey = quadrantsBarChartKey();
 const chartKeySmallScreen = quadrantsBarChartKey();
 
-const QuadrantsBarChartVisual = ({ data={ datapoints:[] }, initSelectedChartKey="" }) => {
+const QuadrantsBarChartVisual = ({ data={ datapoints:[], info:{ } }, initSelectedChartKey="" }) => {
   //why is this not using teh default, instead it passes through teh null
   //console.log("QuadsBarChart", data)
   //state
@@ -75,6 +75,7 @@ const QuadrantsBarChartVisual = ({ data={ datapoints:[] }, initSelectedChartKey=
   const chartKeySmallScreenRef = useRef(null);
   //store the actual zoom function so we can access its methods to get/set the transform
   const zoomRef = useRef(null);
+  const simRef = useRef(null);
 
   //helpers
   const chartMargin = (width, height) => ({ left:width * 0.1, right:width * 0.1, top:height * 0.1, bottom:height * 0.1 });
@@ -160,7 +161,41 @@ const QuadrantsBarChartVisual = ({ data={ datapoints:[] }, initSelectedChartKey=
     if (isFirstRender.current || !sizes) { return; }
     //console.log("renderChartUE...5")
     //data
-    const processedDatapoints = quadrantsBarChartLayout(data, { nrCols: sizes.nrCols });
+    const processedData = quadrantsBarChartLayout(data, { nrCols: sizes.nrCols });
+    const processedDatapoints = processedData.datapoints;
+    const { stdDevMin, stdDevRange } = processedData.info;
+
+    const xAxisProperty = "stdDev"; //"datasetOrder"
+    //@todo - try combining a forceX for the dataset order, and an attraction force manybody based on std dev similarity
+    //force
+    simRef.current = d3.forceSimulation(processedDatapoints);
+    const sim = simRef.current;
+    const extraMarginForForce = sizes.contentsWidth * 0.05;
+    const horizSpace = sizes.contentsWidth - 2 * extraMarginForForce
+    const vertSpace = sizes.contentsHeight - 2 * extraMarginForForce;
+    const horizSpacePerChart = horizSpace/processedDatapoints.length;
+    
+    sim
+    //add option to group by std dev on x axis instead of by datatset order eg date
+      .force("x", d3.forceX(d => {
+        if(xAxisProperty === "datasetOrder"){
+          return (horizSpacePerChart) * d.i + extraMarginForForce;
+        }
+        if(xAxisProperty === "stdDev"){
+          return horizSpace - (horizSpace * (d.info.stdDev - stdDevMin)/stdDevRange) + extraMarginForForce;
+        }
+        //default to centre of screen
+        return sizes.containerWidth/2;
+      })) 
+      .force("y", d3.forceY(d => sizes.contentsHeight - (vertSpace * d.info.value/100) - extraMarginForForce))
+      .force("collide", d3.forceCollide().radius(sizes.chartWidth * 0.5))
+      //.tick(n_frames_to_simulate)
+
+    sim.on("tick", () => 
+      d3.select(containerRef.current).selectAll("g.chart")
+        .attr("transform", d => `translate(${d.x}, ${d.y})`)
+    )
+
     //settings
     chart
         .width(sizes.chartWidth)
@@ -181,10 +216,11 @@ const QuadrantsBarChartVisual = ({ data={ datapoints:[] }, initSelectedChartKey=
         .attr("id", d => `chart-${d.key}`)
         .call(fadeIn, { transition:TRANSITION_IN})
         .merge(chartG)
-        .attr("transform", (d,i) => `translate(${d.colNr * sizes.chartWidth},${d.rowNr * sizes.chartHeight})`)
-        .call(chart)
+        //.attr("transform", (d,i) => `translate(${d.colNr * sizes.chartWidth},${d.rowNr * sizes.chartHeight})`)
+        .call(chart);
 
     chartG.exit().call(remove, { transition:TRANSITION_OUT})
+
   }, [sizes, selectedQuadrantIndex])
 
   //zoom set-up
