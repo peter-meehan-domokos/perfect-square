@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 import { isNumber } from '../../helpers/dataHelpers';
 import { remove, fadeIn } from '../../helpers/domHelpers';
 import { COLOURS } from "../../constants";
+import { DEFAULT_SETTINGS } from './constants';
 
 const { BLUE, LIGHT_BLUE, GREY } = COLOURS;
 
@@ -55,6 +56,7 @@ export default function quadrantsBarChart() {
 
     //settings
     let zoomState = { transform: d3.zoomIdentity };
+    let arrangeBy = DEFAULT_SETTINGS.arrangeBy;
     let withQuadrantTitles;
     //let withBarLabels;
     let levelOfDetail;
@@ -136,6 +138,7 @@ export default function quadrantsBarChart() {
     function chart(selection) {
         nrCharts = selection.nodes().length;
         updateDimns();
+        console.log("chartupdate", arrangeBy)
 
         selection.each(function (data,i) {
             if(d3.select(this).selectAll("*").empty()){ init(this, data); }
@@ -635,6 +638,11 @@ export default function quadrantsBarChart() {
         if (!arguments.length) { return zoomState; }
         zoomState = value;
         if(shouldUpdateDom && !d3.selectAll(".chart").empty()){ d3.selectAll(".chart").call(updateZoom) }
+        return chart;
+    };
+    chart.arrangeBy = function (value) {
+        if (!arguments.length) { return arrangeBy; }
+        arrangeBy = value;
         return chart;
     };
     return chart;

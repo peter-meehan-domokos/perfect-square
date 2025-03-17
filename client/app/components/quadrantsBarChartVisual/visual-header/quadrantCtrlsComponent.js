@@ -1,12 +1,12 @@
 import * as d3 from 'd3';
-import { isNumber } from '../../helpers/dataHelpers';
-import { remove, fadeIn } from '../../helpers/domHelpers';
-import { COLOURS } from "../../constants";
-import { resetIcon } from "../../assets/svgIcons";
+import { isNumber } from '../../../helpers/dataHelpers';
+import { remove, fadeIn } from '../../../helpers/domHelpers';
+import { COLOURS } from "../../../constants";
+import { resetIcon } from "../../../assets/svgIcons";
 
 const { BLUE, LIGHT_BLUE, GREY } = COLOURS;
 
-export default function quadrantsBarChartKey() {
+export default function quadrantCtrls() {
     // settings that apply to all quadrantsBartCharts, in case there is more than 1 eg a row of players
     let margin = { left:0, right:0, top: 0, bottom:0 };
     let width = 800;
@@ -35,7 +35,7 @@ export default function quadrantsBarChartKey() {
         contentsHeight = height - margin.top - margin.bottom;
         quadrantWidth = contentsWidth/2;
         quadrantHeight = contentsHeight/2;
-        styles.quadrant.title.fontSize = quadrantHeight * 0.2;
+        styles.quadrant.title.fontSize = quadrantHeight * 0.35;
     };
 
     //state

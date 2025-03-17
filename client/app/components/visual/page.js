@@ -11,14 +11,12 @@ const GET_EXAMPLE_DATA = gql`
 `
 
 const Visual = ({ exampleKey="" }) => {
-    //console.log("exampleKey", exampleKey)
     const { data } = useQuery(GET_EXAMPLE_DATA, { variables: { exampleKey }} );
     const [visData, setVisData] = useState(undefined);
     
     useEffect(() => {
         const dataStr = data?.exampleData?.data;
         const dataJSON = dataStr ? JSON.parse(dataStr) : undefined;
-        //console.log("dataJson", dataJSON)
         setVisData(dataJSON)
     }, [data])
 

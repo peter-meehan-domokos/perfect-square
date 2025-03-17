@@ -1,10 +1,11 @@
 'use client'
 import React, { useState, useEffect, useRef } from 'react'
 import * as d3 from 'd3';
+import VisualHeader from './visual-header/page';
 import { quadrantsBarChartLayout } from './quadrantsBarChartLayout';
 import quadrantsBarChart from "./quadrantsBarChartComponent";
-import quadrantsBarChartKey from "./quadrantsBarChartKeyComponent";
 import { remove, fadeIn } from '../../helpers/domHelpers';
+import { DEFAULT_SETTINGS } from "./constants.js";
 
 const CONTAINER_MARGIN = { left:0, right:0, top:0, bottom:0 };// { left:10, right:10, top:10, bottom:40 };
 const TRANSITION_OUT = { 
@@ -29,7 +30,7 @@ const calcNrColsAndRows = (containerWidth, containerHeight, n) => {
   return { nrCols, nrRows }
 }
 
-const calculateChartSizesAndGridLayout = (container, nrItems, _containerMargin={}, _chartMargin={}) => {
+const calculateChartSizesAndGridLayout = (container, nrItems, arrangeBy, _containerMargin={}, _chartMargin={}) => {
   //dimns for overall container
   const containerWidth = container.getBoundingClientRect().width;
   const containerHeight = container.getBoundingClientRect().height;
@@ -42,8 +43,10 @@ const calculateChartSizesAndGridLayout = (container, nrItems, _containerMargin={
   //nrRows and cols
   const { nrCols, nrRows } = !nrItems ? { nrCols:1, nrRows:1 } : calcNrColsAndRows(contentsWidth, contentsHeight, nrItems);
   //dimns for single chart
-  const chartWidth = 0.35 * contentsWidth / nrCols;
-  const chartHeight = 0.35 * contentsHeight / nrRows;
+  //flag
+  const reductionForArrangement = arrangeBy.x || arrangeBy.y ? 0.35 : 1;
+  const chartWidth = reductionForArrangement * contentsWidth / nrCols;
+  const chartHeight = reductionForArrangement * contentsHeight / nrRows;
   const chartMarginValues = typeof _chartMargin === "function" ? _chartMargin(chartWidth, chartHeight) : _chartMargin;
   const chartMargin = { ...defaultMargin, ...chartMarginValues }
 
@@ -55,91 +58,81 @@ const calculateChartSizesAndGridLayout = (container, nrItems, _containerMargin={
 }
 
 const chart = quadrantsBarChart();
-const chartKey = quadrantsBarChartKey();
-const chartKeySmallScreen = quadrantsBarChartKey();
 
-const QuadrantsBarChartVisual = ({ data={ datapoints:[], info:{ } }, initSelectedChartKey="" }) => {
-  //why is this not using teh default, instead it passes through teh null
+const QuadrantsBarChartVisual = ({ data={ datapoints:[], info:{ } }, initSelectedChartKey="", initSettings }) => {
   //console.log("QuadsBarChart", data)
   //state
+  const [headerExtended, setHeaderExtended] = useState(false);
   const [sizes, setSizes] = useState(null);
   const [selectedQuadrantIndex, setSelectedQuadrantIndex] = useState(null);
   const [selectedChartKey, setSelectedChartKey] = useState(initSelectedChartKey);
-  const [headerExtended, setHeaderExtended] = useState(false);
   const [zoomState, setZoomState] = useState({ transform:d3.zoomIdentity, manual:true });
+  const [settings, setSettings] = useState(initSettings || DEFAULT_SETTINGS)
   //refs
   const isFirstRender = useRef(true);
   const containerRef = useRef(null);
   const zoomGRef = useRef(null);
-  const chartKeyRef = useRef(null);
-  const chartKeySmallScreenRef = useRef(null);
+  
   //store the actual zoom function so we can access its methods to get/set the transform
   const zoomRef = useRef(null);
   const simRef = useRef(null);
+  //other data that doesnt trigger re-renders
+  //const sizesRef = useRef(null);
+  const processedDataRef = useRef(null);
+
+  const { key, title, desc, info, categories, datapoints } = data
+
+  const headerData = {
+    title,
+    categories,
+    desc,
+    info
+  }
 
   //helpers
   const chartMargin = (width, height) => ({ left:width * 0.1, right:width * 0.1, top:height * 0.1, bottom:height * 0.1 });
   const toggleHeaderExtended = e => {
     setHeaderExtended(prevState => !prevState);
   }
+  console.log("Render chartwidth", sizes?.chartWidth)
 
   //sizes
   useEffect(() => {
-    //console.log("chartSizeUE...1")
-    const chartSizes = calculateChartSizesAndGridLayout(containerRef.current, data.datapoints.length, CONTAINER_MARGIN, chartMargin);
+    console.log("chartSizeUE...1")
+    const chartSizes = calculateChartSizesAndGridLayout(containerRef.current, datapoints.length, settings.arrangeBy, CONTAINER_MARGIN, chartMargin);
     setSizes(chartSizes);
-  },[data.datapoints.length])
+  },[datapoints.length, settings.arrangeBy])
 
   //resize listener
   useEffect(() => {
-    //console.log("resizeUE...2")
+    console.log("resizeUE...2")
     let resizeObserver = new ResizeObserver(() => { 
-      const chartSizes = calculateChartSizesAndGridLayout(containerRef.current, data.datapoints.length, CONTAINER_MARGIN, chartMargin);
+      const chartSizes = calculateChartSizesAndGridLayout(containerRef.current, datapoints.length, settings.arrangeBy, CONTAINER_MARGIN, chartMargin);
       setSizes(chartSizes);
     }); 
     resizeObserver.observe(containerRef.current);
-  }, [data.datapoints.length]);
+  }, [datapoints.length]);
 
   //change the overall viz dataset (not just the datapoints)
   useEffect(() => {
     if (isFirstRender.current) { return; }
-    //console.log("dataKeyUE...3")
+    console.log("dataKeyChangeUE...3")
     setTimeout(() => {
       setSelectedQuadrantIndex(null);
       setSelectedChartKey("");
       if(zoomRef.current){ d3.select(containerRef.current).call(zoomRef.current.transform, d3.zoomIdentity); }
       setZoomState({ transform:d3.zoomIdentity, manual:true });
     }, TRANSITION_OUT.delay + TRANSITION_OUT.duration)
-  },[data.key])
+  },[key])
 
-  //render chartkey
+  //reset zoom if user changes arrangement
   useEffect(() => {
-    const chartKeyData = data.categories;
-    if(!chartKeyData){ return; }
-    //call key
-    d3.select(chartKeyRef.current)
-      ?.datum(chartKeyData)
-      .call(chartKey
-        .width(240)
-        .height(140)
-        .margin({ left:20, right: 20, top: 20, bottom:20 })
-        .selectedQuadrantIndex(selectedQuadrantIndex)
-        .setSelectedQuadrantIndex(setSelectedQuadrantIndex));
-
-    d3.select(chartKeySmallScreenRef.current)
-      ?.datum(chartKeyData)
-      .call(chartKeySmallScreen
-        .width(190)
-        .height(100)
-        .margin({ left:10, right: 20, top: 20, bottom:20 })
-        .selectedQuadrantIndex(selectedQuadrantIndex)
-        .setSelectedQuadrantIndex(setSelectedQuadrantIndex));
-
-  }, [selectedQuadrantIndex, data.categories])
+    setZoomState({ transform:d3.zoomIdentity, manual:false });
+  },[settings.arrangeBy])
 
   //note- this useEffect may be neede don first render, if a selectedChartKey is passed in
   useEffect(() => {
-    //console.log("selectedChartKeyUE...4")
+    console.log("selectedChartKeyUE...4")
     chart.selectedChartKey(selectedChartKey)
     //user deselects by zooming or panning manually, so no need to do anything here in that case
     if(!selectedChartKey){ return; }
@@ -156,14 +149,26 @@ const QuadrantsBarChartVisual = ({ data={ datapoints:[], info:{ } }, initSelecte
     //as there are no other things that change when a chart is selected at present
   }, [selectedChartKey])
 
-  //render/update chart
+  //layout applied to data
   useEffect(() => {
     if (isFirstRender.current || !sizes) { return; }
-    //console.log("renderChartUE...5")
-    //data
-    const processedData = quadrantsBarChartLayout(data, { nrCols: sizes.nrCols });
+    console.log("layoutUE...5")
+    processedDataRef.current = quadrantsBarChartLayout(data, { nrCols: sizes.nrCols });
+  }, [data.key, data.datapoints, sizes?.nrCols])
+
+  //simulation
+  useEffect(() => {
+    if (isFirstRender.current || !sizes) { return; }
+    //CHECK - do we need anyting in here to run if arrangement is turned off!!!!!!!!!!!!
+    //@todo - used this, no need to setup the sim if !dataIsArraged
+    const dataIsArranged = settings.arrangeBy.x || settings.arrangeBy.y;
+    if(!dataIsArranged){ return; }
+    console.log("simUE...6")
+
+    const processedData = processedDataRef.current;
     const processedDatapoints = processedData.datapoints;
     const { stdDevMin, stdDevRange } = processedData.info;
+  
 
     const xAxisProperty = "stdDev"; //"datasetOrder"
     //@todo - try combining a forceX for the dataset order, and an attraction force manybody based on std dev similarity
@@ -174,7 +179,6 @@ const QuadrantsBarChartVisual = ({ data={ datapoints:[], info:{ } }, initSelecte
     const horizSpace = sizes.contentsWidth - 2 * extraMarginForForce
     const vertSpace = sizes.contentsHeight - 2 * extraMarginForForce;
     const horizSpacePerChart = horizSpace/processedDatapoints.length;
-    
     sim
     //add option to group by std dev on x axis instead of by datatset order eg date
       .force("x", d3.forceX(d => {
@@ -196,6 +200,30 @@ const QuadrantsBarChartVisual = ({ data={ datapoints:[], info:{ } }, initSelecte
         .attr("transform", d => `translate(${d.x}, ${d.y})`)
     )
 
+  }, [settings.arrangeBy])
+  //render/update chart
+  useEffect(() => {
+    if (isFirstRender.current || !sizes) { return; }
+    console.log("renderChartUE...7")
+    const dataIsArranged = settings.arrangeBy.x || settings.arrangeBy.y ? true : false;
+    //data
+    const processedData = processedDataRef.current;
+    const processedDatapoints = processedData.datapoints;
+    //next - if remving arrangement, must go back to grid, so must remove nide.x and y values??
+    //also, bug when adding a 2nd arrangement..bars are too big..its to do with the orer things happen
+    //this is the order we need
+    /*
+    - user removes x arrangement
+    - chart size recalculated -> sizes state updated
+      - chart re-rendered, with sim.stop() and new tranform appliied via selection.transform
+        (also need to move sim stuff into separate useEffect..it doesnt need to run every time, only when arrangeBy changes)
+    */
+    if(!dataIsArranged){
+      simRef.current?.stop();
+    }else{
+      simRef.current?.restart();
+    }
+
     //settings
     chart
         .width(sizes.chartWidth)
@@ -204,6 +232,7 @@ const QuadrantsBarChartVisual = ({ data={ datapoints:[], info:{ } }, initSelecte
         .selectedQuadrantIndex(selectedQuadrantIndex)
         .setSelectedChartKey(setSelectedChartKey)
         .zoomState(zoomState)
+        .arrangeBy(settings.arrangeBy)
 
     //call chart
     const visContentsG = d3.select(containerRef.current).selectAll("g.vis-contents")
@@ -216,17 +245,17 @@ const QuadrantsBarChartVisual = ({ data={ datapoints:[], info:{ } }, initSelecte
         .attr("id", d => `chart-${d.key}`)
         .call(fadeIn, { transition:TRANSITION_IN})
         .merge(chartG)
-        //.attr("transform", (d,i) => `translate(${d.colNr * sizes.chartWidth},${d.rowNr * sizes.chartHeight})`)
+        .attr("transform", (d,i) => dataIsArranged ? null : `translate(${d.colNr * sizes.chartWidth},${d.rowNr * sizes.chartHeight})`)
         .call(chart);
 
     chartG.exit().call(remove, { transition:TRANSITION_OUT})
 
-  }, [sizes, selectedQuadrantIndex])
+  }, [sizes, selectedQuadrantIndex, settings.arrangeBy])
 
   //zoom set-up
   useEffect(() => {
     if (isFirstRender.current || !sizes) { return; }
-    //console.log("zoomSetupUE...6")
+    console.log("zoomSetupUE...8")
     if(!zoomRef.current){ zoomRef.current = d3.zoom(); }
     zoomRef.current
       .scaleExtent([1, 100])
@@ -244,7 +273,7 @@ const QuadrantsBarChartVisual = ({ data={ datapoints:[], info:{ } }, initSelecte
   //zoom change
   useEffect(() => {
     if (isFirstRender.current) { return; }
-    //console.log("zoomChangeUE...7")
+    console.log("zoomChangeUE...9")
     //update zoomstate in the dom
     if(zoomState.manual){
       d3.select(zoomGRef.current).attr("transform", zoomState.transform);
@@ -265,42 +294,16 @@ const QuadrantsBarChartVisual = ({ data={ datapoints:[], info:{ } }, initSelecte
 
   return (
     <div className="viz-root">
-      <div className={`viz-header ${headerExtended ? "extended" : ""}`}>
-        <div className="viz-overview">
-          <div className="title-and-description">
-            <div className="viz-title">
-              {data.title?.map((line, i) => 
-                <div className="title-line" key={`title-line-${i}`}>{line}</div> )
-              }
-            </div>
-            <div
-              className={`desc-btn ${headerExtended ? "to-hide" : "to-show"}`}
-              onClick={toggleHeaderExtended}
-            >
-              {`${headerExtended ? "Hide" : "Show"} Description`}
-            </div>
-            <div className={`viz-desc ${headerExtended ? "extended" : ""}`}>
-              {data.desc?.map((line, i) => 
-                <div className="desc-line" key={`desc-line-${i}`}>{line}</div> )
-              }
-            </div>
-          </div>
-          <div className="viz-info">
-              {data.info && 
-                <div className="visual-name">
-                  <div className="label">{data.info.label}</div>
-                  <div className="name">{data.info.name}</div>
-                </div>
-              }
-              <div className="key key-sm-only">
-                <svg ref={chartKeySmallScreenRef}></svg>
-              </div>
-          </div>
-        </div>
-        <div className="key key-above-sm">
-          <svg ref={chartKeyRef}></svg>
-        </div>
-      </div>
+      <VisualHeader 
+        data={headerData} 
+        settings={settings}
+        zoomScaleValue={zoomState.transform.k}
+        headerExtended={headerExtended} 
+        setHeaderExtended={setHeaderExtended} 
+        selectedQuadrantIndex={selectedQuadrantIndex}
+        setSelectedQuadrantIndex={setSelectedQuadrantIndex}
+        setSettings={setSettings}
+      />
       <div className={`viz-container ${headerExtended ? "with-extended-header" : ""}`} >
         <div className="viz-inner-container" ref={containerRef}>
           <svg className="viz" width="100%" height="100%">
