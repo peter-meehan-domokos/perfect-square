@@ -89,7 +89,7 @@ const valuesForSessionsPostInjury = {
 }
 
 const howItWorks = [
-  "Click chart to select. Click key to select quadrant. Spread fingers to zoom. Drag to pan."
+  "Click a chart to select. Spread/pinch to zoom. Drag to pan."
 ]
 
 export const getRehabDataForVisuals = (nrSessions=24) => {
@@ -159,13 +159,13 @@ function createRehabCategoriesData(sessionIndex, sessionKey, categoryIndex){
 const createMockDatum = (datapointIndex, categories=[], measures=[]) => {
   //Give the measure scores for this datapoint a random mean around 70, and standard deviation around 30
   const meanOfMean = 70;
-  const stdDevOfMean = 40;
-  const meanOfStdDev = 30;
-  const stdDevOfStdDev = 20;
-  const meanOfScore = randomNormal(meanOfMean, stdDevOfMean)();
-  const stdDevOfScore = randomNormal(meanOfStdDev, stdDevOfStdDev)();
-  //create the score generator using a normal distribution with this mean and stdDev
-  const randGenerator = randomNormal(meanOfScore, stdDevOfScore);
+  const deviationOfMean = 40;
+  const meanOfdeviation = 30;
+  const deviationOfDeviation = 20;
+  const meanOfScore = randomNormal(meanOfMean, deviationOfMean)();
+  const deviationOfScore = randomNormal(meanOfdeviation, deviationOfDeviation)();
+  //create the score generator using a normal distribution with this mean and deviation
+  const randGenerator = randomNormal(meanOfScore, deviationOfScore);
   return { 
     key:`datapoint-${datapointIndex}`,
     title:`Datapoint ${datapointIndex + 1}`,

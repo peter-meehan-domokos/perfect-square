@@ -1,10 +1,10 @@
 import * as d3 from 'd3';
 import { isNumber } from '../../../helpers/dataHelpers';
 import { remove, fadeIn } from '../../../helpers/domHelpers';
-import { COLOURS } from "../../../constants";
+import { COLOURS, FADE_IN_TRANSITION } from "../../../constants";
 import { resetIcon } from "../../../assets/svgIcons";
 
-const { BLUE, LIGHT_BLUE, GREY } = COLOURS;
+const { BLUE, LIGHT_BLUE, GREY, SMOKE_WHITE } = COLOURS;
 
 export default function quadrantCtrls() {
     // settings that apply to all quadrantsBartCharts, in case there is more than 1 eg a row of players
@@ -60,21 +60,23 @@ export default function quadrantCtrls() {
             contentsG
                 .append("rect")
                     .attr("class", "chart-contents-bg")
-                    .attr("stroke", "grey")
-                    .attr("fill", "transparent");
+                    .attr("stroke-width", 2)
+                    .attr("stroke", SMOKE_WHITE)
+                    .attr("fill", "transparent")
+                    .call(fadeIn, { transition:FADE_IN_TRANSITION });      
 
             contentsG.append("line").attr("class", "axis x-axis");
             contentsG.append("line").attr("class", "axis y-axis");
             contentsG.selectAll("line.axis")
                 .attr("stroke-width", 0.5)
-                .attr("stroke", "grey")
-
+                .attr("stroke", GREY)
+                .call(fadeIn, { transition:FADE_IN_TRANSITION });  
         }
 
         function update(containerElement, data, settings={}){
             const contentsG = d3.select(containerElement).select("g.chart-contents")
                 .attr("transform", `translate(${margin.left}, ${margin.top})`)
-            
+
             //bg
             contentsG.select("rect.chart-contents-bg")
                 .attr("width", `${contentsWidth}px`)
@@ -107,8 +109,9 @@ export default function quadrantCtrls() {
                                 .attr("text-anchor", "middle")
                                 .attr("dominant-baseline", "central")
                                 .attr("stroke-width", 0.1)
-                                .attr("opacity", selectedQuadrantIndex === i ? 1 : 0.5);
+                                .style("opacity", selectedQuadrantIndex === i ? 1 : 0.5);
                     })
+                    .call(fadeIn, { transition:FADE_IN_TRANSITION })
                     .merge(quadrantContainerG)
                     .attr("transform", (d,i) => `translate(${(i === 0 || i === 2) ? 0 : quadrantWidth}, ${(i === 0 || i === 1) ? 0 : quadrantHeight})`)
                     .on("click", function(e,d){
@@ -127,7 +130,7 @@ export default function quadrantCtrls() {
                             .text(d.title)
                                 .transition()
                                 .duration(200)
-                                    .attr("opacity", selectedQuadrantIndex === i ? 1 : 0.5);
+                                    .style("opacity", selectedQuadrantIndex === i ? 1 : 0.5);
                     })
             
             quadrantContainerG.exit().call(remove);

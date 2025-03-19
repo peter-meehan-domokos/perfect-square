@@ -126,6 +126,7 @@ export default function quadrantsBarChart() {
     };
 
     //state
+    let metaData = {};
     let selectedQuadrantIndex = null;
     let selectedChartKey = "";
     //handlers
@@ -134,11 +135,22 @@ export default function quadrantsBarChart() {
 
     //helper
     let scaleValue;
+    const colourScale = d3.scaleSequential(d3.interpolateBlues); //takes values 0 to 1
+    const scaleStartPoint = 0.5;
+    const scaleEndPoint = 1;
+    let calcDatapointColour;
 
     function chart(selection) {
         nrCharts = selection.nodes().length;
         updateDimns();
-        console.log("chartupdate", arrangeBy)
+        calcDatapointColour = d => {
+            const summaryMeasureKey = arrangeBy.colour; //value, deviation or position
+            if(!summaryMeasureKey || !metaData.data) { return BLUE; }
+            const { min, max, range } = metaData.data.info[summaryMeasureKey] 
+            const value = d.info[summaryMeasureKey];
+            const valueAsProportion = (value - min)/range;
+            return colourScale(scaleStartPoint + valueAsProportion * (scaleEndPoint - scaleStartPoint))
+        };
 
         selection.each(function (data,i) {
             if(d3.select(this).selectAll("*").empty()){ init(this, data); }
@@ -208,7 +220,9 @@ export default function quadrantsBarChart() {
         function update(containerElement, data, options={}){
             //'this' is the container
             const container = d3.select(containerElement);
+            //flags
             const anotherChartIsSelected = selectedChartKey && selectedChartKey !== data.key;
+
             //bg
             container.select("rect.chart-bg")
                 .attr("width", `${width}px`)
@@ -343,7 +357,7 @@ export default function quadrantsBarChart() {
                         barsAreaG
                             .append("rect")
                                 .attr("class", "bars-area-bg")
-                                .attr("stroke", anotherQuadrantIsSelected || anotherChartIsSelected ? GREY : BLUE)
+                                .attr("stroke", anotherQuadrantIsSelected || anotherChartIsSelected ? GREY : calcDatapointColour(data)) 
                                 .attr("stroke-width", scaleValue(anotherQuadrantIsSelected || anotherChartIsSelected ? 0.1 : 0.3))
                                 .attr("fill", "transparent");
                          
@@ -410,7 +424,7 @@ export default function quadrantsBarChart() {
                         barsAreaG.select("rect.bars-area-bg")
                                 .transition()
                                 .duration(500)
-                                    .attr("stroke", anotherQuadrantIsSelected || anotherChartIsSelected ? GREY : BLUE)
+                                    .attr("stroke", anotherQuadrantIsSelected || anotherChartIsSelected ? GREY : calcDatapointColour(data)) 
                                     .attr("stroke-width", scaleValue(anotherQuadrantIsSelected || anotherChartIsSelected ? 0.1 : 0.3))
 
                         //bars
@@ -442,7 +456,7 @@ export default function quadrantsBarChart() {
                                             .attr("class", "bar")
                                                 .attr("width", barWidth)
                                                 .attr("height", barHeight)
-                                                .attr("fill", anotherQuadrantIsSelected || anotherChartIsSelected ? GREY : BLUE);
+                                                .attr("fill", anotherQuadrantIsSelected || anotherChartIsSelected ? GREY : calcDatapointColour(data));
                                 })
                                 .merge(barG)
                                 .each(function(barD,j){
@@ -460,7 +474,7 @@ export default function quadrantsBarChart() {
                                         .duration(100)
                                             .attr("width", barWidth)
                                             .attr("height", barHeight)
-                                            .attr("fill", anotherQuadrantIsSelected || anotherChartIsSelected ? GREY : BLUE);
+                                            .attr("fill", anotherQuadrantIsSelected || anotherChartIsSelected ? GREY : calcDatapointColour(data));
 
                                     //labels
                                     /*
@@ -544,7 +558,7 @@ export default function quadrantsBarChart() {
                     .attr("transform", `translate(0, ${chartTitleHeight * 0.8})`)
                     .attr("opacity", shouldShowSubtitle ? 0.45 : 0)
                     .attr("font-size", styles.chart.subtitle.fontSize)
-                    .text(data.subtitle || (data.position ? `Position ${data.position} / ${nrCharts}` : ""));
+                    .text(data.subtitle || (data.info.position ? `Position ${data.info.position} / ${nrCharts}` : ""));
 
         }
 
@@ -581,7 +595,7 @@ export default function quadrantsBarChart() {
                     .attr("stroke-width", scaleValue(anotherChartIsSelected ? 0.1 : 0.3))
                     .transition()
                     .duration(200)
-                        .attr("stroke", anotherChartIsSelected ? GREY : BLUE)
+                        .attr("stroke", anotherChartIsSelected ? GREY : calcDatapointColour(data))
                 
                 //add the extra gap between quadrants, and colour the bars correctly
                 //note - the order of the nodes in this selectAll is not reliable, so we use d.i not i
@@ -594,7 +608,7 @@ export default function quadrantsBarChart() {
                         d3.select(this).selectAll("rect.bar")
                             .transition()
                             .duration(200)
-                                .attr("fill", anotherQuadrantIsSelected || anotherChartIsSelected ? GREY : BLUE)
+                                .attr("fill", anotherQuadrantIsSelected || anotherChartIsSelected ? GREY : calcDatapointColour(data))
                     });
 
             })
@@ -617,6 +631,11 @@ export default function quadrantsBarChart() {
     chart.margin = function (value) {
         if (!arguments.length) { return margin }
         margin = { ...margin, ...value };
+        return chart;
+    };
+    chart.metaData = function (value) {
+        if (!arguments.length) { return metaData; }
+        metaData = value;
         return chart;
     };
     chart.selectedQuadrantIndex = function (value) {

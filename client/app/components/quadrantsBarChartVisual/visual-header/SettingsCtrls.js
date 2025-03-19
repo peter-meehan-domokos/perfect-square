@@ -1,19 +1,19 @@
 'use client'
-import React, { } from 'react';
+import React, { useRef } from 'react';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';
 import Checkbox from '@mui/material/Checkbox';
-import { SETTINGS_OPTIONS } from "../constants.js";
+import { SETTINGS_OPTIONS, ARRANGEMENT_OPTIONS } from "../constants.js";
 
 //these objects are applied to the checkbox and label roots, using the sx prop
 //see https://www.youtube.com/watch?v=gw30zyh3Irw&t=806s
 const medScreenCheckboxFormGroupStyle = {
-  border:"solid", borderColor:"red", 
-  display:"flex", flexDirection:"row", justifyContent:"space-around", alignItems:"center"
+  marginBottom:"5px", paddingLeft:"15px",
+  display:"flex", flexDirection:"row", justifyContent:"space-around", alignItems:"center",
 
 }
 const largeScreenCheckboxFormGroupStyle = {
-  width:"80px",
+  width:"90px", paddingLeft:"10px",
   display:"flex", flexDirection:"column", justifyContent:"space-around", alignItems:"flex-start"
 
 }
@@ -21,42 +21,86 @@ const checkboxStyle = {
   '& .MuiSvgIcon-root': { fontSize: "14px" }
 }
 const FormControlLabelStyle = {
-  '& .MuiFormControlLabel-label': { fontSize: "8px" }
+  '& .MuiFormControlLabel-label': { fontSize: "9px" }
 }
 
-const SettingsCtrls = ({ settings, setSettings }) => {
+const SettingsCtrls = ({ settings, setSettings, setTooltipsData }) => {
+  const mouseOverRef = useRef("");
   const handleSettingsChange = (checkboxKey, checkboxValue) => {
     //helper
     setSettings(prevState => {
-      const { x, y } = prevState.arrangeBy;
+      const { x, y, colour } = prevState.arrangeBy;
       //helpers (note - value here will be the arrangeBy key or "")
-      const replaceX = value => ({ ...prevState, arrangeBy:{ x:value, y }});
-      const replaceY = value => ({ ...prevState, arrangeBy:{ x, y:value }});
+      const replaceX = value => ({ ...prevState, arrangeBy:{ x:value, y, colour }});
+      const replaceY = value => ({ ...prevState, arrangeBy:{ x, y:value, colour }});
+      const replaceColour = value => ({ ...prevState, arrangeBy:{ x, y, colour:value }});
       if(checkboxValue === true){
-        //put in x if available, else put in y
-        return !x ? replaceX(checkboxKey) : replaceY(checkboxKey);
+        //put in x if available, else put in y, else put in colour
+        return !x ? replaceX(checkboxKey) : (!y ? replaceY(checkboxKey) : replaceColour(checkboxKey));
       }else{
         //find where it is and remove it
-        return x === checkboxKey ? replaceX("") : replaceY("")
+        return x === checkboxKey ? replaceX("") : ( y === checkboxKey ? replaceY("") : replaceColour(""));
       }
     })
   }
 
+  const handleMouseOver = optKey => {
+    //console.log("over---", optKey)
+    mouseOverRef.current = optKey;
+    setTimeout(() => {
+      if(!mouseOverRef.current === optKey) { return; }
+      //note - tooltip key is same for all 3 so it doesnt disappear when going from one to the other
+      const option = SETTINGS_OPTIONS.arrangeBy.find(opt => opt.key === optKey);
+      const newTooltipDatum = { key:"setting", title:option.label, paragraphs:option.desc, fixedInPlace:false };
+      setTooltipsData(prevState => {
+        const currentSettingsTooltip = prevState.find(d => d.key === "setting");
+        if(currentSettingsTooltip){
+          return prevState.map(d => d.key !== "setting" ? d : newTooltipDatum)
+        }else{
+          return [...prevState, newTooltipDatum]
+        }
+      })
+    }, 200)
+  }
+
+  const handleMouseOut = () => {
+    //console.log("out---")
+    mouseOverRef.current = "";
+    setTimeout(() => {
+      if(mouseOverRef.current) { return; }
+      setTooltipsData(prevState => prevState.filter(d => d.key !== "setting"))
+    }, 500)
+  }
+
   const renderSettingsList = () => (
     <>
-      {SETTINGS_OPTIONS.arrangeBy.map(option => 
-        <FormControlLabel 
-          control={<Checkbox 
-            sx={checkboxStyle} 
-            checked={Object.values(settings.arrangeBy).includes(option.key)}
-            onChange={(e, value) => handleSettingsChange(option.key, value)}
-          />} 
-          label={option.label} 
-          sx={FormControlLabelStyle}
-          disabled={option.disabled}
-          key={`settings-option-${option.key}`}
-        />
-      )}
+      {SETTINGS_OPTIONS.arrangeBy.map(option => {
+        const { arrangeBy } = settings;
+        const { x, y, colour } = arrangeBy;
+        const checked = Object.values(arrangeBy).includes(option.key);
+        const arrangementKey = checked && (x === option.key ? "x" :(y === option.key ? "y" : "colour"))
+        const arrangement = ARRANGEMENT_OPTIONS.find(ar => ar.key === arrangementKey);
+        return(
+          <FormControlLabel 
+            control={<Checkbox 
+              sx={checkboxStyle} 
+              checked={checked}
+              onChange={(e, value) => handleSettingsChange(option.key, value)}
+            />} 
+            label={
+              <span className="arrangement-label">
+                <span className="option-label">{option.label}</span>
+                {checked && <span className="arrangement-desc">({arrangement.label})</span>}
+              </span>
+            }
+            sx={FormControlLabelStyle}
+            disabled={option.disabled}
+            key={`settings-option-${option.key}`}
+            onMouseOver={() => handleMouseOver(option.key)}
+            onMouseOut={() => handleMouseOut(option.key)}
+          />
+        )
+      })}
     </>
   )
 
