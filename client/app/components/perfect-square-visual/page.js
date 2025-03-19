@@ -2,8 +2,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import * as d3 from 'd3';
 import VisualHeader from './visual-header/page';
-import { quadrantsBarChartLayout } from './quadrantsBarChartLayout';
-import quadrantsBarChart from "./quadrantsBarChartComponent";
+import perfectSquareLayout from './perfectSquareLayout';
+import perfectSquareComponent from "./perfectSquareComponent";
 import tooltipComponent from "../d3HelperComponents/tooltipComponent";
 import { remove, fadeIn } from '../../helpers/domHelpers';
 import { DEFAULT_SETTINGS, SETTINGS_OPTIONS } from "./constants.js";
@@ -48,11 +48,10 @@ const calculateChartSizesAndGridLayout = (contentsWidth, contentsHeight, nrCols,
   }
 }
 
-const chart = quadrantsBarChart();
+const perfectSquare = perfectSquareComponent();
 const tooltip = tooltipComponent();
 
-const QuadrantsBarChartVisual = ({ data={ datapoints:[], info:{ } }, initSelectedChartKey="", initSettings }) => {
-  //console.log("QuadsBarChart", data)
+const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelectedChartKey="", initSettings }) => {
   //state
   const [headerExtended, setHeaderExtended] = useState(false);
   const [containerSizesAndGrid, setContainerSizesAndGrid] = useState({});
@@ -138,7 +137,7 @@ const QuadrantsBarChartVisual = ({ data={ datapoints:[], info:{ } }, initSelecte
   //note- this useEffect may be neede don first render, if a selectedChartKey is passed in
   useEffect(() => {
     //console.log("selectedChartKeyUE...4")
-    chart.selectedChartKey(selectedChartKey)
+    perfectSquare.selectedChartKey(selectedChartKey)
     //user deselects by zooming or panning manually, so no need to do anything here in that case
     if(!selectedChartKey){ return; }
     const { contentsWidth, contentsHeight } = containerSizesAndGrid;
@@ -159,7 +158,7 @@ const QuadrantsBarChartVisual = ({ data={ datapoints:[], info:{ } }, initSelecte
   useEffect(() => {
     if (isFirstRender.current) { return; }
     //console.log("layoutUE...5")
-    processedDataRef.current = quadrantsBarChartLayout(data, { nrCols: containerSizesAndGrid.nrCols });
+    processedDataRef.current = perfectSquareLayout(data, { nrCols: containerSizesAndGrid.nrCols });
 
     //issue - we need new layout when containersize changes as nr cols might change
     //options -> put nrcols and rows into containerSizesAndGrid instead of sizesRef
@@ -253,7 +252,7 @@ const QuadrantsBarChartVisual = ({ data={ datapoints:[], info:{ } }, initSelecte
     }
 
     //settings
-    chart
+    perfectSquare
         .width(sizesRef.current.chartWidth)
         .height(sizesRef.current.chartHeight)
         .margin(sizesRef.current.chartMargin)
@@ -275,14 +274,14 @@ const QuadrantsBarChartVisual = ({ data={ datapoints:[], info:{ } }, initSelecte
         .call(fadeIn, { transition:TRANSITION_IN})
         .merge(chartG)
         .attr("transform", (d,i) => dataIsArranged ? null : `translate(${d.colNr * sizesRef.current.chartWidth},${d.rowNr * sizesRef.current.chartHeight})`)
-        .call(chart);
+        .call(perfectSquare);
 
     chartG.exit().call(remove, { transition:TRANSITION_OUT});
 
   }, [containerSizesAndGrid, selectedQuadrantIndex, settings.arrangeBy])
 
   useEffect(() => {
-    console.log("tooltipsUE...", tooltipsData)
+    //console.log("tooltipsUE...", tooltipsData)
     const tooltipWidth = 150;
     const tooltipHeight = 150;
 
@@ -343,7 +342,7 @@ const QuadrantsBarChartVisual = ({ data={ datapoints:[], info:{ } }, initSelecte
           });
     }
     //pass zoomstate change onto component for other adjustments
-    chart.zoomState(zoomState, true)
+    perfectSquare.zoomState(zoomState, true)
   },[zoomState])
 
   useEffect(() => { isFirstRender.current = false; })
@@ -396,6 +395,6 @@ const QuadrantsBarChartVisual = ({ data={ datapoints:[], info:{ } }, initSelecte
   )
 }
 
-export default QuadrantsBarChartVisual;
+export default PerfectSquareVisual;
 
 

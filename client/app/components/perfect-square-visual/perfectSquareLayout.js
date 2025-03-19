@@ -9,7 +9,7 @@ const calcColNr = (i, nrCols) => i % nrCols;
 /*
     @todo rewrite as a proper d3 layout function instead of using settings as a parameter
 */
-export const quadrantsBarChartLayout = (data, settings={}) => {
+export default function(data, settings={}){
     const { measures, datapoints } = data;
     const { nrCols } = settings;
     const datapointsWithOrderedMeasures = datapoints.map((datapoint,i) => ({

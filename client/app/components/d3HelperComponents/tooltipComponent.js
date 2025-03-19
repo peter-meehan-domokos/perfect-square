@@ -109,7 +109,6 @@ export default function tooltip() {
         }
 
         function update(containerElement, data, componentEnter, options={}){
-            console.log("data", data)
             if(!componentEnter){
                 d3.select('clipPath#tooltip-clip').select('rect')
                 .attr('width', width)

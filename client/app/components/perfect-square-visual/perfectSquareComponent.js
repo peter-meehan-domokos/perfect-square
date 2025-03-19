@@ -6,7 +6,7 @@ import { DEFAULT_SETTINGS } from './constants';
 
 const { BLUE, LIGHT_BLUE, GREY } = COLOURS;
 
-export default function quadrantsBarChart() {
+export default function perfectSquare() {
     // settings that apply to all quadrantsBartCharts, in case there is more than 1 eg a row of players
     let margin = { left:0, right:0, top: 0, bottom:0 };
     let width = 800;

@@ -1,6 +1,6 @@
 import { gql, useQuery } from "@apollo/client";
 import { useEffect, useState } from "react";
-import QuadrantsBarChartVisual from '../quadrantsBarChartVisual/page';
+import PerfectSquareVisual from '../perfect-square-visual/page';
 
 const GET_EXAMPLE_DATA = gql`
   query getExampleData($exampleKey: String!){
@@ -22,7 +22,7 @@ const Visual = ({ exampleKey="" }) => {
 
     return (
         <main className="main">
-            <QuadrantsBarChartVisual data={visData} />
+            <PerfectSquareVisual data={visData} />
         </main>
     )
 }
