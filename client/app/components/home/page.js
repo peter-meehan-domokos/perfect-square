@@ -18,7 +18,7 @@ const Home = ({ }) => {
     const [selectedExampleKey, setSelectedExampleKey] = useState("");
 
     useEffect(() => {
-      setSelectedExampleKey(examples[0]?.key)
+      setSelectedExampleKey(examples[1]?.key)
     }, [data])
 
     return (

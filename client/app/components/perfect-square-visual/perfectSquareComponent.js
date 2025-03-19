@@ -476,62 +476,7 @@ export default function perfectSquare() {
                                             .attr("height", barHeight)
                                             .attr("fill", anotherQuadrantIsSelected || anotherChartIsSelected ? GREY : calcDatapointColour(data));
 
-                                    //labels
-                                    /*
-                                    const shouldShowLabels = withBarLabels && selectedQuadrantIndex === j;
-                                    const labelG = barG.selectAll("g.bar-label").data(shouldShowLabels ? [1] : []);
-                                    labelG.enter()
-                                        .append("g")
-                                            .attr("class", "bar-label")
-                                            .call(fadeIn)
-                                            .each(function(){
-                                                const labelG = d3.select(this);
-                                                labelG.append("rect")
-                                                    .attr("fill", LIGHT_BLUE)
-                                                    .attr("stroke-width", 0.3)
-                                                    .attr("rx", "2")
-                                                    .attr("ry", "2");
-                                                
-                                                labelG.append("text")
-                                                    .attr("x", barLabelWidth/2)
-                                                    .attr("y", `${barLabelHeight/2}`)
-                                                    .attr("dominant-baseline", "central")
-                                                    .attr("text-anchor", "middle")
-                                                    .attr("fill", "white")
-                                                    .attr("stroke", "white")
-                                                    .attr("stroke-width", 0.1)
-                                                    .attr("font-size", styles.bar.fontSize)
-                                                    .text(barD.label);
-                                            })
-                                            .merge(labelG)
-                                            .each(function(){
-                                                const labelG = d3.select(this);
-                                                const vertAdjustmentForOverlap = 2.5;
-                                                const labelAngle = -45;
-                                                //@todo - if angel not 45, need to use toRadians function
-                                                const labelAngleRads = Math.PI/4;
-                                                const labelX = i < 2 ? -(barLabelWidth * Math.cos(labelAngleRads)) + horizLabelMargin : horizLabelMargin; 
-                                                const labelY = i < 2 ? (barHeight - vertAdjustmentForOverlap) + (barLabelWidth * Math.sin(labelAngleRads)) : 0; 
-                                                const shouldShowlabels = withBarLabels && selectedQuadrantIndex === i;
-                                                
-                                                //turn display on before fade in if necc
-                                                //@todo - use a fadeIn custom function that checks for this
-                                                if(shouldShowlabels && labelG.attr("display") === "none"){ labelG.attr("display", null) }
-                                                labelG
-                                                    .attr("transform", `translate(${labelX} ${labelY}) rotate(${labelAngle})`)
-                                                    .transition()
-                                                    .duration(500)
-                                                        .attr("opacity", shouldShowlabels ? 1 : 0)
-                                                        //if revealing them, we need to set display to null before trans
-                                                        //.on("end", function(){ d3.select(this).attr("display", shouldShowlabels ? null : "none" )});
-
-                                                labelG.select("rect")
-                                                    .attr("width", `${barLabelWidth}px`)
-                                                    .attr("height", `${barLabelHeight}px`)
-                                                    .attr("opacity", 0.8);
-
-                                            })
-                                    */
+                                   
                                 })
 
                         barG.exit().call(remove);
