@@ -1,4 +1,4 @@
-# The Perfect Square (a.k.a. The Quadrants Bar Chart)
+# The Perfect Square
 
 ## Overview
 
