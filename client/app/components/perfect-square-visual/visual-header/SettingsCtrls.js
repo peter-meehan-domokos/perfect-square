@@ -27,6 +27,9 @@ const FormControlLabelStyle = {
 const SettingsCtrls = ({ settings, setSettings, setTooltipsData }) => {
   const mouseOverRef = useRef("");
   const handleSettingsChange = (checkboxKey, checkboxValue) => {
+    //remove tooltip as it has been clicked
+    mouseOverRef.current = "";
+    setTooltipsData([]);
     //helper
     setSettings(prevState => {
       const { x, y, colour } = prevState.arrangeBy;
