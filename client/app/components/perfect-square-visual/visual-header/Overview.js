@@ -1,0 +1,32 @@
+'use client'
+import React, { useState, useEffect } from 'react';
+import Fade from '@mui/material/Fade';
+
+const Overview = ({ title=[], desc=[], headerExtended=false, toggleHeaderExtended }) => {
+    return (
+        <Fade appear={true} in={true} timeout={{ enter: 1200, exit:400 }}>
+            <div className="viz-overview">
+                <div className="title-and-description" >
+                <div className="viz-title">
+                    {title?.map((line, i) => <div className="title-line" key={`title-line-${i}`}>{line}</div> )}
+                </div>
+                {desc?.length > 0 &&
+                    <div
+                        className={`desc-btn ${headerExtended ? "to-hide" : "to-show"}`}
+                        onClick={toggleHeaderExtended}
+                    >
+                        {`${headerExtended ? "Hide" : "Show"} Description`}
+                    </div>
+                }
+                <div className={`viz-desc ${headerExtended ? "extended" : ""}`}>
+                    {desc?.map((line, i) => <div className="desc-line" key={`desc-line-${i}`}>{line}</div> )}
+                </div>
+                </div>
+            </div> 
+        </Fade>
+    )
+}
+
+export default Overview;
+
+

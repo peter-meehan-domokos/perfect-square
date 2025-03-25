@@ -1,10 +1,14 @@
+export const LEVELS_OF_DETAIL = [1,2,3];
+//these values base_sizes (derived from the chart width and height essentially)
+export const LEVELS_OF_DETAIL_THRESHOLDS = [90, 220]; //note - level 2 below 90 has poor performance as too many charts
+
 export const SETTINGS_OPTIONS = {
     arrangeBy:[
         { 
-            key:"value", label:"Mean Avg", 
+            key:"mean", label:"Mean Avg", 
             desc:[
                 { text:"Each chart is a datapoint (vector) made up of multiple bars (measures or dimensions)." },
-                { text:"The mean of the entire datapoint is the avg score for all the bars" }
+                { text:"The datapoint's mean average is the mean average of all it bar values." }
             ] 
         },
         { 
@@ -12,14 +16,14 @@ export const SETTINGS_OPTIONS = {
             desc:"",
             desc:[
                 { text:"Each chart is a datapoint (vector) made up of multiple bars (measures or dimensions)." },
-                { text:"The standard deviation of the datapoint is the deviation of the values of all the bars" }
+                { text:"The datapoint's standard deviation is the standard deviation of all it bar values." }
             ] 
         },
         { 
             key:"position", label:"Date", 
             desc:[
                 { title:"What it is", text:"This arranges the charts (datapoints) in order of the date associaated with them." },
-                { title:"How it works", text:"If there are no dates, then it arranegs tehm based on the order that they are stored in" }
+                { title:"How it works", text:"If there are no dates, then it arranges them based on the order that they are stored in." }
             ] 
         }
         /*{ key:"similarity", label:"Similarity", disabled:true, desc:"" }*/

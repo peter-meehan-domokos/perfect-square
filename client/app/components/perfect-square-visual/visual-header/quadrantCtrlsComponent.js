@@ -1,7 +1,8 @@
 import * as d3 from 'd3';
 import { isNumber } from '../../../helpers/dataHelpers';
 import { remove, fadeIn } from '../../../helpers/domHelpers';
-import { COLOURS, FADE_IN_TRANSITION } from "../../../constants";
+import { COLOURS } from "../../../constants";
+import { CHART_IN_TRANSITION } from '../../../constants';
 import { resetIcon } from "../../../assets/svgIcons";
 
 const { BLUE, LIGHT_BLUE, GREY, SMOKE_WHITE } = COLOURS;
@@ -63,14 +64,14 @@ export default function quadrantCtrls() {
                     .attr("stroke-width", 2)
                     .attr("stroke", SMOKE_WHITE)
                     .attr("fill", "transparent")
-                    .call(fadeIn, { transition:FADE_IN_TRANSITION });      
+                    .call(fadeIn, { transition:CHART_IN_TRANSITION });      
 
             contentsG.append("line").attr("class", "axis x-axis");
             contentsG.append("line").attr("class", "axis y-axis");
             contentsG.selectAll("line.axis")
                 .attr("stroke-width", 0.5)
                 .attr("stroke", GREY)
-                .call(fadeIn, { transition:FADE_IN_TRANSITION });  
+                .call(fadeIn, { transition:CHART_IN_TRANSITION });  
         }
 
         function update(containerElement, data, settings={}){
@@ -96,7 +97,7 @@ export default function quadrantCtrls() {
                 .attr("y2", contentsHeight)
 
             //Quadrants
-            const quadrantContainerG = contentsG.selectAll("g.quadrant-container").data(data)
+            const quadrantContainerG = contentsG.selectAll("g.quadrant-container").data(data, d => d.key)
             quadrantContainerG.enter()
                 .append("g")
                     .attr("class", (d,i) => `quadrant-container quandrant-container-${d.key}`)
@@ -111,7 +112,7 @@ export default function quadrantCtrls() {
                                 .attr("stroke-width", 0.1)
                                 .style("opacity", selectedQuadrantIndex === i ? 1 : 0.5);
                     })
-                    .call(fadeIn, { transition:FADE_IN_TRANSITION })
+                    .call(fadeIn, { transition:CHART_IN_TRANSITION })
                     .merge(quadrantContainerG)
                     .attr("transform", (d,i) => `translate(${(i === 0 || i === 2) ? 0 : quadrantWidth}, ${(i === 0 || i === 1) ? 0 : quadrantHeight})`)
                     .on("click", function(e,d){

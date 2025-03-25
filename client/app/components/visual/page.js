@@ -13,6 +13,10 @@ const GET_EXAMPLE_DATA = gql`
 const Visual = ({ exampleKey="" }) => {
     const { data } = useQuery(GET_EXAMPLE_DATA, { variables: { exampleKey }} );
     const [visData, setVisData] = useState(undefined);
+    const _visData = {
+      ...visData,
+      datapoints:visData?.key === "rehab" ? visData.datapoints : [],
+    }
     
     useEffect(() => {
         const dataStr = data?.exampleData?.data;

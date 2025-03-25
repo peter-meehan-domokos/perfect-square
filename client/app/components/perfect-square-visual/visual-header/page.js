@@ -1,6 +1,7 @@
 'use client'
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import * as d3 from 'd3';
+import Overview from './Overview';
 import ZoomCtrls from './ZoomCtrls';
 import SettingsCtrls from './SettingsCtrls';
 import quadrantCtrlsComponent from "./quadrantCtrlsComponent";
@@ -10,14 +11,14 @@ import { selectClasses } from '@mui/material';
 const quadrantCtrls = quadrantCtrlsComponent();
 
 const QuadrantsBarChartHeader = ({ data={}, settings, zoomTransform, headerExtended=false, selectedQuadrantIndex, onClickZoom, resetZoom, setSettings, setSelectedQuadrantIndex, setHeaderExtended, setTooltipsData }) => { 
+    const { categories, nrDatapoints, title, desc } = data;
     //refs
     const quadrantCtrlsRef = useRef(null);
-    const overviewRef = useRef(null);
     //handler
     const toggleHeaderExtended = e => { setHeaderExtended(!headerExtended); }
     //render quadrantCtrls
     useEffect(() => {
-        const quadrantCtrlsData = data.categories;
+        const quadrantCtrlsData = categories;
         if(!quadrantCtrlsData){ return; }
 
         d3.select(quadrantCtrlsRef.current)
@@ -29,39 +30,16 @@ const QuadrantsBarChartHeader = ({ data={}, settings, zoomTransform, headerExten
             .selectedQuadrantIndex(selectedQuadrantIndex)
             .setSelectedQuadrantIndex(setSelectedQuadrantIndex));
 
-    }, [selectedQuadrantIndex, data.categories])
+    }, [selectedQuadrantIndex, categories])
 
-    useEffect(() => {
-      //delay needed to coincide with quadrantCtrlsComponent
-      d3.select(overviewRef.current)
-        .call(fadeIn, { transition:{ duration:300, delay:450 } })
-    },[])
-
+  //put overview into a component, snd force an unmount when props change
+  //next - move key from visualheader onto the overview component,
+  ///and move the fade into the overview component ( i think)
+  //and add same transition onto remove func of quadrantCtrls text as is in exit of Fade
   return (
-      <div className={`viz-header ${headerExtended ? "extended" : ""}`}>
-        <div className="viz-overview" ref={overviewRef}>
-          {data.key && 
-            <div className="title-and-description" >
-              <div className="viz-title">
-                {data.title?.map((line, i) => 
-                  <div className="title-line" key={`title-line-${i}`}>{line}</div> )
-                }
-              </div>
-              <div
-                className={`desc-btn ${headerExtended ? "to-hide" : "to-show"}`}
-                onClick={toggleHeaderExtended}
-              >
-                {`${headerExtended ? "Hide" : "Show"} Description`}
-              </div>
-              <div className={`viz-desc ${headerExtended ? "extended" : ""}`}>
-                {data.desc?.map((line, i) => 
-                  <div className="desc-line" key={`desc-line-${i}`}>{line}</div> )
-                }
-              </div>
-            </div>
-          }
-        </div>
-        <div className="visual-ctrls">
+      <div className={`viz-header ${headerExtended ? "extended" : ""}`} >
+        <Overview key={data.key} title={title} desc={desc} headerExtended={headerExtended} toggleHeaderExtended={toggleHeaderExtended} />
+        <div className="visual-ctrls" style={{ pointerEvents:nrDatapoints === 0 ? "none" : "all" }}>
           <div className="interaction-ctrls">
             <div className="quadrant-ctrls">
               <div className="ctrls-section-label">Select</div>

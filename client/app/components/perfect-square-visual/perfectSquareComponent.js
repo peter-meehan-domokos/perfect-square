@@ -1,129 +1,226 @@
 import * as d3 from 'd3';
+import { header, quadrantsSummary, quadrants, chartOutlinePath } from './subComponents';
+import { quadrantsContainerTransform } from './d3DomHelpers';
 import { isNumber } from '../../helpers/dataHelpers';
 import { remove, fadeIn } from '../../helpers/domHelpers';
+import { calcLevelOfDetailFromBase, getDisabledLevelsForZoom } from './helpers';
 import { COLOURS } from "../../constants";
-import { DEFAULT_SETTINGS } from './constants';
+import { DEFAULT_SETTINGS, APPEAR_TRANSITION_DURATION } from './constants';
 
-const { BLUE, LIGHT_BLUE, GREY } = COLOURS;
+const { BLUE, LIGHT_BLUE, GREY, DARK_GREY } = COLOURS;
 
 export default function perfectSquare() {
-    // settings that apply to all quadrantsBartCharts, in case there is more than 1 eg a row of players
+    // settings that apply to all charts
+    // Some settings need values as can be called before updateDimnsAndColourAccessors() function sets them
     let margin = { left:0, right:0, top: 0, bottom:0 };
     let width = 800;
     let height = 600;
     let contentsWidth;
     let contentsHeight;
 
-    let chartTitleHeight;
-    let chartWidth;
-    let chartHeight;
+    let headerWidth;
+    let headerHeight;
+    let chartAreaWidth;
+    let chartAreaHeight;
 
     let gapBetweenQuadrants;
     let zoomedGapBetweenQuadrants;
     let quadrantWidth;
     let quadrantHeight;
     let quadrantTitleHeight;
-
-    let quadrantsSummaryWidth;
-    let quadrantsSummaryHeight;
-
-    let barsAreaWidth;
     let barsAreaHeight;
     let extraHorizMargin;
     let extraVertMargin;
 
+    let gapBetweenBars;
+    let quadrantBarWidths = [];
+
     let styles = {
-        chart:{
-            title:{
-                fontSize:12
+        header:{
+            primaryTitle:{
+                fontSize:24
             },
-            subtitle:{
+            secondaryTitle:{
+                fontSize:14
+            },
+            summary:{
                 fontSize:10
             }
         },
         quadrant:{
             title:{
-                fontSize:10
+                fontSize:12
             },
             selectedTitle:{
-                fontSize:10
+                fontSize:12
             }
         },
         bar:{
             fontSize:10
+        },
+        outlinePath:{
+            strokeWidth:0.3
         }
     }
 
     //settings
-    let zoomState = { transform: d3.zoomIdentity };
+    //semantic zoom-related (level of detail)
+    let baseSize = width;
+    let calcLevelOfDetail = calcLevelOfDetailFromBase(baseSize);
+    let zoomingInProgress = null;
+    let zoomK = 1;
     let arrangeBy = DEFAULT_SETTINGS.arrangeBy;
-    let withQuadrantTitles;
     //let withBarLabels;
     let levelOfDetail;
-    let shouldShowTitle;
-    let shouldShowSubtitle;
-    let barsAreClickable;
-    let shouldShowQuadrantsSummary;
+    let prevLevelOfDetail;
 
     let nrCharts;
 
-    function updateDimns(){
-        scaleValue = value => value / zoomState.transform.k;
+    //@todo - move these funcitons into a map in constants file instead
+    const _shouldShowHeader = levelOfDetail => levelOfDetail >= 2;
+    const _shouldShowQuadrantOutlines = levelOfDetail => levelOfDetail >= 2;
+    const _shouldShowSubtitle = levelOfDetail => levelOfDetail >= 3;
+    const _shouldShowBars = levelOfDetail => levelOfDetail >= 3;
+    const _barsAreClickable = levelOfDetail => levelOfDetail >= 3;
+    const _shouldShowQuadrantsSummary = levelOfDetail => levelOfDetail >= 3;
+    const _shouldShowSelectedQuadrantTitle = levelOfDetail => levelOfDetail >= 3;
+
+    //level of detail related flags
+    let shouldShowHeader;
+    let shouldShowSubtitle;
+    let shouldShowQuadrantsSummary;
+    let shouldShowSelectedQuadrantTitle;
+    let shouldShowBars;
+    let shouldShowQuadrantOutlines;
+    let shouldShowChartOutline;
+    let barsAreClickable;
+ 
+    function updateDimnsAndColourAccessors(selection){
+        updateDimns(selection);
+        updateColourAccessors();
+    };
+
+    function updateDimns(selection){
+        _scaleValue = value => value / zoomK;
 
         const maxContentsWidth = width - margin.left - margin.right;
         const maxContentsHeight = height - margin.top - margin.bottom;
-        //next - pass xoom state thorugyh and use it for calculating sizes
-        chartTitleHeight = maxContentsHeight * 0.15;// d3.max([18, maxContentsHeight * 0.1]);
+
         quadrantTitleHeight = 0;
-        withQuadrantTitles = false;
         //withBarLabels = true;
-        levelOfDetail = 1;
-        if(chartTitleHeight * zoomState.transform.k > 10){
-            levelOfDetail = 2;
-        }
-        if(chartTitleHeight * zoomState.transform.k > 45){
-            levelOfDetail = 3;
-        }
-        shouldShowTitle = levelOfDetail >= 2;
-        shouldShowSubtitle = levelOfDetail >= 3;
-        barsAreClickable = levelOfDetail >= 3;
-        shouldShowQuadrantsSummary = levelOfDetail >= 3;
+        //level of detail 
+        prevLevelOfDetail = levelOfDetail;
+        baseSize = d3.min([maxContentsWidth, maxContentsHeight]);
+        const disabledLevels = getDisabledLevelsForZoom(zoomingInProgress?.initLevelOfDetail, zoomingInProgress?.targLevelOfDetail);
+        //store calculation funciton so can use it elsewhere dynamically
+        calcLevelOfDetail = calcLevelOfDetailFromBase(baseSize, disabledLevels);
+        levelOfDetail = calcLevelOfDetail(zoomK);
+
+        //level of detail related flags
+        shouldShowHeader =  _shouldShowHeader(levelOfDetail);
+        shouldShowSubtitle =  _shouldShowSubtitle(levelOfDetail);
+        shouldShowQuadrantsSummary = _shouldShowQuadrantsSummary(levelOfDetail);
+        shouldShowSelectedQuadrantTitle = _shouldShowSelectedQuadrantTitle(levelOfDetail, selectedQuadrantIndex);
+        shouldShowBars = _shouldShowBars(levelOfDetail);
+        shouldShowQuadrantOutlines = _shouldShowQuadrantOutlines(levelOfDetail);
+        shouldShowChartOutline = !shouldShowQuadrantOutlines && !isNumber(selectedQuadrantIndex);
+        barsAreClickable  = _barsAreClickable(levelOfDetail);
+
+        headerHeight = shouldShowHeader ? (maxContentsHeight * (shouldShowSubtitle ? 0.18 : 0.15)) : 0;
 
         //contentsheight includes space for quad titles, whereas contenstWidth doesnt
-        contentsWidth = d3.min([maxContentsWidth, maxContentsHeight - chartTitleHeight - 2 * quadrantTitleHeight]);
-        contentsHeight = contentsWidth + chartTitleHeight + 2 * quadrantTitleHeight;
+        contentsWidth = d3.min([maxContentsWidth, maxContentsHeight - headerHeight - 2 * quadrantTitleHeight]);
+        contentsHeight = contentsWidth + headerHeight + 2 * quadrantTitleHeight;
+
+        gapBetweenQuadrants = d3.min([10, contentsWidth * 0.005]);
+        //gap must not be as large as the axeswidth
+        gapBetweenBars = gapBetweenQuadrants * 0.1;
+        //keep the gap between quadrants under some control
+        const maxGapBetweenQuadrants = gapBetweenQuadrants * 5;
+        //note - the zoomed gap is the one displayed, but it doesnt affect any other calculations, so it can adjust with zoom
+        //and not affect performance
+        //next - make this 0 when lost of charts on screen ir when width very small, and scale it up nicely
+        zoomedGapBetweenQuadrants = /*levelOfDetail === 1 ? 0 :*/ d3.min([maxGapBetweenQuadrants, gapBetweenQuadrants * zoomK ** 0.7]);
 
         const extraHorizSpace = maxContentsWidth - contentsWidth;
         const extraVertSpace = maxContentsHeight - contentsHeight;
         extraHorizMargin = extraHorizSpace/2;
         extraVertMargin = extraVertSpace/2;
 
-        gapBetweenQuadrants = d3.min([10, contentsWidth * 0.005]);
-        //keep the gap between quadrants under some control
-        const maxGapBetweenQuadrants = gapBetweenQuadrants * 5;
-        //note - the zoomed gap is the one displayed, but it doesnt affect any other calculations, so it can adjust with zoom
-        //and not affect performance
-        zoomedGapBetweenQuadrants = d3.min([maxGapBetweenQuadrants, gapBetweenQuadrants * zoomState.transform.k ** 0.7]);
+        headerWidth = contentsWidth;
 
-        quadrantsSummaryWidth = contentsWidth * 0.3;
-        quadrantsSummaryHeight = chartTitleHeight * 0.8;
+        chartAreaWidth = contentsWidth;
+        chartAreaHeight = contentsHeight - headerHeight;
 
-        chartWidth = contentsWidth;
-        chartHeight = contentsHeight - chartTitleHeight;
-        quadrantWidth = (contentsWidth - gapBetweenQuadrants)/2;
+        quadrantWidth = (chartAreaWidth - gapBetweenQuadrants - zoomedGapBetweenQuadrants)/2;
         //quadrant title is part of the quadrant, whereas chart title is not, so we subtract it
-        quadrantHeight = (chartHeight - gapBetweenQuadrants)/2;
+        quadrantHeight = (chartAreaHeight - gapBetweenQuadrants - zoomedGapBetweenQuadrants)/2;
         //Each bar area works out as a square because of the way dimns are done above
-        barsAreaWidth = quadrantWidth;
+        //barsAreaWidth = quadrantWidth;
+        //barsAreaHeight = quadrantHeight - quadrantTitleHeight;
         barsAreaHeight = quadrantHeight - quadrantTitleHeight;
 
-        //styles that are based on dimns
-        styles.chart.title.fontSize = shouldShowSubtitle ? chartTitleHeight * 0.4 : chartTitleHeight * 0.55;
-        styles.chart.subtitle.fontSize = chartTitleHeight * 0.25;
-        styles.quadrant.title.fontSize = quadrantHeight * 0.11;
-        styles.quadrant.selectedTitle.fontSize = quadrantHeight * 0.11;
-        styles.bar.fontSize = quadrantHeight * 0.09;
-    };
+        //bar widths for each quadrant
+        selection
+            .filter((d,i) => i === 0)
+            .each(function(chartData){
+                const { quadrantsData } = chartData;
+                quadrantsData.forEach(quadD => {
+                    const nrBars = quadD.values.length;
+                    const nrGaps = nrBars - 1;
+                    const totalSpaceForBars = quadrantWidth - gapBetweenBars * nrGaps;
+                    quadrantBarWidths[quadD.i] = totalSpaceForBars/nrBars;
+                })
+            })
+
+        styles.header.primaryTitle.fontSize = shouldShowSubtitle ? headerHeight * 0.32 : headerHeight * 0.7;
+        styles.header.secondaryTitle.fontSize = headerHeight * 0.2;
+        styles.header.summary.fontSize = headerHeight * 0.15;
+    }
+
+    function updateColourAccessors(){
+        _chartColourWhenNotGreyedOut = d => {
+            const summaryMeasureKey = arrangeBy.colour; //value, deviation or position
+            if(!summaryMeasureKey || !metaData.data) { return BLUE; }
+            const { min, max, range } = metaData.data.info[summaryMeasureKey] 
+            const value = d.info[summaryMeasureKey];
+            const valueAsProportion = (value - min)/range;
+            return colourScale(scaleStartPoint + valueAsProportion * (scaleEndPoint - scaleStartPoint))
+        }
+        _chartColour = d => {
+            const anotherChartIsSelected = selectedChartKey && selectedChartKey !== d.key ? true : false;
+            if(anotherChartIsSelected){ return GREY; }
+            return _chartColourWhenNotGreyedOut(d);
+        };
+
+        _quadrantColour = (quadD, chartD) => {
+            //Case 1. quadrant selected overrides other determinants
+            if(quadD.i === selectedQuadrantIndex){ return _chartColourWhenNotGreyedOut(chartD); }
+            //quadrant isnt selcted, so depends on other issues
+            //Case 2. other quadrant selected greys it out
+            const anotherQuadrantIsSelected = isNumber(selectedQuadrantIndex) && selectedQuadrantIndex !== quadDIndex;
+            if(anotherQuadrantIsSelected){ return GREY; }
+            //Case 3. default to chart
+            return _chartColour(chartD);
+        }
+
+        _headerTextColour = chartKey => {
+            const anotherChartIsSelected = selectedChartKey && selectedChartKey !== chartKey ? true : false;
+            return anotherChartIsSelected ? GREY : DARK_GREY;
+        }
+
+        _quadrantSummaryTextColour = (summaryD, chartKey) => {
+            //Case 1. greyed out
+            const anotherChartIsSelected = selectedChartKey && selectedChartKey !== chartKey ? true : false;
+            const anotherQuadrantIsSelected = isNumber(selectedQuadrantIndex) && selectedQuadrantIndex !== summaryD.i;
+            if(anotherChartIsSelected || anotherQuadrantIsSelected){ return GREY; }
+            //Case 2. highlighhted in red
+            if(summaryD.info.mean < 50){ return "red";}
+            //Case 3. return a standard easy to read blue
+            return BLUE;
+        }
+
+    }
 
     //state
     let metaData = {};
@@ -132,430 +229,277 @@ export default function perfectSquare() {
     //handlers
     let setSelectedChartKey = () => {};
     let updateZoom;
+    let updateChartColour;
+    let updateQuadrantColour;
+    let updateArrangeBy;
 
     //helper
-    let scaleValue;
+    let _scaleValue;
     const colourScale = d3.scaleSequential(d3.interpolateBlues); //takes values 0 to 1
     const scaleStartPoint = 0.5;
     const scaleEndPoint = 1;
-    let calcDatapointColour;
+    let _chartColourWhenNotGreyedOut;
+    let _chartColour;
+    let _quadrantColour;
+    let _headerTextColour;
+    let _quadrantSummaryTextColour;
 
-    function chart(selection) {
+    function chart(selection, options={}) {
+        //const levelChanged = levelOfDetail !== prevLevelOfDetail;
+        //if(levelChanged){ console.log("LEVEL CHANGED!!!!")}
         nrCharts = selection.nodes().length;
-        updateDimns();
-        calcDatapointColour = d => {
-            const summaryMeasureKey = arrangeBy.colour; //value, deviation or position
-            if(!summaryMeasureKey || !metaData.data) { return BLUE; }
-            const { min, max, range } = metaData.data.info[summaryMeasureKey] 
-            const value = d.info[summaryMeasureKey];
-            const valueAsProportion = (value - min)/range;
-            return colourScale(scaleStartPoint + valueAsProportion * (scaleEndPoint - scaleStartPoint))
-        };
+        if(nrCharts === 0){ return; }
+        updateDimnsAndColourAccessors(selection);
+        console.log("UPDATE: nrCharts, LOD", nrCharts, levelOfDetail)
 
-        selection.each(function (data,i) {
-            if(d3.select(this).selectAll("*").empty()){ init(this, data); }
-            update(this, data);
-        })
+        selection
+            .filter(d => d.isOnScreen)
+            .call(init, options)
+            .call(update, options);
 
-        function init(containerElement, data, settings={}){
-            //'this' is the container
-            const container = d3.select(containerElement);
-            //here do anything for the chart that isnt repeated for all quadrants
-            //or just remove the init-update functions altogether
-            //bg
-            container.append("rect").attr("class", "chart-bg")
-                .attr("fill", "transparent");
+        function init(selection, options={}){
+            selection.each(function(){
+                const container = d3.select(this);
+                if(!container.selectAll("*").empty()){ return; }
 
-            const contentsG = container.append("g").attr("class", "chart-contents");
-            contentsG.append("rect").attr("class", "chart-contents-bg")
-                .attr("fill", "transparent");
+                //bg
+                container.append("rect").attr("class", "component-bg")
+                    .attr("fill", "transparent");
 
-            //chart title and contents gs
-            const chartTitleG = contentsG.append("g").attr("class", "chart-title");
-            const mainContentsG = contentsG.append("g").attr("class", "main-contents");
+                const contentsG = container.append("g").attr("class", "component-contents");
+                contentsG.append("rect").attr("class", "component-contents-bg")
+                    .attr("fill", "transparent");
 
-            //title
-            chartTitleG
-                .append("text")
-                    .attr("class", "title")
-                        .attr("dominant-baseline", "hanging")
-                        .attr("opacity", 0)
-                        .attr("stroke-width", 0.1);
-                
-            chartTitleG
-                .append("text")
-                    .attr("class", "subtitle")
-                        .attr("opacity", 0)
-                        .attr("stroke-width", 0.1);
-                      
-            const quadrantsSummaryG = chartTitleG.append("g").attr("class", "quadrants-summary");
-            quadrantsSummaryG.append("rect")
-                .attr("class", "quadrants-summary-outline")
-                .attr("stroke", "grey")
-                .attr("stroke-width", scaleValue(0.1))
-                .attr("fill", "none");
+                //chart area is all the space under the header
+                const chartAreaG = contentsG.append("g").attr("class", "chart-area");
+                chartAreaG.append("rect").attr("class", "chart-area-bg")
+                    .attr("fill", "transparent");
 
-            quadrantsSummaryG.append("line").attr("class", "quadrants-summary-vertical-line quadrants-summary-outline");
-            quadrantsSummaryG.append("line").attr("class", "quadrants-summary-horizontal-line quadrants-summary-outline");
-            quadrantsSummaryG.selectAll("line")
-                .attr("stroke", "grey")
-                .attr("stroke-width", scaleValue(0.1));
+                //g that handles scaling when selections made
+                chartAreaG.append("g").attr("class", "quadrants-container")
+                    .attr("transform", "scale(1)");
 
-            //title-hitbox
-            chartTitleG.append("rect").attr("class", "chart-title-hitbox")
-                .attr("cursor", "pointer")
-                .attr("fill", "transparent");
+                //chart-hitbox
+                chartAreaG.append("rect").attr("class", "chart-hitbox")
+                    .attr("cursor", "pointer")
+                    .attr("fill", "transparent");
 
-
-            //g that handles scaling when selections made
-            mainContentsG.append("g").attr("class", "scale").attr("transform", "scale(1)");
-
-            //chart-hitbox
-            mainContentsG.append("rect").attr("class", "chart-hitbox")
-                .attr("cursor", "pointer")
-                .attr("fill", "transparent");
-
+            })
         }
 
-        function update(containerElement, data, options={}){
-            //'this' is the container
-            const container = d3.select(containerElement);
-            //flags
-            const anotherChartIsSelected = selectedChartKey && selectedChartKey !== data.key;
+        //called for updates to data, core sizes, selectedQuadrantIndex
+        function update(options={}){
+            //console.log("UPDATE: nrDs LOD", selection.data().length, levelOfDetail)
+            selection.each(function(chartData){
+                const container = d3.select(this);
+                //flags & values
+                const anotherChartIsSelected = selectedChartKey && selectedChartKey !== chartData.key ? true : false;
+                const chartColour = _chartColour(chartData);
+                const anotherQuadrantIsSelectedChecker = quadIndex => isNumber(selectedQuadrantIndex) && selectedQuadrantIndex !== quadIndex;
 
-            //bg
-            container.select("rect.chart-bg")
-                .attr("width", `${width}px`)
-                .attr("height", `${height}px`);
+                //bg
+                container.select("rect.component-bg")
+                    .attr("width", `${width}px`)
+                    .attr("height", `${height}px`);
+                    //.attr("stroke", "black")
+                    //.attr("stroke-width", 0.05);
 
-            const contentsG = container.select("g.chart-contents")
-                .attr("transform", `translate(${margin.left + extraHorizMargin}, ${margin.top + extraVertMargin})`);
+                const contentsG = container.select("g.component-contents")
+                    .attr("transform", `translate(${margin.left + extraHorizMargin}, ${margin.top + extraVertMargin})`);
 
-            contentsG.select("rect.chart-contents-bg")
-                .attr("width", `${contentsWidth}px`)
-                .attr("height", `${contentsHeight}px`);
+                contentsG.select("rect.component-contents-bg")
+                    .attr("width", `${contentsWidth}px`)
+                    .attr("height", `${contentsHeight}px`)
 
-            updateTitle.call(containerElement, data);
-
-            const quadrantsSummaryG = contentsG.select("g.chart-title").select("g.quadrants-summary");
-            quadrantsSummaryG
-                .transition()
-                .duration(100)
-                    .attr("transform", `translate(${contentsWidth + zoomedGapBetweenQuadrants - gapBetweenQuadrants - quadrantsSummaryWidth},0)`)
-                    .attr("opacity", shouldShowQuadrantsSummary ? 1 : 0);
-
-            const quadrantSummaryG = quadrantsSummaryG.selectAll("g.quadrant-summary").data(data.quadrantsData, q => q.key);
-            quadrantSummaryG.enter()
-                .append("g")
-                    .attr("class", "quadrant-summary")
-                    .each(function(){
-                        d3.select(this)
-                            .append("text")
-                                .attr("text-anchor", "middle")
-                                .attr("dominant-baseline", "central");
-                    })
-                    .merge(quadrantSummaryG)
-                    .attr("transform", (d,i) => `translate(${i === 0 || i === 2 ? 0 : quadrantsSummaryWidth/2},${i <= 1 ? 0 : quadrantsSummaryHeight/2})`)
-                    .each(function(summaryD){
-                        d3.select(this).select("text")
-                            .attr("x", quadrantsSummaryWidth/4)
-                            .attr("y", quadrantsSummaryHeight/4)
-                            .attr("font-size", scaleValue(9))
-                            .attr("stroke", anotherChartIsSelected ? "grey" : (summaryD.value < 50 ? "red" : BLUE))
-                            .attr("fill", anotherChartIsSelected ? "grey" : (summaryD.value < 50 ? "red" : BLUE))
-                            .attr("stroke-width", scaleValue(0.2))
-                            .text(`${summaryD.value}%`);
-                    })
-            
-            //outline and lines
-            quadrantsSummaryG.select("rect")
-                .attr("width", quadrantsSummaryWidth)
-                .attr("height", quadrantsSummaryHeight)
-                .attr("stroke-width", scaleValue(0.1));
-
-            quadrantsSummaryG.select("line.quadrants-summary-vertical-line")
-                .attr("x1", quadrantsSummaryWidth/2)
-                .attr("x2", quadrantsSummaryWidth/2)
-                .attr("y1", 0)
-                .attr("y2", quadrantsSummaryHeight)
-                .attr("stroke-width", scaleValue(0.1));
-
-            quadrantsSummaryG.select("line.quadrants-summary-horizontal-line")
-                .attr("x1", 0)
-                .attr("x2", quadrantsSummaryWidth)
-                .attr("y1", quadrantsSummaryHeight/2)
-                .attr("y2", quadrantsSummaryHeight/2)
-                .attr("stroke-width", scaleValue(0.1));
-                    
-
-            //Chart contents
-            const mainContentsG = contentsG.select("g.main-contents")
-                .attr("transform", `translate(0, ${chartTitleHeight})`);
-
-            //hitboxes (title is always clickable, but chart itself is only clickable when bars are not)
-            contentsG.select("rect.chart-title-hitbox")
-                .attr("width", contentsWidth)
-                .attr("height", chartTitleHeight)
-                .on("click", () => setSelectedChartKey(data.key))
-                .attr("stroke-width", scaleValue(0.3))
-
-            mainContentsG.select("rect.chart-hitbox")
-                .attr("display", barsAreClickable ? "none" : null)
-                .attr("width", chartWidth)
-                .attr("height", chartHeight)
-                .attr("fill", "transparent")
-                .on("click", () => setSelectedChartKey(data.key))
-
-            //scaling transforms
-            const scaleG = mainContentsG.select("g.scale");
-
-            const chartTransformOrigin = 
-                selectedQuadrantIndex === 0 ? `${contentsWidth} ${contentsHeight}` :
-                selectedQuadrantIndex === 1 ? `0 ${contentsHeight}` :
-                selectedQuadrantIndex === 2 ? `${contentsWidth} 0` :
-                `0 0`;
-
-            const chartTransform = `scale(${isNumber(selectedQuadrantIndex) ? 0.5 : 1})`;
-            scaleG
-                .transition()
-                .delay(isNumber(selectedQuadrantIndex) ? 0 : 75)
-                .duration(500)
-                    .attr("transform", chartTransform)
-                    .attr("transform-origin", chartTransformOrigin)
-
-            //Quadrants
-            const quadrantContainerG = scaleG.selectAll("g.quadrant-container").data(data.quadrantsData, d => d.key)
-            quadrantContainerG.enter()
-                .append("g")
-                    .attr("class", (d,i) => `quadrant-container quandrant-container-${d.key}`)
-                    .each(function(d,i){
-                        const quadrantContainerG = d3.select(this);
-                        const quadrantG = quadrantContainerG.append("g").attr("class", "quadrant")
-
-                        quadrantG
-                            .append("text")
-                                .attr("class", "quadrant-title")
-                                .attr("text-anchor", "middle")
-                                .attr("dominant-baseline", "central")
-                                .attr("stroke-width", 0.1)
-                                .attr("opacity", withQuadrantTitles ? 0.5 : 0)
-                                .attr("display", withQuadrantTitles ? null : "none");
-
-                        const shouldShowSelectedQuadrantTitle = !withQuadrantTitles && selectedQuadrantIndex === i;
-                        quadrantG
-                            .append("text")
-                                .attr("class", "selected-quadrant-title")
-                                    .attr("text-anchor", "middle")
-                                    .attr("dominant-baseline", i < 2 ? null : "hanging")
-                                    .attr("stroke-width", 0.1)
-                                    .attr("display", shouldShowSelectedQuadrantTitle ? null : "none")
-                                    .attr("opacity", shouldShowSelectedQuadrantTitle ? 0.5 : 0)
-
-
-                        const barsAreaG = quadrantG.append("g").attr("class", "bars-area");
-                        const anotherQuadrantIsSelected = isNumber(selectedQuadrantIndex) && selectedQuadrantIndex !== i;
-                        barsAreaG
-                            .append("rect")
-                                .attr("class", "bars-area-bg")
-                                .attr("stroke", anotherQuadrantIsSelected || anotherChartIsSelected ? GREY : calcDatapointColour(data)) 
-                                .attr("stroke-width", scaleValue(anotherQuadrantIsSelected || anotherChartIsSelected ? 0.1 : 0.3))
-                                .attr("fill", "transparent");
-                         
-                        barsAreaG.append("g").attr("class", "bars");
-                    })
-                    .merge(quadrantContainerG)
-                    .attr("transform", (d,i) => `translate(${(i === 0 || i === 2) ? 0 : quadrantWidth + zoomedGapBetweenQuadrants}, ${(i === 0 || i === 1) ? 0 : quadrantHeight + zoomedGapBetweenQuadrants})`)
-                    .each(function(quadD,i){
-                        const quadrantContainerG = d3.select(this);
-                        //make sure bar labels etc are on top of DOM
-                        if(selectedQuadrantIndex === i){ quadrantContainerG.raise(); }
-
-                        const quadScale = i === selectedQuadrantIndex ? 3 : 1;
-                        const quadTransformOrigin =
-                            selectedQuadrantIndex === 0 ? `${quadrantWidth} ${quadrantHeight}` :
-                            selectedQuadrantIndex === 1 ? `0 ${quadrantHeight}` :
-                            selectedQuadrantIndex === 2 ? `${quadrantWidth} 0` :
-                            `0 0`;
-
-                        const quadrantG = quadrantContainerG.select("g.quadrant");
-                        quadrantG
-                            .transition()
-                            .delay(isNumber(selectedQuadrantIndex) ? 75 : 0)
-                            .duration(500)
-                                .attr("transform", `scale(${quadScale})`)
-                                .attr("transform-origin", quadTransformOrigin);
-
-                        const titleShiftHoriz = i === 0 || i === 2 ? barsAreaWidth/2 : barsAreaWidth/2;
-                        const titleShiftVert = i === 0 || i === 1 ? quadrantTitleHeight/2 : quadrantHeight - quadrantTitleHeight/2;
-                        quadrantG.select("text.quadrant-title")
-                            .attr("transform", `translate(${titleShiftHoriz}, ${titleShiftVert})`)
-                            .attr("font-size", styles.quadrant.title.fontSize)
-                            .text(quadD.title)
-                                .transition()
-                                .duration(200)
-                                    .attr("opacity", withQuadrantTitles ? 0.5 : 0)
-                                    .on("end", function(){ d3.select(this).attr("display", withQuadrantTitles ? null : "none") });
-
-
-                        const shouldShowSelectedQuadrantTitle = !withQuadrantTitles && selectedQuadrantIndex === i;
-                        const selectedQuadrantTitleText = quadrantG.select("text.selected-quadrant-title");
-                        //@todo - use a fadeIn custom function that checks for this
-                        if(shouldShowSelectedQuadrantTitle && selectedQuadrantTitleText.attr("display") === "none"){ selectedQuadrantTitleText.attr("display", null) }
-                        selectedQuadrantTitleText
-                            .attr("x", quadrantWidth/2)
-                            .attr("y", i < 2 ? -2 : quadrantHeight + 2)
-                            .attr("font-size", styles.quadrant.selectedTitle.fontSize)
-                            .text(quadD.title)
-                                .transition()
-                                .duration(500)
-                                    .attr("opacity", shouldShowSelectedQuadrantTitle ? 0.5 : 0)
-                                        .on("end", function(){ d3.select(this).attr("display", shouldShowSelectedQuadrantTitle ? null : "none")})
-
-                        const barAreaShiftVert = i === 0 || i === 1 ? quadrantTitleHeight : 0;
-                        const barsAreaG = quadrantG.select("g.bars-area")
-                            .attr("transform", `translate(0, ${barAreaShiftVert})`);
-
-                        const anotherQuadrantIsSelected = isNumber(selectedQuadrantIndex) && selectedQuadrantIndex !== quadD.i;
-                        const anotherChartIsSelected = selectedChartKey && selectedChartKey !== data.key;
-                        barsAreaG.select("rect.bars-area-bg")
-                            .attr("width", barsAreaWidth)
-                            .attr("height", barsAreaHeight);
-
-                        barsAreaG.select("rect.bars-area-bg")
-                                .transition()
-                                .duration(500)
-                                    .attr("stroke", anotherQuadrantIsSelected || anotherChartIsSelected ? GREY : calcDatapointColour(data)) 
-                                    .attr("stroke-width", scaleValue(anotherQuadrantIsSelected || anotherChartIsSelected ? 0.1 : 0.3))
-
-                        //bars
-                        const nrBars = quadD.values.length;
-                        const nrGaps = nrBars - 1;
-                        //gap must not be as large as the axeswidth
-                        const gapBetweenBars = gapBetweenQuadrants * 0.1;
-                        const totalSpaceForBars = barsAreaWidth - gapBetweenBars * nrGaps;
-                        const barWidth = totalSpaceForBars/nrBars;
-                        //const barLabelWidth = 15;
-                        //const barLabelHeight = 4;
-                        //const horizLabelMargin = barWidth * 0.2;
-
-                        //@todo - base this showing on zoomScale * quadrantsWidth
-                        const shouldShowBars = true;
-                        const barsData = shouldShowBars ? quadD.values : [];
-
-                        const barsG = barsAreaG.select("g.bars");
-                        const barG = barsG.selectAll("g.bar").data(barsData, d => d.key);
-                        barG.enter()
-                            .append("g")
-                                .attr("class", `bar`)
-                                .attr("cursor", "pointer")
-                                .each(function(barD,j){
-                                    const barHeight = barD.calcBarHeight(barsAreaHeight);
-                                    const barG = d3.select(this);
-                                    barG
-                                        .append("rect")
-                                            .attr("class", "bar")
-                                                .attr("width", barWidth)
-                                                .attr("height", barHeight)
-                                                .attr("fill", anotherQuadrantIsSelected || anotherChartIsSelected ? GREY : calcDatapointColour(data));
-                                })
-                                .merge(barG)
-                                .each(function(barD,j){
-
-                                    const barHeight = barD.calcBarHeight(barsAreaHeight);
-                                    //no space between bars and outer edge of chart
-                                    const barG = d3.select(this)
-                                        .attr("transform", `translate(${j * (barWidth + gapBetweenBars)},${i < 2 ? barsAreaHeight - barHeight : 0})`)
-                                        .on("click", function(){
-                                            console.log("bar clicked", barD)
-                                        });
-
-                                    barG.select("rect.bar")
-                                        .transition()
-                                        .duration(100)
-                                            .attr("width", barWidth)
-                                            .attr("height", barHeight)
-                                            .attr("fill", anotherQuadrantIsSelected || anotherChartIsSelected ? GREY : calcDatapointColour(data));
-
-                                   
-                                })
-
-                        barG.exit().call(remove);
-
-                    })
-            
-            quadrantContainerG.exit().call(remove);
-            //handlers and helpers
-        }
-
-        function updateTitle(data){
-            const titleG = d3.select(this).select("g.chart-title");
-            titleG.select("text.title")
-                .transition()
-                .duration(100)
-                    .attr("opacity", shouldShowTitle ? 0.55 : 0)
-                    .attr("font-size", styles.chart.title.fontSize)
-                    .text(data.title || "");
-
-
-            titleG.select("text.subtitle")
-                .transition()
-                .duration(100)
-                    .attr("transform", `translate(0, ${chartTitleHeight * 0.8})`)
-                    .attr("opacity", shouldShowSubtitle ? 0.45 : 0)
-                    .attr("font-size", styles.chart.subtitle.fontSize)
-                    .text(data.subtitle || (data.info.position ? `Position ${data.info.position} / ${nrCharts}` : ""));
-
-        }
-
-        updateZoom = function(){
-            updateDimns();
-            selection.each(function(data,i){
-                const chartG = d3.select(this);
-                const anotherChartIsSelected = selectedChartKey && selectedChartKey !== data.key;
-                //hide/show title
-                updateTitle.call(this, data);
-                const quadrantsSummaryG = chartG.select("g.chart-title").select("g.quadrants-summary");
-                quadrantsSummaryG
-                    .transition()
-                    .duration(100)
-                        .attr("transform", `translate(${contentsWidth + zoomedGapBetweenQuadrants - gapBetweenQuadrants - quadrantsSummaryWidth},0)`)
-                        .attr("opacity", shouldShowQuadrantsSummary ? 1 : 0);
-
-                quadrantsSummaryG.selectAll("text")
-                    .transition()
-                    .duration(100)
-                        .attr("font-size", scaleValue(9))
-                        .attr("stroke-width", scaleValue(0.2))
-                        .attr("stroke", summaryD => anotherChartIsSelected ? "grey" : (summaryD.value < 50 ? "red" : BLUE))
-                        .attr("fill", summaryD => anotherChartIsSelected ? "grey" : (summaryD.value < 50 ? "red" : BLUE));
-                    
-
-                quadrantsSummaryG.selectAll(".quadrants-summary-outline")
-                    .attr("stroke-width", scaleValue(0.1))
-
-                chartG.select("rect.chart-hitbox")
-                    .attr("display", barsAreClickable ? "none" : null);
-
-                chartG.selectAll("rect.bars-area-bg")
-                    .attr("stroke-width", scaleValue(anotherChartIsSelected ? 0.1 : 0.3))
-                    .transition()
-                    .duration(200)
-                        .attr("stroke", anotherChartIsSelected ? GREY : calcDatapointColour(data))
-                
-                //add the extra gap between quadrants, and colour the bars correctly
-                //note - the order of the nodes in this selectAll is not reliable, so we use d.i not i
-                chartG.selectAll("g.quadrant-container")
-                    .attr("transform", d => `translate(
-                        ${(d.i === 0 || d.i === 2) ? 0 : quadrantWidth + zoomedGapBetweenQuadrants}, 
-                        ${(d.i === 0 || d.i === 1) ? 0 : quadrantHeight + zoomedGapBetweenQuadrants})`)
-                    .each(function(quadD,j){
-                        const anotherQuadrantIsSelected = isNumber(selectedQuadrantIndex) && selectedQuadrantIndex !== quadD.i;
-                        d3.select(this).selectAll("rect.bar")
-                            .transition()
-                            .duration(200)
-                                .attr("fill", anotherQuadrantIsSelected || anotherChartIsSelected ? GREY : calcDatapointColour(data))
+                //header
+                contentsG.call(header, headerWidth, headerHeight, 
+                    { 
+                        onClick:() => setSelectedChartKey(chartData.key),
+                        summaryComponent:quadrantsSummary, 
+                        styles:styles.header,
+                        _scaleValue,
+                        shouldShowHeader,
+                        shouldShowSubtitle,
+                        shouldShowQuadrantsSummary,
+                        _textColour:_headerTextColour,
+                        _quadrantSummaryTextColour
                     });
 
+
+                const chartAreaG = contentsG.select("g.chart-area")
+                    .attr("transform", `translate(0, ${headerHeight})`);
+
+                chartAreaG.select("rect.chart-area-bg")
+                    .attr("width", `${chartAreaWidth}px`)
+                    .attr("height", `${chartAreaHeight}px`)
+                    //we use chart-area-bg as the default border when no quadrants are showing (ie when its the chart path showing)
+                    .attr("stroke", shouldShowQuadrantOutlines || isNumber(selectedQuadrantIndex)  ? "none" : chartColour)
+                    .attr("stroke-width", _scaleValue(0.2));
+
+                //hitbox (title is always clickable, but chart itself is only clickable when bars are not)
+                chartAreaG.select("rect.chart-hitbox")
+                    .attr("width", chartAreaWidth)
+                    .attr("height", chartAreaHeight)
+                    .attr("cursor", "pointer")
+                    .attr("display", barsAreClickable ? "none" : null)
+                    .on("click", () => setSelectedChartKey(chartData.key))
+                    
+                chartAreaG.select("g.quadrants-container")
+                    .call(quadrantsContainerTransform, chartAreaWidth, chartAreaHeight, selectedQuadrantIndex)
+                    .call(quadrants, quadrantWidth, quadrantHeight, quadrantTitleHeight, {
+                        _quadrantsContainerTransform:quadD => `translate(
+                            ${(quadD.i === 0 || quadD.i === 2) ? 0 : quadrantWidth + gapBetweenQuadrants + zoomedGapBetweenQuadrants}, 
+                            ${(quadD.i === 0 || quadD.i === 1) ? 0 : quadrantHeight + gapBetweenQuadrants + zoomedGapBetweenQuadrants})`,
+                        styles:styles.quadrant,
+                        _scaleValue,
+                        quadrantBarWidths,
+                        gapBetweenBars,
+                        selectedChartKey,
+                        selectedQuadrantIndex,
+                        shouldShowSelectedQuadrantTitle,
+                        shouldShowBars,
+                        shouldShowQuadrantOutlines,
+                        _chartColour,
+                        _colour:quadIndex => anotherQuadrantIsSelectedChecker(quadIndex) || anotherChartIsSelected ? GREY : chartColour,
+                        getBarsAreaStrokeWidth:quadIndex => _scaleValue(anotherQuadrantIsSelectedChecker(quadIndex) || anotherChartIsSelected ? 0.1 : 0.3),
+                    });
+
+                //chart outline
+                chartAreaG.call(chartOutlinePath, quadrantBarWidths, barsAreaHeight, gapBetweenBars, {
+                    shouldShowChartOutline,
+                    colour: anotherChartIsSelected ? GREY : chartColour,
+                    onClick:() => setSelectedChartKey(chartData.key)
+                })
+            })
+        }
+
+        updateArrangeBy = function(selection, options={}){
+             //if(levelOfDetail < ??){ return; }
+            //@todo...
+        }
+
+        updateQuadrantColour = function(selection, options={ }){
+            /*
+            const { levelOfDetail } = options;
+            //if(levelOfDetail < 2 && !isNumber(selectedQuadrantIndex)){ return; }
+            const anotherQuadrantIsSelectedChecker = quadD => isNumber(selectedQuadrantIndex) && selectedQuadrantIndex !== quadD.i;
+            selection
+                .filter(d => d.isOnScreen)
+                .each(function(data){
+                    const chartG = d3.select(this);
+                    const chartColour = _chartColour(data);
+                    const anotherChartIsSelected = selectedChartKey && selectedChartKey !== data.key;
+                    //@todo - add in if statements so we only do the updates for the right level
+                    //or add classname chart-filled-item and just update them all in one selection
+                    chartG.selectAll("g.quadrant-container").each(function(quadD){
+                        const quadrantContainerG = d3.select(this);
+                        const anotherQuadrantIsSelected = anotherQuadrantIsSelectedChecker(quadD);
+    
+                        //DETAIL LEVEL 3 ONLY
+                        quadrantContainerG.selectAll("rect.bar")
+                            .attr("fill", anotherChartIsSelected || anotherQuadrantIsSelected ? GREY : chartColour);
+    
+                        //DETAIL LEVEL 2 AND ABOVE
+                        quadrantContainerG.select("rect.bars-area-bg")
+                            .attr("stroke", anotherChartIsSelected || anotherQuadrantIsSelected ? GREY : chartColour)
+                            .attr("stroke-width", _scaleValue(anotherChartIsSelected ? 0.1 : 0.3))
+    
+                        //DETAIL LEVEL 2 ONLY
+                        quadrantContainerG.select("path.quadrant-outline")
+                            .attr("fill",  anotherChartIsSelected ?? anotherQuadrantIsSelected ? GREY : chartColour)
+                 
+                    })
+
+                    //DETAIL LEVEL 3 ONLY
+                    chartG.select("quadrants-summary").selectAll("g.quadrant-summary").each(function(quadD){
+                        const anotherQuadrantIsSelected = anotherQuadrantIsSelectedChecker(quadD);
+                        d3.select(this).selectAll("text")
+                            .attr("stroke", summaryD => 
+                                anotherChartIsSelected || anotherQuadrantIsSelected ? "grey" : (summaryD.info.mean < 50 ? "red" : BLUE))
+                            .attr("fill", summaryD => 
+                                anotherChartIsSelected || anotherQuadrantIsSelected ? "grey" : (summaryD.info.mean < 50 ? "red" : BLUE));
+                    })
+                })
+                */
+
+        }
+
+        updateChartColour = function(selection, options={}){
+            /*
+            const { levelOfDetail } = options;
+            //if(levelOfDetail > 1{ return; } //but levelofxetail > 2 is mentioned!  
+            selection
+                .filter(d => d.isOnScreen)
+                .each(function(data){
+                const chartG = d3.select(this);
+                const chartColour = _chartColour(data);
+                const anotherChartIsSelected = selectedChartKey && selectedChartKey !== data.key;
+
+                //DETAIL LEVEL 1 ONLY 
+                chartG.select("path.chart-outline")
+                    .attr("fill",  anotherChartIsSelected ? GREY : chartColour)
+                
+                chartG.select("rect.chart-hitbox")
+                    .attr("stroke", 
+                        levelOfDetail >= 2 ||  isNumber(selectedQuadrantIndex) ? "none" :
+                        anotherChartIsSelected ? GREY : 
+                        chartColour)
+            })
+            */
+        }
+
+        updateZoom = function(selection, options={}){
+            //console.log("updateZoom..", selection.data().filter(d => d.isOnScreen).length)
+            const { } = options;
+            updateDimnsAndColourAccessors(selection);
+            return;
+
+            //semantic zoom changes
+            if(prevLevelOfDetail !== levelOfDetail){
+                selection.call(updateLevelOfDetail, { levelOfDetail })
+            }
+
+            //geometric zoom changes
+            selection
+                .attr("display", d => d.isOnScreen ? null : "none")
+                .filter(d => d.isOnScreen) 
+                //.call(updateChartOutline, quadrantBarWidths, barsAreaHeight, gapBetweenBars)
+                .each(function(chartData,i){
+                    const chartG = d3.select(this);
+                    const chartColour = _chartColour(chartData);
+                    //if(!data.isOnScreen){ return; }
+
+                    const anotherChartIsSelected = selectedChartKey && selectedChartKey !== chartData.key;
+                    //hide/show title
+                    //chartG.call(updateTitleText);
+                    const quadrantsSummaryG = chartG.select("g.chart-header").select("g.quadrants-summary");
+                    quadrantsSummaryG
+                        .transition()
+                        .duration(100)
+                            //.attr("transform", `translate(${contentsWidth + zoomedGapBetweenQuadrants - gapBetweenQuadrants - quadrantsSummaryWidth},0)`)
+                            //.attr("opacity", _shouldShowQuadrantsSummary(levelOfDetail) ? 1 : 0);
+
+                    quadrantsSummaryG.selectAll("text")
+                        .transition()
+                        .duration(100)
+                            .attr("font-size", _scaleValue(9))
+                            .attr("stroke-width", _scaleValue(0.2));
+                    
+
+                    quadrantsSummaryG.selectAll(".quadrants-summary-outline")
+                        .attr("stroke-width", _scaleValue(0.1))
+
+                    chartG.select("rect.chart-hitbox")
+                        .attr("display", _barsAreClickable(levelOfDetail) ? "none" : null)
+                        .attr("stroke-width", _scaleValue(0.2))
+                        .attr("stroke", levelOfDetail === 1 && !isNumber(selectedQuadrantIndex) ? chartColour : "none");
+                    
+                    chartG.selectAll("g.quadrant-container")
+                        .attr("transform", d => `translate(
+                            ${(d.i === 0 || d.i === 2) ? 0 : quadrantWidth + zoomedGapBetweenQuadrants}, 
+                            ${(d.i === 0 || d.i === 1) ? 0 : quadrantHeight + zoomedGapBetweenQuadrants})`
+                        )
+                        //.call(updateQuadrantContents, { anotherChartIsSelected, chartColour })
             })
         }
 
@@ -583,30 +527,47 @@ export default function perfectSquare() {
         metaData = value;
         return chart;
     };
-    chart.selectedQuadrantIndex = function (value) {
+    chart.selectedQuadrantIndex = function (value, shouldUpdateDom) {
         if (!arguments.length) { return selectedQuadrantIndex; }
         selectedQuadrantIndex = value;
+        if(shouldUpdateDom && !d3.selectAll(".chart").empty()){ 
+            //d3.selectAll(".chart").call(updateQuadrantColour);
+        }
         return chart;
     };
-    chart.selectedChartKey = function (value) {
+    chart.selectedChartKey = function (value, shouldUpdateDom) {
         if (!arguments.length) { return selectedChartKey; }
         selectedChartKey = value;
+        return chart;
+    };
+    chart.zoomK = function (value, shouldUpdateDom) {
+        if (!arguments.length) { return zoomK; }
+        zoomK = value;
+        if(shouldUpdateDom && !d3.selectAll(".chart").empty()){ 
+            //d3.selectAll(".chart")
+                //.call(updateZoom); 
+        }
+        return chart;
+    };
+    chart.zoomingInProgress = function (value, shouldUpdateDom) {
+        if (!arguments.length) { return zoomingInProgress; }
+        zoomingInProgress = { 
+            ...value, initLevelOfDetail:levelOfDetail, targLevelOfDetail:calcLevelOfDetail(value.targK) 
+        }
+        return chart;
+    };
+    chart.arrangeBy = function (value, shouldUpdateDom) {
+        if (!arguments.length) { return arrangeBy; }
+        arrangeBy = value;
+        if(shouldUpdateDom && !d3.selectAll(".chart").empty()){ 
+            d3.selectAll(".chart")
+                .call(updateArrangeBy); 
+        }
         return chart;
     };
     chart.setSelectedChartKey = function (func) {
         if (!arguments.length) { return setSelectedChartKey; }
         setSelectedChartKey = func;
-        return chart;
-    };
-    chart.zoomState = function (value, shouldUpdateDom) {
-        if (!arguments.length) { return zoomState; }
-        zoomState = value;
-        if(shouldUpdateDom && !d3.selectAll(".chart").empty()){ d3.selectAll(".chart").call(updateZoom) }
-        return chart;
-    };
-    chart.arrangeBy = function (value) {
-        if (!arguments.length) { return arrangeBy; }
-        arrangeBy = value;
         return chart;
     };
     return chart;

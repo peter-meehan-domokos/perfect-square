@@ -417,7 +417,7 @@ body {
   width:100%;
   height:calc(100% - 15px);
   display:flex;
-  justify-content:space-between;
+  justify-content:center;
   align-items:center;
 }
 
@@ -444,14 +444,13 @@ body {
   width:30px;
   height:30px;
   color:#C8C8C8;
-  cursor:pointer;
 }
 
 .zoom-reset-icon {
   width:30px;
   height:30px;
-  cursor:pointer;
 }
+
 
 
 .arrangement-label {

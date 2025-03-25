@@ -13,7 +13,7 @@ const medScreenCheckboxFormGroupStyle = {
 
 }
 const largeScreenCheckboxFormGroupStyle = {
-  width:"90px", paddingLeft:"10px",
+  width:"100px", paddingLeft:"10px",
   display:"flex", flexDirection:"column", justifyContent:"space-around", alignItems:"flex-start"
 
 }
