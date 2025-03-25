@@ -5,13 +5,20 @@ import textWrapComponent from './textWrap';
 
 const { BLUE, LIGHT_BLUE, GREY } = COLOURS;
 
+const TOOLTIP_OPACITY = 0.85;
+
 export default function tooltip() {
     // settings that apply to all quadrantsBartcomponents, in case there is more than 1 eg a row of players
-    let margin = { left:10, right:10, top: 0, bottom:10 };
-    let width = 300;
-    let height = 300;
-    let contentsWidth;
-    let contentsHeight;
+    let margin = { left:10, right:10, top: 10, bottom:10 };
+    let fixedWidth = 300;
+    let fixedHeight = 300;
+    let fixedContentsWidth;
+    let fixedContentsHeight;
+    //dimns can be set to be dynamic functions (_ convention)
+    let _width;
+    let _height;
+    let _contentsWidth;
+    let _contentsHeight;
 
     let titleHeight = 30;
     let subtitleHeight = 20;
@@ -48,8 +55,16 @@ export default function tooltip() {
 
 
     function updateDimns(){
-        contentsWidth = width - margin.left - margin.right;
-        contentsHeight = height - margin.top - margin.bottom;
+        if(_width){
+            _contentsWidth = d => _width(d) - margin.left - margin.right;
+        }else{
+            fixedContentsWidth = fixedWidth - margin.left - margin.right;
+        }
+        if(_height){
+            _contentsHeight = d => _height(d) - margin.top - margin.bottom;
+        }else{
+            fixedContentsHeight = fixedHeight - margin.top - margin.bottom;
+        }
     };
 
     const textWrapComponents = [];
@@ -64,22 +79,16 @@ export default function tooltip() {
         })
 
         function init(containerElement, data, settings={}){
+            const width = _width ? _width(data) : fixedWidth;
+            const height = _height ? _height(data) : fixedHeight;
+
             //'this' is the container
-            const container = d3.select(containerElement)
-                .attr('clip-path', "url(#tooltip-clip)")
-            //here do anything for the component that isnt repeated for all quadrants
-            //or just remove the init-update functions altogether
+            const container = d3.select(containerElement);
             //bg
             container.append("rect").attr("class", "component-bg")
-                .attr("opacity", 0.85);
-
-            d3.select('clipPath#tooltip-clip').select('rect')
-                .attr('width', width)
-                .attr("rx", styles.bg.rx)
-                .attr("ry", styles.bg.ry)
-                    .transition()
-                    .duration(500)
-                        .attr('height', height)
+                .attr("opacity", TOOLTIP_OPACITY)
+                .attr("rx", 5)
+                .attr("ry", 5);
 
             const contentsG = container.append("g").attr("class", "component-contents");
             contentsG.append("rect").attr("class", "component-contents-bg")
@@ -109,6 +118,11 @@ export default function tooltip() {
         }
 
         function update(containerElement, data, componentEnter, options={}){
+            const width = _width ? _width(data) : fixedWidth;
+            const height = _height ? _height(data) : fixedHeight;
+            const contentsWidth = _contentsWidth ? _contentsWidth(data) : fixedContentsWidth;
+            const contentsHeight = _contentsHeight ? _contentsHeight(data) : fixedContentsHeight;
+
             if(!componentEnter){
                 d3.select('clipPath#tooltip-clip').select('rect')
                 .attr('width', width)
@@ -118,6 +132,7 @@ export default function tooltip() {
             const actualTitleHeight = data.title ? titleHeight : 0;
             const actualSubtitleHeight = data.subtitle ? subtitleHeight : 0;
             const mainContentsHeight = contentsHeight - actualTitleHeight - actualSubtitleHeight;
+            console.log("ch mch", contentsHeight, mainContentsHeight)
             //'this' is the container
             const container = d3.select(containerElement)
             //bg
@@ -134,7 +149,7 @@ export default function tooltip() {
                 .attr("width", `${contentsWidth}px`)
                 .attr("height", `${contentsHeight}px`);
 
-            updateTitle.call(containerElement, data, { actualTitleHeight, actualSubtitleHeight });
+            updateTitle.call(containerElement, data, { contentsWidth, contentsHeight, actualTitleHeight, actualSubtitleHeight });
 
             const mainContentsG = contentsG.select("g.main-contents")
                 .attr("transform", `translate(0, ${actualTitleHeight + actualSubtitleHeight})`);
@@ -179,8 +194,6 @@ export default function tooltip() {
                                     fontMin:10,
                                     fontMax:10
                                 });
-
-
                     })
 
             paragraphG.exit().call(remove)
@@ -193,7 +206,7 @@ export default function tooltip() {
     }
 
     function updateTitle(data, options={}){
-        const { actualTitleHeight, actualSubtitleHeight } = options;
+        const { contentsWidth, contentsHeight, actualTitleHeight, actualSubtitleHeight } = options;
         const titleG = d3.select(this).select("g.component-title-and-subtitle");
         titleG.select("text.title")
             .attr("transform", `translate(${contentsWidth/2}, ${actualTitleHeight/2})`)
@@ -219,13 +232,16 @@ export default function tooltip() {
 
     //api
     component.width = function (value) {
-        if (!arguments.length) { return width }
-        width = value;
+        if (!arguments.length) { return _width || fixedWidth }
+        if(typeof value === "function"){ _width = value; }
+        else{ fixedWidth = value; }
+
         return component;
     };
     component.height = function (value) {
-        if (!arguments.length) { return height }
-        height = value;
+        if (!arguments.length) { return _height || fixedHeight }
+        if(typeof value === "function"){ _height = value; }
+        else{ fixedHeight = value; }
         return component;
     };
     component.margin = function (obj) {

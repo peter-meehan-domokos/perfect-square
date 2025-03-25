@@ -226,12 +226,10 @@ export default function perfectSquare() {
     let metaData = {};
     let selectedQuadrantIndex = null;
     let selectedChartKey = "";
+    let selectedMeasureKey = "";
     //handlers
     let setSelectedChartKey = () => {};
-    let updateZoom;
-    let updateChartColour;
-    let updateQuadrantColour;
-    let updateArrangeBy;
+    let setSelectedMeasureKey = () => {};
 
     //helper
     let _scaleValue;
@@ -362,6 +360,7 @@ export default function perfectSquare() {
                         _chartColour,
                         _colour:quadIndex => anotherQuadrantIsSelectedChecker(quadIndex) || anotherChartIsSelected ? GREY : chartColour,
                         getBarsAreaStrokeWidth:quadIndex => _scaleValue(anotherQuadrantIsSelectedChecker(quadIndex) || anotherChartIsSelected ? 0.1 : 0.3),
+                        onClickBar:(e, barD) => setSelectedMeasureKey(barD.measureKey)
                     });
 
                 //chart outline
@@ -370,136 +369,6 @@ export default function perfectSquare() {
                     colour: anotherChartIsSelected ? GREY : chartColour,
                     onClick:() => setSelectedChartKey(chartData.key)
                 })
-            })
-        }
-
-        updateArrangeBy = function(selection, options={}){
-             //if(levelOfDetail < ??){ return; }
-            //@todo...
-        }
-
-        updateQuadrantColour = function(selection, options={ }){
-            /*
-            const { levelOfDetail } = options;
-            //if(levelOfDetail < 2 && !isNumber(selectedQuadrantIndex)){ return; }
-            const anotherQuadrantIsSelectedChecker = quadD => isNumber(selectedQuadrantIndex) && selectedQuadrantIndex !== quadD.i;
-            selection
-                .filter(d => d.isOnScreen)
-                .each(function(data){
-                    const chartG = d3.select(this);
-                    const chartColour = _chartColour(data);
-                    const anotherChartIsSelected = selectedChartKey && selectedChartKey !== data.key;
-                    //@todo - add in if statements so we only do the updates for the right level
-                    //or add classname chart-filled-item and just update them all in one selection
-                    chartG.selectAll("g.quadrant-container").each(function(quadD){
-                        const quadrantContainerG = d3.select(this);
-                        const anotherQuadrantIsSelected = anotherQuadrantIsSelectedChecker(quadD);
-    
-                        //DETAIL LEVEL 3 ONLY
-                        quadrantContainerG.selectAll("rect.bar")
-                            .attr("fill", anotherChartIsSelected || anotherQuadrantIsSelected ? GREY : chartColour);
-    
-                        //DETAIL LEVEL 2 AND ABOVE
-                        quadrantContainerG.select("rect.bars-area-bg")
-                            .attr("stroke", anotherChartIsSelected || anotherQuadrantIsSelected ? GREY : chartColour)
-                            .attr("stroke-width", _scaleValue(anotherChartIsSelected ? 0.1 : 0.3))
-    
-                        //DETAIL LEVEL 2 ONLY
-                        quadrantContainerG.select("path.quadrant-outline")
-                            .attr("fill",  anotherChartIsSelected ?? anotherQuadrantIsSelected ? GREY : chartColour)
-                 
-                    })
-
-                    //DETAIL LEVEL 3 ONLY
-                    chartG.select("quadrants-summary").selectAll("g.quadrant-summary").each(function(quadD){
-                        const anotherQuadrantIsSelected = anotherQuadrantIsSelectedChecker(quadD);
-                        d3.select(this).selectAll("text")
-                            .attr("stroke", summaryD => 
-                                anotherChartIsSelected || anotherQuadrantIsSelected ? "grey" : (summaryD.info.mean < 50 ? "red" : BLUE))
-                            .attr("fill", summaryD => 
-                                anotherChartIsSelected || anotherQuadrantIsSelected ? "grey" : (summaryD.info.mean < 50 ? "red" : BLUE));
-                    })
-                })
-                */
-
-        }
-
-        updateChartColour = function(selection, options={}){
-            /*
-            const { levelOfDetail } = options;
-            //if(levelOfDetail > 1{ return; } //but levelofxetail > 2 is mentioned!  
-            selection
-                .filter(d => d.isOnScreen)
-                .each(function(data){
-                const chartG = d3.select(this);
-                const chartColour = _chartColour(data);
-                const anotherChartIsSelected = selectedChartKey && selectedChartKey !== data.key;
-
-                //DETAIL LEVEL 1 ONLY 
-                chartG.select("path.chart-outline")
-                    .attr("fill",  anotherChartIsSelected ? GREY : chartColour)
-                
-                chartG.select("rect.chart-hitbox")
-                    .attr("stroke", 
-                        levelOfDetail >= 2 ||  isNumber(selectedQuadrantIndex) ? "none" :
-                        anotherChartIsSelected ? GREY : 
-                        chartColour)
-            })
-            */
-        }
-
-        updateZoom = function(selection, options={}){
-            //console.log("updateZoom..", selection.data().filter(d => d.isOnScreen).length)
-            const { } = options;
-            updateDimnsAndColourAccessors(selection);
-            return;
-
-            //semantic zoom changes
-            if(prevLevelOfDetail !== levelOfDetail){
-                selection.call(updateLevelOfDetail, { levelOfDetail })
-            }
-
-            //geometric zoom changes
-            selection
-                .attr("display", d => d.isOnScreen ? null : "none")
-                .filter(d => d.isOnScreen) 
-                //.call(updateChartOutline, quadrantBarWidths, barsAreaHeight, gapBetweenBars)
-                .each(function(chartData,i){
-                    const chartG = d3.select(this);
-                    const chartColour = _chartColour(chartData);
-                    //if(!data.isOnScreen){ return; }
-
-                    const anotherChartIsSelected = selectedChartKey && selectedChartKey !== chartData.key;
-                    //hide/show title
-                    //chartG.call(updateTitleText);
-                    const quadrantsSummaryG = chartG.select("g.chart-header").select("g.quadrants-summary");
-                    quadrantsSummaryG
-                        .transition()
-                        .duration(100)
-                            //.attr("transform", `translate(${contentsWidth + zoomedGapBetweenQuadrants - gapBetweenQuadrants - quadrantsSummaryWidth},0)`)
-                            //.attr("opacity", _shouldShowQuadrantsSummary(levelOfDetail) ? 1 : 0);
-
-                    quadrantsSummaryG.selectAll("text")
-                        .transition()
-                        .duration(100)
-                            .attr("font-size", _scaleValue(9))
-                            .attr("stroke-width", _scaleValue(0.2));
-                    
-
-                    quadrantsSummaryG.selectAll(".quadrants-summary-outline")
-                        .attr("stroke-width", _scaleValue(0.1))
-
-                    chartG.select("rect.chart-hitbox")
-                        .attr("display", _barsAreClickable(levelOfDetail) ? "none" : null)
-                        .attr("stroke-width", _scaleValue(0.2))
-                        .attr("stroke", levelOfDetail === 1 && !isNumber(selectedQuadrantIndex) ? chartColour : "none");
-                    
-                    chartG.selectAll("g.quadrant-container")
-                        .attr("transform", d => `translate(
-                            ${(d.i === 0 || d.i === 2) ? 0 : quadrantWidth + zoomedGapBetweenQuadrants}, 
-                            ${(d.i === 0 || d.i === 1) ? 0 : quadrantHeight + zoomedGapBetweenQuadrants})`
-                        )
-                        //.call(updateQuadrantContents, { anotherChartIsSelected, chartColour })
             })
         }
 
@@ -527,47 +396,46 @@ export default function perfectSquare() {
         metaData = value;
         return chart;
     };
-    chart.selectedQuadrantIndex = function (value, shouldUpdateDom) {
+    chart.selectedQuadrantIndex = function (value) {
         if (!arguments.length) { return selectedQuadrantIndex; }
         selectedQuadrantIndex = value;
-        if(shouldUpdateDom && !d3.selectAll(".chart").empty()){ 
-            //d3.selectAll(".chart").call(updateQuadrantColour);
-        }
         return chart;
     };
-    chart.selectedChartKey = function (value, shouldUpdateDom) {
+    chart.selectedChartKey = function (value) {
         if (!arguments.length) { return selectedChartKey; }
         selectedChartKey = value;
         return chart;
     };
-    chart.zoomK = function (value, shouldUpdateDom) {
-        if (!arguments.length) { return zoomK; }
-        zoomK = value;
-        if(shouldUpdateDom && !d3.selectAll(".chart").empty()){ 
-            //d3.selectAll(".chart")
-                //.call(updateZoom); 
-        }
+    chart.selectedMeasureKey = function (value) {
+        if (!arguments.length) { return selectedMeasureKey; }
+        selectedMeasureKey = value;
         return chart;
     };
-    chart.zoomingInProgress = function (value, shouldUpdateDom) {
+    chart.zoomK = function (value) {
+        if (!arguments.length) { return zoomK; }
+        zoomK = value;
+        return chart;
+    };
+    chart.zoomingInProgress = function (value) {
         if (!arguments.length) { return zoomingInProgress; }
         zoomingInProgress = { 
             ...value, initLevelOfDetail:levelOfDetail, targLevelOfDetail:calcLevelOfDetail(value.targK) 
         }
         return chart;
     };
-    chart.arrangeBy = function (value, shouldUpdateDom) {
+    chart.arrangeBy = function (value) {
         if (!arguments.length) { return arrangeBy; }
         arrangeBy = value;
-        if(shouldUpdateDom && !d3.selectAll(".chart").empty()){ 
-            d3.selectAll(".chart")
-                .call(updateArrangeBy); 
-        }
         return chart;
     };
     chart.setSelectedChartKey = function (func) {
         if (!arguments.length) { return setSelectedChartKey; }
         setSelectedChartKey = func;
+        return chart;
+    };
+    chart.setSelectedMeasureKey = function (func) {
+        if (!arguments.length) { return setSelectedMeasureKey; }
+        setSelectedMeasureKey = func;
         return chart;
     };
     return chart;

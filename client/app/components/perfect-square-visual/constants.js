@@ -30,6 +30,13 @@ export const SETTINGS_OPTIONS = {
     ]
 }
 
+export const SELECT_MEASURE_TOOLTIP = {
+    paragraphs:[
+        { text: "Clicking a measure isn't available yet." }
+    ],
+    fixedInPlace:false 
+}
+
 export const DEFAULT_SETTINGS = { 
     arrangeBy:{ x: "", y:"", colour:"" }
 }

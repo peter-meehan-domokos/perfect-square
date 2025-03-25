@@ -7,7 +7,7 @@ import perfectSquareComponent from "./perfectSquareComponent";
 import tooltipComponent from "../d3HelperComponents/tooltipComponent";
 import { remove, fadeIn } from '../../helpers/domHelpers';
 import { renderCharts } from './d3RenderFunctions';
-import { DEFAULT_SETTINGS, SETTINGS_OPTIONS } from "./constants.js";
+import { DEFAULT_SETTINGS, SELECT_MEASURE_TOOLTIP } from "./constants.js";
 import { CHART_IN_DURATION, CHART_OUT_DURATION } from '@/app/constants';
 
 const CONTAINER_MARGIN = { left:10, right:10, top:10, bottom:10 };
@@ -52,17 +52,19 @@ const calculateChartSizesAndGridLayout = (contentsWidth, contentsHeight, nrCols,
 const perfectSquare = perfectSquareComponent();
 const tooltip = tooltipComponent();
 
-const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelectedChartKey="", initSettings }) => {
+const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelectedChartKey="", initSelectedMeasureKey="", initSettings }) => {
   //state
   //this triggers the container to be sized, which triggers everything else
   const [dataKey, setDataKey] = useState(data.key);
   const [cleanUpInProgress, setCleanupInProgress] = useState(false);
   const [headerExtended, setHeaderExtended] = useState(false);
   const [containerSizesAndGrid, setContainerSizesAndGrid] = useState({});
-  const [selectedQuadrantIndex, setSelectedQuadrantIndex] = useState(null);
   const [selectedChartKey, setSelectedChartKey] = useState(initSelectedChartKey);
+  const [selectedQuadrantIndex, setSelectedQuadrantIndex] = useState(null);
+  const [selectedMeasureKey, setSelectedMeasureKey] = useState(initSelectedMeasureKey);
   const [settings, setSettings] = useState(initSettings || DEFAULT_SETTINGS)
-  const [tooltipsData, setTooltipsData] = useState([]);
+  const [headerTooltipsData, setHeaderTooltipsData] = useState([]);
+  const [chartsViewboxTooltipsData, setChartsViewboxTooltipsData] = useState([]);
   //only used for React components
   const [zoomTransformState, setZoomTransformState] = useState(d3.zoomIdentity)
   const { width, height, margin, contentsWidth, contentsHeight, nrDatapoints, nrCols, nrRows, visKey } = containerSizesAndGrid;
@@ -99,7 +101,6 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelectedCha
   const chartMargin = (width, height) => ({ left:width * 0.1, right:width * 0.1, top:height * 0.1, bottom:height * 0.1 });
   const setSizesAndTriggerDataRendering = useCallback((data) => {
     const setSizesAndGrid = () => {
-      console.log("RESIZE---------------------")
       const width = containerRef.current.getBoundingClientRect().width;
       const height = containerRef.current.getBoundingClientRect().height;
       const margin = CONTAINER_MARGIN;
@@ -129,6 +130,7 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelectedCha
       setTimeout(() => {
         setSelectedQuadrantIndex(null);
         setSelectedChartKey("");
+        setSelectedMeasureKey("");
         resetZoom(false);
         setDataKey(key);
         cleanupInProgressRef.current = false;
@@ -286,10 +288,13 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelectedCha
         .metaData({ data: { info } })
         .selectedChartKey(selectedChartKey)
         .selectedQuadrantIndex(selectedQuadrantIndex)
+        .selectedMeasureKey(selectedMeasureKey)
         .setSelectedChartKey(chartKey => {
           zoomTo(chartKey, 
             () => setSelectedChartKey(chartKey));
         })
+        //.setSelectedMeasureKey((measureKey) => { console.log("meas", measureKey)})
+        .setSelectedMeasureKey(setSelectedMeasureKey)
         .zoomK(d3.zoomTransform(containerRef.current).k)
         .arrangeBy(arrangeBy)
 
@@ -316,29 +321,71 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelectedCha
   //render/update tooltips
   useEffect(() => {
     //console.log("tooltipsUE...7", tooltipsData)
-    const tooltipWidth = 150;
-    const tooltipHeight = 150;
+    const headerTooltipWidth = 150;
+    const headerTooltipHeight = 150;
+    const chartsViewboxTooltipWidth = 200;
+    const chartsViewboxTooltipHeight = 60;
 
-    const tooltipG = d3.select(containerRef.current).select("svg.viz").selectAll("g.tooltip").data(tooltipsData, t => t.key);
+    const tooltipsData = [
+      ...headerTooltipsData.map(t => ({ 
+        ...t, area:"header",  enterTransitionType:"slideFromTop",
+        x:width - headerTooltipWidth, y:0, width:headerTooltipWidth, height:headerTooltipHeight
+      })), 
+      ...chartsViewboxTooltipsData.map(t => ({ 
+        ...t, area:"charts-viewbox", enterTransitionType:"fadeIn",
+        x:(width - chartsViewboxTooltipWidth)/2, y:20, width:chartsViewboxTooltipWidth, height:chartsViewboxTooltipHeight
+      }))
+    ]
+
+    console.log("tooltipsData", tooltipsData)
+
+    const tooltipG = d3.select(containerRef.current).select("svg.viz").selectAll("g.tooltip").data(tooltipsData, d => d.key);
     tooltipG.enter()
       .append("g")
         .attr("class", "tooltip")
+        .each(function(d){
+          const tooltipG = d3.select(this);
+          //transition in
+          if(d.enterTransitionType === "slideFromTop"){
+            tooltipG
+                .attr('clip-path', "url(#slide-tooltip-clip)")
+
+            d3.select('clipPath#slide-tooltip-clip').select('rect')
+                .attr('width', d.width)
+                .attr('height', 0)
+                .attr("rx", 5)
+                .attr("ry", 5)
+                    .transition()
+                    .duration(500)
+                        .attr('height', d.height)
+          }else{
+              tooltipG.attr("opacity", 0)
+                  .transition()
+                  .duration(500)
+                      .attr("opacity", 1)
+          }
+
+        })
         .merge(tooltipG)
-        .attr("transform", `translate(${containerSizesAndGrid.width - tooltipWidth}, 0)`)
+        .attr("transform", d => `translate(${d.x}, ${d.y})`)
         .call(tooltip
-          .width(tooltipWidth)
-          .height(tooltipHeight))
+          .width(d => d.width)
+          .height(d => d.height))
 
     tooltipG.exit().each(function(d){
       const tooltipG = d3.select(this);
-      d3.select('clipPath#tooltip-clip').select('rect')
-        .transition()
-        .duration(500)
-            .attr('height', 0)
-            .on("end", () => { tooltipG.remove(); })
+      if(d.enterTransitionType === "slideFromTop"){
+        d3.select('clipPath#slide-tooltip-clip').select('rect')
+          .transition()
+          .duration(500)
+              .attr('height', 0)
+              .on("end", () => { tooltipG.remove(); })
+      }else{
+        tooltipG.call(remove);
+      }
     });
 
-  }, [tooltipsData])
+  }, [headerTooltipsData, chartsViewboxTooltipsData])
 
   //Selected chart change
   useEffect(() => {
@@ -359,6 +406,19 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelectedCha
       .call(perfectSquare
         .selectedQuadrantIndex(selectedQuadrantIndex))
   }, [selectedQuadrantIndex])
+
+  //Selected measure change
+  useEffect(() => {
+    if (isFirstRender.current) { return; }
+    //for now, just show a tooltip
+    if(selectedMeasureKey){
+      setChartsViewboxTooltipsData([SELECT_MEASURE_TOOLTIP])
+      setTimeout(() => { 
+        setChartsViewboxTooltipsData([]); 
+        setSelectedMeasureKey("");
+      }, 3000)
+    }
+  }, [selectedMeasureKey])
 
     //arrangement change
   useEffect(() => {
@@ -401,38 +461,6 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelectedCha
 
   const handleClickResetZoom = () => { resetZoom(); }
 
-
-  /*
-zoom
- - //@todo - add this back in
-  const zoomTo = useCallback((chartKey, cb=() => {}) => {
-    const { chartWidth, chartHeight } = sizesRef.current;
-    const zoom = zoomRef.current;
-    const chartD = processedDataRef.current.datapoints.find(d => d.key === chartKey);
-    //zoom into selected chart
-    const k = d3.min([contentsWidth/chartWidth, contentsHeight/chartHeight]);
-
-    //we remove teh impact of zoom on margin. This is needed because we want teh chart to have a margin, 
-    //but when user zooms manually, we want it to disappear, which is more immersive (ie no artificial border)
-    //therefore zoom is on the margin aswell, so we must discount it so it isnt enlarged
-    const marginLeftAdjustment = CONTAINER_MARGIN.left - k * CONTAINER_MARGIN.left;
-    const marginTopAdjustment = CONTAINER_MARGIN.top - k * CONTAINER_MARGIN.top
-    const extraHorizSpace = contentsWidth - (chartWidth * k);
-    const extraVertSpace = contentsHeight - (chartHeight * k);
-    const x = -chartWidth * chartD.colNr * k + marginLeftAdjustment + (extraHorizSpace/2);
-    const y = -chartHeight * chartD.rowNr * k + marginTopAdjustment + (extraVertSpace/2);
-    const transform = d3.zoomIdentity.translate(x, y).scale(k);
-
-    //tell d3comp we are zooming to a level 3, so it can ignore level 2 (if we are at level 1)
-    perfectSquare.zoomingInProgress({ targK:transform.k, sourceEvent:null })
-    d3.select(containerRef.current)
-      .transition()
-      .duration(ZOOM_APPEAR_TRANSITION_DURATION)
-        .call(zoom.transform, transform)
-        .on("end", function(){ cb(); })
-  },[contentsWidth, contentsHeight, nrDatapoints])
-
-    */
   const zoomTo = useCallback((chartKey, cb=() => {}) => {
     //when sim on, it still zooms in based on colnr
     const { chartWidth, chartHeight } = sizesRef.current;
@@ -467,7 +495,7 @@ zoom
   //zoom
   useEffect(() => {
     if (isFirstRender.current) { return; }
-    console.log("zoomSetupUE...10", data.datapoints.length)
+    //console.log("zoomSetupUE...10", data.datapoints.length)
     if(!zoomRef.current){ zoomRef.current = d3.zoom(); }
     const zoom = zoomRef.current;
     //can zoom in until 1 chart takes up the screen
@@ -518,7 +546,7 @@ zoom
         setSelectedQuadrantIndex={setSelectedQuadrantIndex}
         setSettings={setSettings}
         resetZoom={handleClickResetZoom}
-        setTooltipsData={setTooltipsData}
+        setTooltipsData={setHeaderTooltipsData}
       />
       <div className={`viz-container ${headerExtended ? "with-extended-header" : ""}`} >
         <div className="viz-inner-container" ref={containerRef}>
@@ -527,7 +555,7 @@ zoom
               <g className="viz-contents" ref={visContentsGRef}></g>
             </g>
             <defs>
-              <clipPath id="tooltip-clip">
+              <clipPath id="slide-tooltip-clip">
                 <rect></rect>
               </clipPath>
             </defs>

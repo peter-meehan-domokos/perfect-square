@@ -171,7 +171,7 @@ export function quadrants(selection, quadrantWidth, quadrantHeight, quadrantTitl
     const { styles, _scaleValue, _colour=() => "none", getBarsAreaStrokeWidth=() => 1,
         selectedQuadrantIndex, shouldShowSelectedQuadrantTitle,
         quadrantBarWidths, gapBetweenBars, _quadrantsContainerTransform=() => null, 
-        shouldShowBars, shouldShowQuadrantOutlines
+        shouldShowBars, shouldShowQuadrantOutlines, onClickBar
     } = settings;
 
     const barsAreaHeight = quadrantHeight - quadrantTitleHeight;
@@ -247,7 +247,7 @@ export function quadrants(selection, quadrantWidth, quadrantHeight, quadrantTitl
                         .datum(quadD)
                         //width, barsAreaHeight, barWidth, gapBetweenBars
                         .call(bars, barsAreaHeight, quadrantBarWidths[quadD.i], gapBetweenBars,{
-                            shouldShowBars, barsDirection, styles:styles.bar, colour
+                            shouldShowBars, barsDirection, styles:styles.bar, colour, onClick:onClickBar
                         })
                         .call(quadrantOutlinePath, barsAreaHeight, quadrantBarWidths[quadD.i], gapBetweenBars, {
                             shouldShowQuadrantPaths:!shouldShowBars, styles:styles.outlinePath, colour
@@ -260,7 +260,7 @@ export function quadrants(selection, quadrantWidth, quadrantHeight, quadrantTitl
 }
 
 function bars(selection, barsAreaHeight, barWidth, gapBetweenBars, settings={}){
-    const { styles, shouldShowBars, barsDirection="up", colour } = settings;
+    const { styles, shouldShowBars, barsDirection="up", colour, onClick=() => {} } = settings;
     selection.each(function(data){
         const container = d3.select(this);
         //bars
@@ -282,7 +282,10 @@ function bars(selection, barsAreaHeight, barWidth, gapBetweenBars, settings={}){
                 })
                 .merge(barG)
                 .each(function(barD, barIndex){
-                    const barG = d3.select(this);
+                    const barG = d3.select(this)
+                        .on("click", e => {
+                            onClick(e,barD)
+                        });
                     //update content and fill
                     const barHeight = barD.calcBarHeight(barsAreaHeight);
                     //no space between bars and outer edge of chart
@@ -295,7 +298,6 @@ function bars(selection, barsAreaHeight, barWidth, gapBetweenBars, settings={}){
                             .attr("width", barWidth)
                             .attr("height", barHeight)
                             .attr("fill", colour)
-                
                 })
 
         barG.exit().call(remove);
