@@ -2,12 +2,12 @@
 
 ## Overview
 
-A novel way to view multi-variate datapoints. 
+A novel 2D view multivariate data, or n-dimensional vectors. Yu can easily compare and group thousands of datapoints according to each point's individual shape. Especially good at showing comparison against an ideal state. Also good for visualising clustering and similarity ML algorithms.
 
-Especially good for vectors, as it allows you grasp and compare the shape (distribution) of thousands of datapoints very quickly.
-
-Shows progress towards an ideal state - a common requirement. For example, an injured sports star who is aiming to get nbakc to their pre-injury levels (the ideal state).
+For example, an injured sports star who is aiming to get back to their pre-injury levels (the ideal state).
 Or a recruitment algorithm which aims to find the person who most fits the required profile. Or an AI language model which aims to find a match for a word (token) based on similarity.
+
+In these cases, the dataset is normalised by giving a value for each measure as a proporiton of the ideal value for that measure (eg a percentage of the target achieved).
  
 ## Key features
 
@@ -16,6 +16,11 @@ Or a recruitment algorithm which aims to find the person who most fits the requi
 The highest bars, representing the best values, are always towards the centre of the overall square. This make it easier to see the shape of the overall progress, at the expense of the ability to track progress for a particular bar. User will soon be able to remove auto-ordering when they want to track several specific bars more than the overall progress.
 
 In our sports rehabilitation example, whereas an executive (or manager) may want to just know the overall shape for all injured players, a coach or physio would be more interested in the specific bars.
+
+### Categories
+
+It is particularly useful when each vector needs to be grouped into categories/subvectors (see rehab example below). 
+It can therefore also visualise the product quantization process in a vector database search.
 
 ### Drilling down
 
@@ -33,7 +38,9 @@ Its very important in dataviz that space is used effectively. In this implementa
 
 ### Development Stack 
 
-This is React plus D3 project, developed on a chrome browser, and is responsive to all display sizes. However, it hasn't been tested on other browsers or mobile devices.
+This is React plus D3 project, developed on a chrome browser, and is responsive to all display sizes. However, it hasn't been tested on other browsers or mobile devices. 
+
+not optimised for mobile/tablet or non-chrome browsers yet, although can be viewed on it.
 
 ### Architecture
 
@@ -59,9 +66,9 @@ There is currently no React redux, context, or hooks used for state management a
 
 ## Some Known Issues
 
- - ...
- - ...
- - ...
+ - zoom ctrls zoom from 0,0 not centre...(note: if we go from centre, then need to adjust the isChartOnScreenChecker function)
+ - BUG - zooming out with - can override translate extent, so need to put in a check for these bounds,
+ - if user selects a chart whilst force is running, need to cut smoothly to the end position of the simulation before zooming in
 
 
 ## More functionality coming soon
