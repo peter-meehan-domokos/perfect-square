@@ -132,7 +132,6 @@ export default function tooltip() {
             const actualTitleHeight = data.title ? titleHeight : 0;
             const actualSubtitleHeight = data.subtitle ? subtitleHeight : 0;
             const mainContentsHeight = contentsHeight - actualTitleHeight - actualSubtitleHeight;
-            console.log("ch mch", contentsHeight, mainContentsHeight)
             //'this' is the container
             const container = d3.select(containerElement)
             //bg

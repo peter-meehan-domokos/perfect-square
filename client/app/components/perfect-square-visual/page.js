@@ -53,6 +53,7 @@ const perfectSquare = perfectSquareComponent();
 const tooltip = tooltipComponent();
 
 const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelectedChartKey="", initSelectedMeasureKey="", initSettings }) => {
+
   //state
   //this triggers the container to be sized, which triggers everything else
   const [dataKey, setDataKey] = useState(data.key);
@@ -67,6 +68,7 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelectedCha
   const [chartsViewboxTooltipsData, setChartsViewboxTooltipsData] = useState([]);
   //only used for React components
   const [zoomTransformState, setZoomTransformState] = useState(d3.zoomIdentity)
+
   const { width, height, margin, contentsWidth, contentsHeight, nrDatapoints, nrCols, nrRows, visKey } = containerSizesAndGrid;
   const { arrangeBy } = settings;
   const dataIsArranged = arrangeBy.x || arrangeBy.y || arrangeBy.colour ? true : false;
@@ -101,6 +103,7 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelectedCha
   const chartMargin = (width, height) => ({ left:width * 0.1, right:width * 0.1, top:height * 0.1, bottom:height * 0.1 });
   const setSizesAndTriggerDataRendering = useCallback((data) => {
     const setSizesAndGrid = () => {
+      if(!containerRef.current){ return; }
       const width = containerRef.current.getBoundingClientRect().width;
       const height = containerRef.current.getBoundingClientRect().height;
       const margin = CONTAINER_MARGIN;
@@ -116,7 +119,7 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelectedCha
     resizeObserver.observe(containerRef.current);
     //init
     setSizesAndGrid();
-  }, [])
+  }, [data])
 
   //Entire data change/load (eg example changed)
   useEffect(() => {
@@ -149,23 +152,16 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelectedCha
     }
   },[key])
 
-  //container size and grid
-  useEffect(() => {
-    if (isFirstRender.current) { return; }
-    //console.log("resizeUE....2 nrDs", data.datapoints.length)
-    
-  }, [dataKey]);
-
   //container or chart size change
   useEffect(() => {
-    if (isFirstRender.current) { return; }
-    console.log("chartSizesUE...3")
+    if (isFirstRender.current || !contentsWidth) { return; }
+    //console.log("chartSizesUE...3", containerSizesAndGrid)
     sizesRef.current = calculateChartSizesAndGridLayout(contentsWidth, contentsHeight, nrCols, nrRows, arrangeBy, chartMargin);
   },[contentsWidth, contentsHeight, nrCols, nrRows, arrangeBy])
 
   //layout applied to data
   useEffect(() => {
-    if (isFirstRender.current) { return; }
+    if (isFirstRender.current || !contentsWidth) { return; }
     //console.log("layoutUE...4", data.datapoints.length)
     const { chartWidth, chartHeight } = sizesRef.current;
     processedDataRef.current = perfectSquareLayout(data, 
@@ -176,7 +172,7 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelectedCha
 
   //simulation
   useEffect(() => {
-    if (isFirstRender.current) { return; }
+    if (isFirstRender.current || !contentsWidth) { return; }
     const { chartWidth, chartHeight } = sizesRef.current;
     const { arrangeBy } = settings;
     const dataIsArranged = arrangeBy.x || arrangeBy.y || arrangeBy.colour ? true : false;
@@ -265,10 +261,10 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelectedCha
 
   //render/update entire visual
   useEffect(() => {
-    if (isFirstRender.current) { return; }
+    if (isFirstRender.current || !contentsWidth) { return; }
     const { arrangeBy } = settings;
     const dataIsArranged = arrangeBy.x || arrangeBy.y || arrangeBy.colour ? true : false;
-    console.log("renderChartUE...contw chartw",Math.round(contentsWidth), Math.round(sizesRef.current.chartWidth))
+    //console.log("renderChartUE...contw chartw",Math.round(contentsWidth), Math.round(sizesRef.current.chartWidth))
     //data
     const { datapoints, info } = processedDataRef.current;
 
@@ -336,8 +332,6 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelectedCha
         x:(width - chartsViewboxTooltipWidth)/2, y:20, width:chartsViewboxTooltipWidth, height:chartsViewboxTooltipHeight
       }))
     ]
-
-    console.log("tooltipsData", tooltipsData)
 
     const tooltipG = d3.select(containerRef.current).select("svg.viz").selectAll("g.tooltip").data(tooltipsData, d => d.key);
     tooltipG.enter()
@@ -494,7 +488,7 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelectedCha
 
   //zoom
   useEffect(() => {
-    if (isFirstRender.current) { return; }
+    if (isFirstRender.current || !contentsWidth) { return; }
     //console.log("zoomSetupUE...10", data.datapoints.length)
     if(!zoomRef.current){ zoomRef.current = d3.zoom(); }
     const zoom = zoomRef.current;

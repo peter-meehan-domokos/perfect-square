@@ -32,6 +32,221 @@ body {
   text-align: center;
 }
 
+.intro {
+  width:100vw;
+  height:100vh;
+  display:flex;
+  align-items:center;
+  background:#282c34;
+  position:relative;
+}
+
+.slick-dots li.slick-active button {
+  display: block;
+  width: 0.5rem;
+  height: 0.5rem;
+  padding: 0;
+  border: none;
+  border-radius: 100%;
+  text-indent: -9999px;
+  background-color: #696969;
+}
+
+.intro .skip-intro{
+  width:110px;
+  height:35px;
+  position:absolute;
+  bottom:2.5%;
+  right:2.5%;
+  font-size:1rem;
+  cursor:pointer;
+  color:#808080;
+  @media only screen and (max-width: 575px) {
+    font-size:0.8rem;
+  }
+}
+
+.intro-slider-container{
+  width:80%;
+  height:90vh;
+  margin:auto;
+  flex-direction:column;
+  justify-content:center;
+  @media only screen and (max-width: 575px) {
+    width:90%;
+  }
+}
+
+.intro-slide-container{
+  width:600px;
+  height:100%;
+  padding-top:10vh;
+  align-items:center;
+}
+
+.intro-slide-container.last-slide{
+  padding-top:0;
+}
+
+.intro-slide{
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+
+.slide-main-contents{
+  min-height:300px;
+  display:flex;
+  justify-content:center;
+  text-wrap:wrap;
+  @media only screen and (max-width: 575px) {
+    min-height:220px;
+  }
+}
+
+.slide-controls{
+  padding-top:40px;
+  @media only screen and (max-width: 575px) {
+    padding-top:15px;
+    padding-bottom:20px;
+  }
+}
+
+.last-slide-controls{
+  margin-top:20px;
+  margin-bottom:20px;
+  @media only screen and (max-width: 990px) {
+    margin-top:-20px;
+  }
+  @media only screen and (max-width: 768px) {
+    margin-top:-80px;
+    margin-bottom:50px;
+    border:none;
+  }
+  @media only screen and (max-width: 575px) {
+   margin-top:20px;
+  }
+}
+
+.intro-slide-text-container{
+  min-width:50%;
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+.intro-slide-text-container .slide-title {
+  font-size:2rem;
+  @media only screen and (max-width: 768px) {
+    font-size: 1.3rem;
+  }
+  @media only screen and (max-width: 575px) {
+    font-size: 1.2rem;
+    padding:2.5%;
+  }
+}
+
+.intro-slide-text-container .slide-textline {
+  width:100%;
+  font-size:1.2rem;
+  @media only screen and (max-width: 768px) {
+    font-size: 0.9rem;
+  }
+  @media only screen and (max-width: 575px) {
+    font-size: 0.8rem;
+    padding:2.5%;
+  }
+}
+
+.intro-slide-visual{
+  width:50%;
+  min-width:50%;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+}
+
+.intro-vis-container{
+  flex-grow:1;
+  background:grey;
+}
+
+.intro-slide button {
+  width:80px; 
+  height:40px; 
+  borderRadius:1px;
+  cursor:pointer;
+}
+
+.slide-footer-container {
+  margin-top:5%;
+  margin-bottom:5%;
+  display:flex;
+  justify-content:center;
+  @media only screen and (max-width: 575px) {
+    height:150px;
+  }
+}
+
+.slide-footer {
+  padding:20px;
+  border-radius:5px;
+  display:flex;
+  justify-content:center;
+  border:solid;
+  border-color:#C0C0C0;
+  border-width:0.7;
+}
+
+.slide-footer-visual{
+  width:150px;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  @media only screen and (max-width: 575px) {
+   width:120px;
+  }
+}
+
+.slide-footer-visual .image {
+  width:fit-content;
+  height:100%;
+}
+.slide-footer-items-list{
+  padding:0 0 0 20px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  align-items:flex-start;
+}
+
+.slide-footer-item{
+  text-align:left;
+  margin:5px 0;
+  font-size:0.9rem;
+  @media only screen and (max-width: 768px) {
+    font-size:0.8rem;
+    margin:3px 0;
+  }
+  @media only screen and (max-width: 575px) {
+    font-size:0.7rem;
+    margin: 0;
+  }
+}
+
+.url-item{
+  text-decoration: underline;
+  cursor:pointer;
+}
+
+.slide-footer-text li{
+  text-align:left;
+}
+
+
 .header {
   background-color: #282c34; /* green-blue */
   width:100%;
@@ -39,6 +254,7 @@ body {
   display:flex;
   flex-direction:column;
   justify-content: center;
+  position:relative;
 }
 
 .main {
@@ -48,6 +264,20 @@ body {
   background-color: #282c34; /* green-blue */
   @media only screen and (max-width: 990px) {
     padding:0;
+  }
+}
+
+.header .intro-link {
+  position:absolute;
+  width:100px;
+  height:30px;
+  left:2.5%;
+  top:10px;
+  font-size:1rem;
+  cursor:pointer;
+  color:#808080;
+  @media only screen and (max-width: 575px) {
+    font-size:0.8rem;
   }
 }
 

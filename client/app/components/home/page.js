@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { gql, useQuery } from "@apollo/client";
+import Intro from '../intro/page';
 import Header from '../header/page';
 import Visual from '../visual/page';
 
@@ -15,6 +16,7 @@ const GET_EXAMPLES = gql`
 const Home = ({ }) => {
     const { data } = useQuery(GET_EXAMPLES);
     const examples = data?.examples || [];
+    const [introIsDisplayed, setIntroIsDisplayed] = useState(true);
     const [selectedExampleKey, setSelectedExampleKey] = useState("");
 
     useEffect(() => {
@@ -23,8 +25,23 @@ const Home = ({ }) => {
 
     return (
         <>
-          <Header menuItems={examples} selected={selectedExampleKey} onSelect={setSelectedExampleKey} />
-          <Visual exampleKey={selectedExampleKey} />
+          {introIsDisplayed ? 
+            <Intro 
+              closeIntro={() => setIntroIsDisplayed(false)}
+            />
+          :
+            <>
+              <Header 
+                menuItems={examples} 
+                selected={selectedExampleKey} 
+                onSelect={setSelectedExampleKey}
+                openIntro={() => setIntroIsDisplayed(true)} 
+              />
+              <Visual 
+                exampleKey={selectedExampleKey} 
+              />
+            </>
+          }
         </>
     )
 }

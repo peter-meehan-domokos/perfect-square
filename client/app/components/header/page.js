@@ -1,6 +1,9 @@
-const Header = ({ menuItems=[], selected, onSelect }) => {
+const Header = ({ menuItems=[], selected, onSelect, openIntro }) => {
     return (
       <header className="header">
+          <button className="intro-link" onClick={openIntro} >
+              Back to intro
+          </button>
           <div className="vis-title">
             The Perfect Square Examples
           </div>
