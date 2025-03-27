@@ -13,3 +13,5 @@ export const CHART_IN_DURATION = 500;
 export const CHART_OUT_DURATION = 500;
 export const CHART_IN_TRANSITION = { delay:0, duration: CHART_IN_DURATION }
 export const CHART_OUT_TRANSITION = { delay:0, duration: CHART_OUT_DURATION }
+
+export const ZOOM_AND_ARRANGE_TRANSITION_DURATION = 750;

@@ -5,26 +5,19 @@ import VisualHeader from './visual-header/page';
 import perfectSquareLayout from './perfectSquareLayout';
 import perfectSquareComponent from "./perfectSquareComponent";
 import { renderCharts, renderTooltips } from './d3RenderFunctions';
-import { DEFAULT_SETTINGS, SELECT_MEASURE_TOOLTIP, CONTAINER_MARGIN } from "./constants.js";
-import { CHART_OUT_DURATION } from '@/app/constants';
+import { DEFAULT_SETTINGS, SELECT_MEASURE_TOOLTIP, CONTAINER_MARGIN, CALC_CHART_MARGIN } from "./constants.js";
+import { CHART_OUT_DURATION, ZOOM_AND_ARRANGE_TRANSITION_DURATION } from '@/app/constants';
 import { isArranged, calcNrColsAndRows, calcChartSizesAndGridLayout, applyMargin, isChartOnScreenCheckerFunc, calcZoomTransformFunc } from './helpers';
 import { getElementDimns } from '@/app/helpers/domHelpers';
-
-const ZOOM_AND_ARRANGE_TRANSITION_DURATION = 750;
-const COLLISION_FORCE_RADIUS_FACTOR = 1.15;//0.65
-const EXTRA_HORIZ_MARGIN_FACTOR_FOR_FORCE = 0.15;
-const EXTRA_VERT_MARGIN_FACTOR_FOR_FORCE = 0.25// 0.15;
-//const CENTRE_FORCE_STRENGTH = 1.3; //good for just nmena arranged
-const CENTRE_FORCE_STRENGTH = 1.8;
+import { setupSimulation } from './simulation';
+import { setupZoom } from './zoom';
 
 const perfectSquare = perfectSquareComponent();
-
 const defaultSettings = { arrangeBy:{ x:"", y:"", colour:""} }
 
 const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections={}, initSettings=defaultSettings }) => {
   const { initSelectedChartKey="", initSelectedMeasureKey="", initSelectedQuadrantIndex=null } = initSelections;
   //state
-  //this triggers the container to be sized, which triggers everything else
   const [headerExtended, setHeaderExtended] = useState(false);
   const [containerSizesAndGrid, setContainerSizesAndGrid] = useState({});
   const [selectedChartKey, setSelectedChartKey] = useState(initSelectedChartKey);
@@ -33,7 +26,7 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
   const [settings, setSettings] = useState(initSettings || DEFAULT_SETTINGS)
   const [headerTooltipsData, setHeaderTooltipsData] = useState([]);
   const [chartsViewboxTooltipsData, setChartsViewboxTooltipsData] = useState([]);
-  //only used for React components
+  //zoom state is only used for React children ie Header
   const [zoomTransformState, setZoomTransformState] = useState(d3.zoomIdentity)
 
   const { width, height, margin, contentsWidth, contentsHeight, nrDatapoints, nrCols, nrRows, visKey } = containerSizesAndGrid;
@@ -67,8 +60,7 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
     nrDatapoints:datapoints.length
   }
 
-  //helpers
-  const chartMargin = (width, height) => ({ left:width * 0.1, right:width * 0.1, top:height * 0.1, bottom:height * 0.1 });
+  //helper to set sizes
   const setSizesAndTriggerDataRendering = useCallback((data) => {
     const setSizesAndGrid = () => {
       if(!containerDivRef.current){ return; }
@@ -86,7 +78,7 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
     setSizesAndGrid();
   }, [data])
 
-  //Entire data change/load (eg example changed)
+  //data change/load
   useEffect(() => {
     if (isFirstRenderRef.current) { return; }
     //reset perfectSquare component if required
@@ -118,7 +110,7 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
   //container or chart size change
   useEffect(() => {
     if (isFirstRenderRef.current || !contentsWidth) { return; }
-    sizesRef.current = calcChartSizesAndGridLayout(contentsWidth, contentsHeight, nrCols, nrRows, arrangeBy, chartMargin);
+    sizesRef.current = calcChartSizesAndGridLayout(contentsWidth, contentsHeight, nrCols, nrRows, arrangeBy, CALC_CHART_MARGIN);
   },[contentsWidth, contentsHeight, nrCols, nrRows, arrangeBy])
 
   //layout applied to data
@@ -136,12 +128,10 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
     if (isFirstRenderRef.current || !contentsWidth) { return; }
     const { chartWidth, chartHeight } = sizesRef.current;
     const { arrangeBy } = settings;
-    const dataIsArranged = arrangeBy.x || arrangeBy.y || arrangeBy.colour ? true : false;
     if(!dataIsArranged){ return; }
 
     const processedData = processedDataRef.current;
     const processedDatapoints = processedData.datapoints;
-    const { mean, deviation } = processedData.info;
   
     //if moving from a grid (ie non-arranged), we set d.x and d.y properties so transitions starts from current position
     const dataWasAlreadyArranged = isArranged(prevArrangeByRef.current);
@@ -153,62 +143,9 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
     }
 
     simRef.current = d3.forceSimulation(processedDatapoints);
-    const sim = simRef.current;
-    const extraHorizMarginForForce = contentsWidth * EXTRA_HORIZ_MARGIN_FACTOR_FOR_FORCE;
-    const extraVertMarginForForce = contentsHeight * EXTRA_VERT_MARGIN_FACTOR_FOR_FORCE;
-    const horizSpace = contentsWidth - 2 * extraHorizMarginForForce
-    const vertSpace = contentsHeight - 2 * extraVertMarginForForce;
-    const horizSpacePerChart = horizSpace/nrDatapoints;
-    const vertSpacePerChart = vertSpace/nrDatapoints;
+    setupSimulation(simRef.current, contentsWidth, contentsHeight, chartWidth, chartHeight, arrangeBy, nrDatapoints, processedData.info);
 
-    sim
-      .force("center", d3.forceCenter(contentsWidth / 2, contentsHeight / 2).strength(CENTRE_FORCE_STRENGTH))
-      .force("collide", d3.forceCollide().radius((sizesRef.current.chartWidth/2) * COLLISION_FORCE_RADIUS_FACTOR))
-      .force("x", d3.forceX(d => {
-        //need to centre each chart in its horizspaceperchart ie +(hozspacePerChart - chartWidth)/2
-        const adjuster = extraHorizMarginForForce + (horizSpacePerChart - chartWidth)/2;
-        if(arrangeBy.x === "position" && d.date){
-          //@todo - implement this similar to mean and deviation (and can just replace all 3 with d3 scales)
-          return 0;
-        }
-        if(arrangeBy.x === "position"){
-          return horizSpacePerChart * d.i + adjuster;
-        }
-        if(arrangeBy.x === "mean"){
-          const proportion = mean.range === 0 ? 0.5 : (d.info.mean - mean.min)/mean.range;
-          //when prop = 1 ie max chart, its off the screen, so need to adjust it back. This way, if prop=0, it will still be at the start of space
-          return (horizSpace - horizSpacePerChart) * proportion + adjuster;
-        }
-        if(arrangeBy.x === "deviation"){
-          //invert it by subtracting the proportion from 1 to get prop value
-          const proportion = deviation.range === 0 ? 0.5 : 1 - (d.info.deviation - deviation.min)/deviation.range
-          return (horizSpace - horizSpacePerChart) * proportion + adjuster;
-        }
-        //default to centre of screen
-        return (contentsWidth - sizesRef.current.chartWidth)/2;
-      })) 
-      .force("y", d3.forceY(d => {
-        const adjuster = (vertSpacePerChart - chartHeight)/2 - extraVertMarginForForce;
-        if(arrangeBy.y === "position" && d.date){
-          //@todo - implement this similar to mean and deviation (and can just replace all 3 with d3 scales)
-        }
-        if(arrangeBy.y === "position"){
-          return contentsHeight - (d.i + 1) * vertSpacePerChart + adjuster;
-        }
-        if(arrangeBy.y === "mean" && mean.range !== 0){
-          const proportion = (d.info.mean - mean.min)/mean.range;
-          return contentsHeight - vertSpacePerChart - ((vertSpace - vertSpacePerChart) * proportion) + adjuster;
-        }
-        if(arrangeBy.y === "deviation" && deviation.range !== 0){
-          const proportion = 1 - (d.info.deviation - deviation.min)/deviation.range;
-          return contentsHeight - vertSpacePerChart - ((vertSpace - vertSpacePerChart) * proportion) + adjuster;
-        }
-
-        //default to centre of screen
-        return (contentsHeight - sizesRef.current.chartHeight)/2;
-      }))
-
-    sim
+    simRef.current
       .on("tick", () => {
         if(!simTicksInProcessRef.current){ simTicksInProcessRef.current = true; }
         if(!simIsStartedRef.current){ return; }
@@ -219,15 +156,8 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
 
   }, [contentsWidth, contentsHeight, visKey, nrDatapoints, arrangeBy])
 
-  //render/update entire visual
+  //start/stop sim
   useEffect(() => {
-    if (isFirstRenderRef.current || !contentsWidth) { return; }
-    const { arrangeBy } = settings;
-    const dataIsArranged = arrangeBy.x || arrangeBy.y || arrangeBy.colour ? true : false;
-    const arrangementHasChanged = prevArrangeByRef.current !== arrangeBy;
-    //data
-    const { datapoints, info } = processedDataRef.current;
-
     if(!dataIsArranged){
       simRef.current?.stop();
       simIsStartedRef.current = false;
@@ -235,6 +165,15 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
       simRef.current?.restart();
       simIsStartedRef.current = true;
     }
+  },[arrangeBy])
+
+  //render/update entire visual
+  useEffect(() => {
+    if (isFirstRenderRef.current || !contentsWidth) { return; }
+    const { arrangeBy } = settings;
+    const arrangementHasChanged = prevArrangeByRef.current !== arrangeBy;
+    //data
+    const { datapoints, info } = processedDataRef.current;
 
     //settings
     perfectSquare
@@ -253,14 +192,13 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
         .zoomK(d3.zoomTransform(containerDivRef.current).k)
         .arrangeBy(arrangeBy)
 
-    //call chart
-    d3.select(visContentsGRef.current)
-      .attr("transform", `translate(${margin.left}, ${margin.top})`)
-
+    //position and call charts
+    d3.select(visContentsGRef.current).attr("transform", `translate(${margin.left}, ${margin.top})`)
     renderCharts.call(visContentsGRef.current, datapoints, perfectSquare, dataIsArranged, {
       updateTransformTransition: arrangementHasChanged ? { duration:ZOOM_AND_ARRANGE_TRANSITION_DURATION } : null
     });
-    //update flag for transition
+
+    //update flag that determines type of transition
     prevArrangeByRef.current = arrangeBy;
   }, [visKey, contentsWidth, contentsHeight, nrDatapoints, arrangeBy])
 
@@ -273,19 +211,15 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
   //Selected chart change
   useEffect(() => {
     if (isFirstRenderRef.current) { return; }
-    d3.select(visContentsGRef.current)
-      .selectAll(".chart")
-      .call(perfectSquare
-        .selectedChartKey(selectedChartKey))
+    d3.select(visContentsGRef.current).selectAll(".chart").call(perfectSquare
+      .selectedChartKey(selectedChartKey))
   }, [selectedChartKey])
 
   //Selected quadrant change
   useEffect(() => {
     if (isFirstRenderRef.current) { return; }
-    d3.select(visContentsGRef.current)
-      .selectAll(".chart")
-      .call(perfectSquare
-        .selectedQuadrantIndex(selectedQuadrantIndex))
+    d3.select(visContentsGRef.current).selectAll(".chart").call(perfectSquare
+      .selectedQuadrantIndex(selectedQuadrantIndex))
   }, [selectedQuadrantIndex])
 
   //Selected measure change
@@ -347,38 +281,35 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
     if (isFirstRenderRef.current || !contentsWidth) { return; }
     if(!zoomRef.current){ zoomRef.current = d3.zoom(); }
     const zoom = zoomRef.current;
-    //can zoom in until 1 chart takes up the screen
-    const kMax = d3.max([contentsWidth/sizesRef.current.chartWidth, contentsHeight/sizesRef.current.chartHeight]);
-    zoom
-      .scaleExtent([1, kMax])
-      //@todo - make this contentsWidth and height, and shoft zoomG too by the margin
-      .translateExtent([[0, 0], [width, height]])
-      .on("start", () => {
-        setSelectedChartKey("");
-      })
-      .on("zoom", zoomed)
-      .on("end", (e) => {
-        //update react state too
-        setZoomTransformState(e.transform);
-      })
+    const { chartWidth, chartHeight } = sizesRef.current;
+
+    setupZoom(zoom, width, height, chartWidth, chartHeight, {
+      onStart:() => { 
+        setSelectedChartKey(""); 
+      },
+      onZoom:zoomed
+    });
 
     //call zoom
     d3.select(containerDivRef.current).call(zoom);
 
     function zoomed(e){
-      //update geometric zoom
       d3.select(viewGRef.current).attr("transform", e.transform);
 
       //update semantic zoom and virtualisation in the dom
       d3.select(containerDivRef.current).selectAll("g.chart")
-        .each(function(d){ d.isOnScreen = isChartOnScreenChecker(d, e.transform); })
+        .each(function(d){ 
+          d.isOnScreen = isChartOnScreenChecker(d, e.transform); 
+        })
         .attr("display", d => d.isOnScreen ? null : "none")
-        .filter(d => d.isOnScreen).call(perfectSquare
+        .filter(d => d.isOnScreen)
+        .call(perfectSquare
           .zoomK(e.transform.k, true));
 
       //update react state
       setZoomTransformState(e.transform);
     }
+    
   },[width, height, contentsWidth, contentsHeight, visKey, nrDatapoints, arrangeBy])
 
   useEffect(() => { isFirstRenderRef.current = false; })
