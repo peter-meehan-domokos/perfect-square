@@ -54,7 +54,7 @@ const SettingsCtrls = ({ settings, setSettings, setTooltipsData }) => {
       if(!mouseOverRef.current === optKey) { return; }
       //note - tooltip key is same for all 3 so it doesnt disappear when going from one to the other
       const option = SETTINGS_OPTIONS.arrangeBy.find(opt => opt.key === optKey);
-      const newTooltipDatum = { key:"setting", title:option.label, paragraphs:option.desc, fixedInPlace:false };
+      const newTooltipDatum = { key:"setting", area:"header", title:option.label, paragraphs:option.desc, fixedInPlace:false };
       setTooltipsData(prevState => {
         const currentSettingsTooltip = prevState.find(d => d.key === "setting");
         if(currentSettingsTooltip){

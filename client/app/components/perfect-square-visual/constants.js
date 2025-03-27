@@ -31,6 +31,7 @@ export const SETTINGS_OPTIONS = {
 }
 
 export const SELECT_MEASURE_TOOLTIP = {
+    area:"charts-viewbox",
     paragraphs:[
         { text: "Clicking a measure isn't available yet." }
     ],

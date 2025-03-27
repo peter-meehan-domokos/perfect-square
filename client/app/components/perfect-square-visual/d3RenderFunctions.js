@@ -1,6 +1,7 @@
 import * as d3 from 'd3';
 import { remove, fadeIn } from '../../helpers/domHelpers';
 import { CHART_IN_TRANSITION, CHART_OUT_TRANSITION } from '@/app/constants';
+import tooltipComponent from "../d3HelperComponents/tooltipComponent";
 
 export function renderCharts(datapoints, perfectSquare, dataIsArranged, simTicksInProcess, options={}){
     const { updateTransformTransition } = options;
@@ -30,4 +31,70 @@ export function renderCharts(datapoints, perfectSquare, dataIsArranged, simTicks
             .call(perfectSquare);
 
     chartG.exit().call(remove, { transition:CHART_OUT_TRANSITION })
+}
+
+const tooltip = tooltipComponent();
+
+//handles two types of tooltip
+export function renderTooltips(data, width){
+
+    const headerTooltipWidth = 150;
+    const headerTooltipHeight = 150;
+    const chartsViewboxTooltipWidth = 200;
+    const chartsViewboxTooltipHeight = 60;
+
+    const tooltipsData = data.map(d => ({
+        ...d,
+        enterTransitionType:d.area === "header" ? "slideFromTop" : "fadeIn",
+        x:d.area === "header" ? width - headerTooltipWidth : (width - chartsViewboxTooltipWidth)/2,
+        y:d.area === "header" ? 0 : 20,
+        width:d.area === "header" ? headerTooltipWidth : chartsViewboxTooltipWidth,
+        height:d.area === "header" ? headerTooltipHeight : chartsViewboxTooltipHeight
+    }))
+
+    const tooltipG = d3.select(this).select("svg.viz").selectAll("g.tooltip").data(tooltipsData, d => d.key);
+    tooltipG.enter()
+      .append("g")
+        .attr("class", "tooltip")
+        .each(function(d){
+          const tooltipG = d3.select(this);
+          //transition in
+          if(d.enterTransitionType === "slideFromTop"){
+            tooltipG
+                .attr('clip-path', "url(#slide-tooltip-clip)")
+
+            d3.select('clipPath#slide-tooltip-clip').select('rect')
+                .attr('width', d.width)
+                .attr('height', 0)
+                .attr("rx", 5)
+                .attr("ry", 5)
+                    .transition()
+                    .duration(500)
+                        .attr('height', d.height)
+          }else{
+              tooltipG.attr("opacity", 0)
+                  .transition()
+                  .duration(500)
+                      .attr("opacity", 1)
+          }
+
+        })
+        .merge(tooltipG)
+        .attr("transform", d => `translate(${d.x}, ${d.y})`)
+        .call(tooltip
+          .width(d => d.width)
+          .height(d => d.height))
+
+    tooltipG.exit().each(function(d){
+      const tooltipG = d3.select(this);
+      if(d.enterTransitionType === "slideFromTop"){
+        d3.select('clipPath#slide-tooltip-clip').select('rect')
+          .transition()
+          .duration(500)
+              .attr('height', 0)
+              .on("end", () => { tooltipG.remove(); })
+      }else{
+        tooltipG.call(remove);
+      }
+    });
 }

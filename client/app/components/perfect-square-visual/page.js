@@ -4,9 +4,8 @@ import * as d3 from 'd3';
 import VisualHeader from './visual-header/page';
 import perfectSquareLayout from './perfectSquareLayout';
 import perfectSquareComponent from "./perfectSquareComponent";
-import tooltipComponent from "../d3HelperComponents/tooltipComponent";
 import { remove, fadeIn } from '../../helpers/domHelpers';
-import { renderCharts } from './d3RenderFunctions';
+import { renderCharts, renderTooltips } from './d3RenderFunctions';
 import { DEFAULT_SETTINGS, SELECT_MEASURE_TOOLTIP } from "./constants.js";
 import { CHART_IN_DURATION, CHART_OUT_DURATION } from '@/app/constants';
 
@@ -50,7 +49,6 @@ const calculateChartSizesAndGridLayout = (contentsWidth, contentsHeight, nrCols,
 }
 
 const perfectSquare = perfectSquareComponent();
-const tooltip = tooltipComponent();
 
 const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelectedChartKey="", initSelectedMeasureKey="", initSettings }) => {
 
@@ -316,70 +314,8 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelectedCha
 
   //render/update tooltips
   useEffect(() => {
-    //console.log("tooltipsUE...7", tooltipsData)
-    const headerTooltipWidth = 150;
-    const headerTooltipHeight = 150;
-    const chartsViewboxTooltipWidth = 200;
-    const chartsViewboxTooltipHeight = 60;
-
-    const tooltipsData = [
-      ...headerTooltipsData.map(t => ({ 
-        ...t, area:"header",  enterTransitionType:"slideFromTop",
-        x:width - headerTooltipWidth, y:0, width:headerTooltipWidth, height:headerTooltipHeight
-      })), 
-      ...chartsViewboxTooltipsData.map(t => ({ 
-        ...t, area:"charts-viewbox", enterTransitionType:"fadeIn",
-        x:(width - chartsViewboxTooltipWidth)/2, y:20, width:chartsViewboxTooltipWidth, height:chartsViewboxTooltipHeight
-      }))
-    ]
-
-    const tooltipG = d3.select(containerRef.current).select("svg.viz").selectAll("g.tooltip").data(tooltipsData, d => d.key);
-    tooltipG.enter()
-      .append("g")
-        .attr("class", "tooltip")
-        .each(function(d){
-          const tooltipG = d3.select(this);
-          //transition in
-          if(d.enterTransitionType === "slideFromTop"){
-            tooltipG
-                .attr('clip-path', "url(#slide-tooltip-clip)")
-
-            d3.select('clipPath#slide-tooltip-clip').select('rect')
-                .attr('width', d.width)
-                .attr('height', 0)
-                .attr("rx", 5)
-                .attr("ry", 5)
-                    .transition()
-                    .duration(500)
-                        .attr('height', d.height)
-          }else{
-              tooltipG.attr("opacity", 0)
-                  .transition()
-                  .duration(500)
-                      .attr("opacity", 1)
-          }
-
-        })
-        .merge(tooltipG)
-        .attr("transform", d => `translate(${d.x}, ${d.y})`)
-        .call(tooltip
-          .width(d => d.width)
-          .height(d => d.height))
-
-    tooltipG.exit().each(function(d){
-      const tooltipG = d3.select(this);
-      if(d.enterTransitionType === "slideFromTop"){
-        d3.select('clipPath#slide-tooltip-clip').select('rect')
-          .transition()
-          .duration(500)
-              .attr('height', 0)
-              .on("end", () => { tooltipG.remove(); })
-      }else{
-        tooltipG.call(remove);
-      }
-    });
-
-  }, [headerTooltipsData, chartsViewboxTooltipsData])
+    renderTooltips.call(containerRef.current, [...headerTooltipsData, ...chartsViewboxTooltipsData], width);
+  }, [width, headerTooltipsData, chartsViewboxTooltipsData])
 
   //Selected chart change
   useEffect(() => {
