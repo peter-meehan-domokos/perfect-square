@@ -1,6 +1,11 @@
+export const CONTAINER_MARGIN = { left:10, right:10, top:10, bottom:10 };
+export const DEFAULT_CHART_MARGIN = { left:0, right:0, top:0, bottom:0 };
+
 export const LEVELS_OF_DETAIL = [1,2,3];
 //these values base_sizes (derived from the chart width and height essentially)
 export const LEVELS_OF_DETAIL_THRESHOLDS = [90, 220]; //note - level 2 below 90 has poor performance as too many charts
+
+export const CHART_SIZE_REDUCTION_FACTOR_FOR_SIM = 0.6;
 
 export const SETTINGS_OPTIONS = {
     arrangeBy:[

@@ -16,7 +16,7 @@ const GET_EXAMPLES = gql`
 const Home = ({ }) => {
     const { data } = useQuery(GET_EXAMPLES);
     const examples = data?.examples || [];
-    const [introIsDisplayed, setIntroIsDisplayed] = useState(false);
+    const [introIsDisplayed, setIntroIsDisplayed] = useState(true);
     const [selectedExampleKey, setSelectedExampleKey] = useState("");
 
     useEffect(() => {

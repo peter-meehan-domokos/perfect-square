@@ -2,6 +2,13 @@ import * as d3 from "d3";
 import { isNumber } from './dataHelpers';
 import { FADE_IN_DURATION, FADE_OUT_DURATION } from "../constants";
 
+export function getElementDimns(){
+    return {
+        width:this.getBoundingClientRect().width,
+        height: this.getBoundingClientRect().height
+    }
+}
+
 export function fadeIn(selection, options={}){
     const { transition, cb=()=>{}, display=null, opacity=1 } = options;
     selection.each(function(){

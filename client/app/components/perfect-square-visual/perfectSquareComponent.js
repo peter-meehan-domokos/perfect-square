@@ -248,7 +248,7 @@ export default function perfectSquare() {
         nrCharts = selection.nodes().length;
         if(nrCharts === 0){ return; }
         updateDimnsAndColourAccessors(selection);
-        //console.log("UPDATE: nrCharts, LOD", nrCharts, levelOfDetail)
+        //console.log("UPDATE: nrCharts, LOD", nrCharts, /*levelOfDetail*/)
 
         selection
             .filter(d => d.isOnScreen)

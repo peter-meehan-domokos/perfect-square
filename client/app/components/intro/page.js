@@ -37,7 +37,7 @@ const Intro = ({ closeIntro }) => {
 
     return (
         <div className="intro">
-            <button className="skip-intro" onClick={closeIntro} >
+            <button className="skip-intro-btn" onClick={closeIntro}>
               Skip intro
            </button>
             <div className="intro-slider-container">

@@ -3,7 +3,7 @@ import { remove, fadeIn } from '../../helpers/domHelpers';
 import { CHART_IN_TRANSITION, CHART_OUT_TRANSITION } from '@/app/constants';
 import tooltipComponent from "../d3HelperComponents/tooltipComponent";
 
-export function renderCharts(datapoints, perfectSquare, dataIsArranged, simTicksInProcess, options={}){
+export function renderCharts(datapoints, perfectSquare, dataIsArranged, options={}){
     const { updateTransformTransition } = options;
     const chartG = d3.select(this).selectAll("g.chart").data(datapoints, d => d.key);
         chartG.enter()
