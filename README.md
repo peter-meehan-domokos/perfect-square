@@ -1,6 +1,6 @@
 # The Perfect Square
 
-Live Demo [here] (https://github.com/peter-meehan-domokos/perfect-square/edit/main/README.md) 
+Live Demo [here](https://github.com/peter-meehan-domokos/perfect-square/edit/main/README.md) 
 
 ## Overview
 
