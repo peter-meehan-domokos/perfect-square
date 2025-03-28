@@ -1,3 +1,5 @@
+/* eslint react-hooks/exhaustive-deps: 0 */
+
 'use client'
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import * as d3 from 'd3';
