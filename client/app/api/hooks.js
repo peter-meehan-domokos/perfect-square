@@ -1,7 +1,8 @@
 'use client'
 import { useState, useEffect } from "react";
 
-const URL = "http://localhost:8080/graphql";
+//const URL = "http://localhost:8080/graphql";
+const URL = "https://data-server-e2504705c003.herokuapp.com/graphql";
 
 export const useFetch = (query) => {
   const [data, setData] = useState({});
