@@ -12,7 +12,7 @@ const GET_EXAMPLE_DATA = exampleKey => `
 `
 
 const Visual = ({ exampleKey="" }) => {
-    const { data } = useFetch(GET_EXAMPLE_DATA(exampleKey));
+    const { data, loading } = useFetch(GET_EXAMPLE_DATA(exampleKey));
     const [visData, setVisData] = useState(undefined);
     
     useEffect(() => {
@@ -23,7 +23,7 @@ const Visual = ({ exampleKey="" }) => {
 
     return (
         <main className="main">
-            <PerfectSquareVisual data={visData} />
+            <PerfectSquareVisual data={visData} loading={loading} />
         </main>
     )
 }

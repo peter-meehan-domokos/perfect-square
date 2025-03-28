@@ -5,7 +5,7 @@ import VisualHeader from './visual-header/page';
 import perfectSquareLayout from './perfectSquareLayout';
 import perfectSquareComponent from "./perfectSquareComponent";
 import { renderCharts, renderTooltips } from './d3RenderFunctions';
-import { DEFAULT_SETTINGS, SELECT_MEASURE_TOOLTIP, CONTAINER_MARGIN, CALC_CHART_MARGIN } from "./constants.js";
+import { DEFAULT_SETTINGS, SELECT_MEASURE_TOOLTIP, LOADING_TOOLTIP, CONTAINER_MARGIN, CALC_CHART_MARGIN } from "./constants.js";
 import { CHART_OUT_DURATION, ZOOM_AND_ARRANGE_TRANSITION_DURATION } from '@/app/constants';
 import { isArranged, calcNrColsAndRows, calcChartSizesAndGridLayout, applyMargin, isChartOnScreenCheckerFunc, calcZoomTransformFunc } from './helpers';
 import { getElementDimns } from '@/app/helpers/domHelpers';
@@ -14,7 +14,7 @@ import { setupZoom } from './zoom';
 
 const perfectSquare = perfectSquareComponent();
 
-const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections={}, initSettings=DEFAULT_SETTINGS }) => {
+const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections={}, initSettings=DEFAULT_SETTINGS, loading=true }) => {
   const { initSelectedChartKey="", initSelectedMeasureKey="", initSelectedQuadrantIndex=null } = initSelections;
   //state
   const [headerExtended, setHeaderExtended] = useState(false);
@@ -58,6 +58,8 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
     info,
     nrDatapoints:datapoints.length
   }
+
+  const loadingData = loading ? [LOADING_TOOLTIP] : [];
 
   //helper to set sizes
   const setSizesAndTriggerDataRendering = useCallback((data) => {
@@ -202,8 +204,13 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
 
   //render/update tooltips
   useEffect(() => {
-    renderTooltips.call(containerDivRef.current, [...headerTooltipsData, ...chartsViewboxTooltipsData], width);
-  }, [width, headerTooltipsData, chartsViewboxTooltipsData])
+    const tooltipsData = [
+      ...headerTooltipsData, 
+      ...chartsViewboxTooltipsData,
+      ...loadingData
+    ];
+    renderTooltips.call(containerDivRef.current, tooltipsData, width, height);
+  }, [width, headerTooltipsData, chartsViewboxTooltipsData, loadingData])
 
   //Selected chart change
   useEffect(() => {

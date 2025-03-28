@@ -38,10 +38,29 @@ export const SETTINGS_OPTIONS = {
 
 export const SELECT_MEASURE_TOOLTIP = {
     area:"charts-viewbox",
+    position:"top",
     paragraphs:[
         { text: "Clicking a measure isn't available yet." }
+    ]
+}
+
+export const LOADING_TOOLTIP = {
+    area:"charts-viewbox",
+    position:"bottom",
+    paragraphs:[
+        { text: "The data is loading..." }
     ],
-    fixedInPlace:false 
+    styles:{
+        bg:{
+            fill:"none"
+        },
+        textLine:{
+            fontSize:14,
+            fontMin:10,
+            fontMax:16
+        }
+
+    }
 }
 
 export const DEFAULT_SETTINGS = { 

@@ -36,7 +36,8 @@ export function renderCharts(datapoints, perfectSquare, dataIsArranged, options=
 const tooltip = tooltipComponent();
 
 //handles two types of tooltip
-export function renderTooltips(data, width){
+export function renderTooltips(data, width, height){
+    if(!width){ return; }
 
     const headerTooltipWidth = 150;
     const headerTooltipHeight = 150;
@@ -47,7 +48,7 @@ export function renderTooltips(data, width){
         ...d,
         enterTransitionType:d.area === "header" ? "slideFromTop" : "fadeIn",
         x:d.area === "header" ? width - headerTooltipWidth : (width - chartsViewboxTooltipWidth)/2,
-        y:d.area === "header" ? 0 : 20,
+        y:d.area === "header" ? 0 : (d.position === "top" ? 20 : height - 20 - chartsViewboxTooltipHeight),
         width:d.area === "header" ? headerTooltipWidth : chartsViewboxTooltipWidth,
         height:d.area === "header" ? headerTooltipHeight : chartsViewboxTooltipHeight
     }))
@@ -83,7 +84,8 @@ export function renderTooltips(data, width){
         .attr("transform", d => `translate(${d.x}, ${d.y})`)
         .call(tooltip
           .width(d => d.width)
-          .height(d => d.height))
+          .height(d => d.height)
+          .styles(d => d.styles))
 
     tooltipG.exit().each(function(d){
       const tooltipG = d3.select(this);

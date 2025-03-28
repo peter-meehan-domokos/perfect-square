@@ -24,7 +24,8 @@ export default function tooltip() {
     let subtitleHeight = 20;
 
 
-    let styles = {
+    let _styles;
+    let fixedStyles = {
         bg:{
            stroke:"none",
            fill:"grey",
@@ -49,7 +50,8 @@ export default function tooltip() {
         textLine:{
             strokeWidth:0.15,
             stroke:"#505050",
-            fontSize:"10px"
+            fontMin:10,
+            fontMax:10
         }
     }
 
@@ -122,6 +124,7 @@ export default function tooltip() {
             const height = _height ? _height(data) : fixedHeight;
             const contentsWidth = _contentsWidth ? _contentsWidth(data) : fixedContentsWidth;
             const contentsHeight = _contentsHeight ? _contentsHeight(data) : fixedContentsHeight;
+            const styles = _styles ? _styles(data) : fixedStyles;
 
             if(!componentEnter){
                 d3.select('clipPath#tooltip-clip').select('rect')
@@ -148,7 +151,9 @@ export default function tooltip() {
                 .attr("width", `${contentsWidth}px`)
                 .attr("height", `${contentsHeight}px`);
 
-            updateTitle.call(containerElement, data, { contentsWidth, contentsHeight, actualTitleHeight, actualSubtitleHeight });
+            updateTitle.call(containerElement, data, { 
+                contentsWidth, contentsHeight, actualTitleHeight, actualSubtitleHeight, styles
+            });
 
             const mainContentsG = contentsG.select("g.main-contents")
                 .attr("transform", `translate(0, ${actualTitleHeight + actualSubtitleHeight})`);
@@ -190,8 +195,8 @@ export default function tooltip() {
                                     width:contentsWidth, 
                                     //@todo - calc height based on letters/width or get from dom after render
                                     height:mainContentsHeight/2,
-                                    fontMin:10,
-                                    fontMax:10
+                                    fontMin:styles.textLine.fontMin,
+                                    fontMax:styles.textLine.fontMax
                                 });
                     })
 
@@ -205,7 +210,7 @@ export default function tooltip() {
     }
 
     function updateTitle(data, options={}){
-        const { contentsWidth, contentsHeight, actualTitleHeight, actualSubtitleHeight } = options;
+        const { contentsWidth, contentsHeight, actualTitleHeight, actualSubtitleHeight, styles } = options;
         const titleG = d3.select(this).select("g.component-title-and-subtitle");
         titleG.select("text.title")
             .attr("transform", `translate(${contentsWidth/2}, ${actualTitleHeight/2})`)
@@ -232,15 +237,25 @@ export default function tooltip() {
     //api
     component.width = function (value) {
         if (!arguments.length) { return _width || fixedWidth }
-        if(typeof value === "function"){ _width = value; }
-        else{ fixedWidth = value; }
+        if(typeof value === "function"){ 
+            _width = value;
+        }
+        else{ 
+            _width = undefined;
+            fixedWidth = value; 
+        }
 
         return component;
     };
     component.height = function (value) {
         if (!arguments.length) { return _height || fixedHeight }
-        if(typeof value === "function"){ _height = value; }
-        else{ fixedHeight = value; }
+        if(typeof value === "function"){ 
+            _height = value; 
+        }
+        else{ 
+            _height = undefined;
+            fixedHeight = value; 
+        }
         return component;
     };
     component.margin = function (obj) {
@@ -248,15 +263,23 @@ export default function tooltip() {
         margin = { ...margin, ...value };
         return component;
     };
-    component.styles = function (obj) {
+    component.styles = function (customStyles) {
         if (!arguments.length) { return styles; }
-        styles = {
-            ...obj,
-            bg:{ ...styles.bg, ...obj.bg },
-            title:{ ...styles.title, ...obj.title },
-            subtitle:{ ...styles.subtitle, ...obj.subtitle },
-            paragraphTitle:{ ...styles.paragraphTitle, ...obj.paragraphTitle },
-            textLine:{ ...styles.textLine, ...obj.textLine },
+        if(!customStyles){ return component; }
+        //helper
+        const addCustomStyles = customStyles => ({
+            ...customStyles,
+            bg:{ ...fixedStyles.bg, ...customStyles.bg },
+            title:{ ...fixedStyles.title, ...customStyles.title },
+            subtitle:{ ...fixedStyles.subtitle, ...customStyles.subtitle },
+            paragraphTitle:{ ...fixedStyles.paragraphTitle, ...customStyles.paragraphTitle },
+            textLine:{ ...fixedStyles.textLine, ...customStyles.textLine },
+        });
+        if(typeof customStyles === "function"){
+            _styles = d => addCustomStyles(customStyles(d));
+        }else{
+            _styles = undefined;
+            fixedStyles = addCustomStyles(customStyles);
         }
         return component;
     };
