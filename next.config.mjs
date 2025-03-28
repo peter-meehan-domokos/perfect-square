@@ -1,8 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    /*basePath:"./perfect-square",
+    /*basePath:"./perfect-square",*/
     output: "export",
-    reactStrictMode: true*/
+    /*reactStrictMode: true*/
+    image: {
+        unoptimized: true
+    }
 };
 
 export default nextConfig;
