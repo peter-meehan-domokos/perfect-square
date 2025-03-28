@@ -1,8 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    basePath:"./perfect-square",
+    /*basePath:"./perfect-square",
     output: "export",
-    reactStrictMode: true
+    reactStrictMode: true*/
 };
 
 export default nextConfig;
