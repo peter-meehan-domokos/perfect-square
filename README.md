@@ -1,5 +1,7 @@
 # The Perfect Square
 
+Live Demo [here] (https://github.com/peter-meehan-domokos/perfect-square/edit/main/README.md) 
+
 ## Overview
 
 A novel 2D view multivariate data, or n-dimensional vectors. Yu can easily compare and group thousands of datapoints according to each point's individual shape. Especially good at showing comparison against an ideal state. Also good for visualising clustering and similarity ML algorithms.
