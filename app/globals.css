@@ -162,6 +162,8 @@ body {
 .intro-slide-text-container .slide-textline {
   width:100%;
   font-size:1.2rem;
+  font-family:roboto;
+  font-weight:lighter;
   @media only screen and (max-width: 768px) {
     font-size: 0.9rem;
   }
@@ -196,8 +198,12 @@ body {
   margin-bottom:5%;
   display:flex;
   justify-content:center;
+  border:solid;
+  border-width:thin;
+  border-color:red;
   @media only screen and (max-width: 575px) {
     height:150px;
+    border-color:black;
   }
 }
 
@@ -209,6 +215,8 @@ body {
   border:solid;
   border-color:#C0C0C0;
   border-width:0.7;
+  border-width:thin;
+  border-color:yellow;
 }
 
 .slide-footer-visual{
@@ -221,6 +229,9 @@ body {
   @media only screen and (max-width: 575px) {
    width:120px;
   }
+  border:solid;
+  border-width:thin;
+  border-color:#90EE90;
 }
 
 .slide-footer-visual .image {
@@ -233,6 +244,9 @@ body {
   flex-direction:column;
   justify-content:space-between;
   align-items:flex-start;
+  border:solid;
+  border-width:thin;
+  border-color:blue;
 }
 
 .slide-footer-item{
@@ -496,13 +510,14 @@ body {
 .viz-desc {
   height:auto;
   padding:5px 0px;
+  font-family:roboto;
   font-size:0.7rem;
   display:flex;
   flex-direction: column;
   align-items: start;
   overflow:hidden;
   transition: all 500ms;
-  color:black;
+  color:	#505050;
   @media only screen and (max-width: 768px) {
     height:0px;
     padding:0;
