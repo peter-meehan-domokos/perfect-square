@@ -55,9 +55,9 @@ export const INTRO_SLIDES = [
                 key:"photo",
             },
             items:[
-                { key:"github", label:"Github", url:"https://github.com/peter-meehan-domokos/perfect-square" },
-                { key:"linkedin", label:"My Linked In", url:"https://www.linkedin.com/in/petedomokos/" },
-                { key:"phone", label:"+44 7547 196642" },
+                { key:"github", label:"Project Github", url:"https://github.com/peter-meehan-domokos/perfect-square" },
+                { key:"linkedin", label:"Connect on LinkedIn", url:"https://www.linkedin.com/in/petedomokos/" },
+                { key:"phone", label:"Call +44 7547 196642" },
                 { key:"email", label:"petedomokos@gmail.com" },
             ],
         }

@@ -105,13 +105,3 @@ const Intro = ({ closeIntro }) => {
 }
   
 export default Intro;
-
-/*
-
-{item.itemType === "url" && 2 === 3 ?
-                                                    <a className="footer-line">{item.label}</a> 
-                                                    :
-                                                    <h5 className="footer-line">{item.label}</h5>
-                                                }
-
-                                                */

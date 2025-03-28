@@ -203,6 +203,7 @@ body {
 .slide-footer-visual{
   width:150px;
   height:100%;
+  border-radius:5px;
   display:flex;
   flex-direction:column;
   justify-content:center;
