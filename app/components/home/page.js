@@ -37,8 +37,7 @@ const Home = ({ }) => {
     }, [])
 
     return (
-        <div className="home">
-          <h1>{device}</h1>
+        <div className={`home ${device}`}>
           {introIsDisplayed ? 
             <Intro 
               closeIntro={() => setIntroIsDisplayed(false)}

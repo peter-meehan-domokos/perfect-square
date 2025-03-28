@@ -267,7 +267,7 @@ export default function tooltip() {
         if (!arguments.length) { return styles; }
         if(!customStyles){ return component; }
         //helper
-        const addCustomStyles = customStyles => ({
+        const addCustomStyles = (customStyles={}) => ({
             ...customStyles,
             bg:{ ...fixedStyles.bg, ...customStyles.bg },
             title:{ ...fixedStyles.title, ...customStyles.title },
