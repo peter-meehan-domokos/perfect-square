@@ -3,7 +3,7 @@ import React, { useRef } from 'react';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';
 import Checkbox from '@mui/material/Checkbox';
-import { SETTINGS_OPTIONS, ARRANGEMENT_OPTIONS } from "../constants.js";
+import { DEFAULT_SETTINGS, SETTINGS_OPTIONS, ARRANGEMENT_OPTIONS } from "../constants.js";
 
 //these objects are applied to the checkbox and label roots, using the sx prop
 //see https://www.youtube.com/watch?v=gw30zyh3Irw&t=806s
@@ -24,7 +24,7 @@ const FormControlLabelStyle = {
   '& .MuiFormControlLabel-label': { fontSize: "9px" }
 }
 
-const SettingsCtrls = ({ settings, setSettings, setTooltipsData }) => {
+const SettingsCtrls = ({ settings=DEFAULT_SETTINGS, setSettings, setTooltipsData }) => {
   const mouseOverRef = useRef("");
   const handleSettingsChange = (checkboxKey, checkboxValue) => {
     //remove tooltip as it has been clicked
@@ -78,7 +78,7 @@ const SettingsCtrls = ({ settings, setSettings, setTooltipsData }) => {
   const renderSettingsList = () => (
     <>
       {SETTINGS_OPTIONS.arrangeBy.map(option => {
-        const { arrangeBy } = settings;
+        const { arrangeBy={ x:"", y:"", colour:"" } } = settings;
         const { x, y, colour } = arrangeBy;
         const checked = Object.values(arrangeBy).includes(option.key);
         const arrangementKey = checked && (x === option.key ? "x" :(y === option.key ? "y" : "colour"))

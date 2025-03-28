@@ -5,8 +5,6 @@ import Overview from './Overview';
 import ZoomCtrls from './ZoomCtrls';
 import SettingsCtrls from './SettingsCtrls';
 import quadrantCtrlsComponent from "./quadrantCtrlsComponent";
-import { fadeIn, /*fadeOut*/ } from '@/app/helpers/domHelpers';
-import { selectClasses } from '@mui/material';
 
 const quadrantCtrls = quadrantCtrlsComponent();
 
@@ -30,12 +28,8 @@ const QuadrantsBarChartHeader = ({ data={}, settings, zoomTransform, headerExten
             .selectedQuadrantIndex(selectedQuadrantIndex)
             .setSelectedQuadrantIndex(setSelectedQuadrantIndex));
 
-    }, [selectedQuadrantIndex, categories])
+    }, [selectedQuadrantIndex, setSelectedQuadrantIndex, categories])
 
-  //put overview into a component, snd force an unmount when props change
-  //next - move key from visualheader onto the overview component,
-  ///and move the fade into the overview component ( i think)
-  //and add same transition onto remove func of quadrantCtrls text as is in exit of Fade
   return (
       <div className={`viz-header ${headerExtended ? "extended" : ""}`} >
         <Overview key={data.key} title={title} desc={desc} headerExtended={headerExtended} toggleHeaderExtended={toggleHeaderExtended} />

@@ -1,22 +1,19 @@
-import { gql, useQuery } from "@apollo/client";
+'use client'
+import { useFetch } from '@/app/api/hooks';
 import { useEffect, useState } from "react";
 import PerfectSquareVisual from '../perfect-square-visual/page';
 
-const GET_EXAMPLE_DATA = gql`
-  query getExampleData($exampleKey: String!){
-    exampleData(key: $exampleKey){
+const GET_EXAMPLE_DATA = exampleKey => `
+  {
+    exampleData(key: "${exampleKey}"){
       data
     }
   }
 `
 
 const Visual = ({ exampleKey="" }) => {
-    const { data } = useQuery(GET_EXAMPLE_DATA, { variables: { exampleKey }} );
+    const { data } = useFetch(GET_EXAMPLE_DATA(exampleKey));
     const [visData, setVisData] = useState(undefined);
-    const _visData = {
-      ...visData,
-      datapoints:visData?.key === "rehab" ? visData.datapoints : [],
-    }
     
     useEffect(() => {
         const dataStr = data?.exampleData?.data;

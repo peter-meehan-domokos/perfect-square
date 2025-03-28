@@ -11,7 +11,7 @@ const calcY = (rowNr, chartHeight) => rowNr * chartHeight;
 /*
     @todo rewrite as a proper d3 layout function instead of using settings as a parameter
 */
-export default function(data, settings={}){
+ function perfectSquareLayout(data, settings={}){
     const { measures, datapoints } = data;
     const { nrCols, chartWidth, chartHeight } = settings;
 
@@ -119,3 +119,5 @@ export default function(data, settings={}){
         }
     }
 }
+
+export default perfectSquareLayout;

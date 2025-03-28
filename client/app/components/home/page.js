@@ -1,10 +1,11 @@
+'use client'
 import { useEffect, useState } from 'react';
-import { gql, useQuery } from "@apollo/client";
+import { useFetch } from '@/app/api/hooks';
 import Intro from '../intro/page';
 import Header from '../header/page';
 import Visual from '../visual/page';
 
-const GET_EXAMPLES = gql`
+const GET_EXAMPLES = `
   query getExamples{
     examples{
       key,
@@ -12,19 +13,18 @@ const GET_EXAMPLES = gql`
     }
   }
 `
-
 const Home = ({ }) => {
-    const { data } = useQuery(GET_EXAMPLES);
-    const examples = data?.examples || [];
+    const { data } = useFetch(GET_EXAMPLES);
     const [introIsDisplayed, setIntroIsDisplayed] = useState(true);
     const [selectedExampleKey, setSelectedExampleKey] = useState("");
 
     useEffect(() => {
+      const examples = data?.examples || [];
       setSelectedExampleKey(examples[0]?.key)
-    }, [data])
+    }, [data?.examples])
 
     return (
-        <>
+        <div className="home">
           {introIsDisplayed ? 
             <Intro 
               closeIntro={() => setIntroIsDisplayed(false)}
@@ -32,7 +32,7 @@ const Home = ({ }) => {
           :
             <>
               <Header 
-                menuItems={examples} 
+                menuItems={data?.examples} 
                 selected={selectedExampleKey} 
                 onSelect={setSelectedExampleKey}
                 openIntro={() => setIntroIsDisplayed(true)} 
@@ -42,7 +42,7 @@ const Home = ({ }) => {
               />
             </>
           }
-        </>
+        </div>
     )
 }
   

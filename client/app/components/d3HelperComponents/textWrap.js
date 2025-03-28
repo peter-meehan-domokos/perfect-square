@@ -29,9 +29,7 @@ export default function textWrap() {
         fontOpacity = options.fontOpacity || fontOpacity;
         fontResize = options.fontResize || fontResize;
 
-        /* eslint-disable func-names */
         selection.each(function (data) {
-        /* eslint-enable func-names */
             const requiredText = typeof text === "function" ? text(data) : text;
             textbox
                 .data([{ text: requiredText }])
@@ -52,7 +50,6 @@ export default function textWrap() {
         return selection;
     }
     update.text = function (value) {
-        /* eslint-enable func-names */
         if (!arguments.length) { return text; }
         text = value;
         return update;

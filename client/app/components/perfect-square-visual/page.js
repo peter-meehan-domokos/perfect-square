@@ -13,9 +13,8 @@ import { setupSimulation } from './simulation';
 import { setupZoom } from './zoom';
 
 const perfectSquare = perfectSquareComponent();
-const defaultSettings = { arrangeBy:{ x:"", y:"", colour:""} }
 
-const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections={}, initSettings=defaultSettings }) => {
+const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections={}, initSettings=DEFAULT_SETTINGS }) => {
   const { initSelectedChartKey="", initSelectedMeasureKey="", initSelectedQuadrantIndex=null } = initSelections;
   //state
   const [headerExtended, setHeaderExtended] = useState(false);
@@ -127,7 +126,6 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
   useEffect(() => {
     if (isFirstRenderRef.current || !contentsWidth) { return; }
     const { chartWidth, chartHeight } = sizesRef.current;
-    const { arrangeBy } = settings;
     if(!dataIsArranged){ return; }
 
     const processedData = processedDataRef.current;
@@ -170,7 +168,6 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
   //render/update entire visual
   useEffect(() => {
     if (isFirstRenderRef.current || !contentsWidth) { return; }
-    const { arrangeBy } = settings;
     const arrangementHasChanged = prevArrangeByRef.current !== arrangeBy;
     //data
     const { datapoints, info } = processedDataRef.current;
