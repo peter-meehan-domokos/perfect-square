@@ -64,6 +64,12 @@ There is currently no React redux, context, or hooks used for state management a
 
 #### React optimisations
 
+#### Fetch Optimisations (not done yet)
+
+I will optimise the fetch for ds, by only loading
+the mean and std dev values for each datapoint when nr ds > 1000.
+Because we know that the levelOfDetail will start as 0 (ie the new 1) anyway
+
 ## Some Known Issues
 
  - zoom ctrls zoom from 0,0 not centre...(note: if we go from centre, then need to adjust the isChartOnScreenChecker function)
