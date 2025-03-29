@@ -197,12 +197,8 @@ body {
   margin-bottom:5%;
   display:flex;
   justify-content:center;
-  border:solid;
-  border-width:thin;
-  border-color:red;
   @media only screen and (max-width: 575px) {
     height:150px;
-    border-color:black;
   }
 }
 
@@ -214,8 +210,6 @@ body {
   border:solid;
   border-color:#C0C0C0;
   border-width:0.7;
-  border-width:thin;
-  border-color:yellow;
 }
 
 .slide-footer-visual{
@@ -228,9 +222,6 @@ body {
   @media only screen and (max-width: 575px) {
    width:120px;
   }
-  border:solid;
-  border-width:thin;
-  border-color:#90EE90;
 }
 
 .slide-footer-visual .image {
@@ -243,9 +234,6 @@ body {
   flex-direction:column;
   justify-content:space-between;
   align-items:flex-start;
-  border:solid;
-  border-width:thin;
-  border-color:blue;
 }
 
 .slide-footer-item{
@@ -515,9 +503,9 @@ body {
   align-items: start;
   overflow:hidden;
   transition: all 500ms;
-  color:	#303030;
+  color:#303030;
   @media only screen and (max-width: 1200px) {
-    font-size:0.8rem;
+    font-size:0.75rem;
   }
   @media only screen and (max-width: 990px) {
     font-size:0.7rem;
@@ -525,7 +513,7 @@ body {
   @media only screen and (max-width: 768px) {
     height:0px;
     padding:0;
-    font-size:0.75rem;
+    font-size:0.7rem;
   }
   @media only screen and (max-width: 575px) {
     font-size:0.65rem;
