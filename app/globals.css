@@ -72,6 +72,8 @@ body {
   font-size:1rem;
   cursor:pointer;
   color:#808080;
+  background:transparent;
+  z-index:2;
   @media only screen and (max-width: 575px) {
     font-size:0.8rem;
   }
@@ -290,6 +292,7 @@ body {
   font-size:1rem;
   cursor:pointer;
   color:#808080;
+  z-index:2;
   @media only screen and (max-width: 575px) {
     font-size:0.8rem;
   }
@@ -478,13 +481,13 @@ body {
   min-height: 20px;
   padding:0 10px;
   font-size:0.7rem;
-  display:flex;
+  display:none;
   align-items: center;
   transition: color 500ms;
   text-decoration: underline;
   cursor: pointer;
-  @media only screen and (min-width: 769px) {
-    display:none;
+  @media only screen and (max-width: 768px) {
+    display:flex;
   }
 }
 
@@ -680,15 +683,25 @@ body {
   align-items:center;
 }
 
-.lg-up {
+.settings-lg-up {
+  display:block;
+  border:solid;
+  border-width:thin;
+  border-color:red;
   @media only screen and (max-width: 768px) {
     display:none;
+    border-color:yellow;
   }
 }
 
-.md-down {
-  @media only screen and (min-width: 769px) {
-    display:none;
+.settings-md-down {
+  display:none;
+  border:solid;
+  border-width:thin;
+  border-color:pink;
+  @media only screen and (max-width: 768px) {
+    display:block;
+    border-color:black;
   }
 }
 

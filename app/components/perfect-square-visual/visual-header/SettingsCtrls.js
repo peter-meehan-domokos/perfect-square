@@ -111,12 +111,12 @@ const SettingsCtrls = ({ settings=DEFAULT_SETTINGS, setSettings, setTooltipsData
     <div className="setting-ctrls">
       <div className="toggles-area">
         <div className="ctrls-section-label">Arrange By</div>
-        <div className="lg-up">
+        <div className="settings-lg-up">
           <FormGroup sx={largeScreenCheckboxFormGroupStyle}>
             {renderSettingsList()}
           </FormGroup>
         </div>
-        <div className="md-down">
+        <div className="settings-md-down">
           <FormGroup sx={medScreenCheckboxFormGroupStyle} >
             {renderSettingsList()}
           </FormGroup>
