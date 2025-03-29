@@ -162,8 +162,6 @@ body {
 .intro-slide-text-container .slide-textline {
   width:100%;
   font-size:1.2rem;
-  font-family:roboto;
-  font-weight:lighter;
   @media only screen and (max-width: 768px) {
     font-size: 0.9rem;
   }
@@ -194,6 +192,7 @@ body {
 }
 
 .slide-footer-container {
+  height:200px;
   margin-top:5%;
   margin-bottom:5%;
   display:flex;
@@ -461,7 +460,7 @@ body {
 .viz-title {
   width:100%;
   padding:10px 10px 0px;
-  font-size:0.8rem;
+  font-size:0.9rem;
   font-weight:bold;
   display:flex;
   color:black;
@@ -510,18 +509,23 @@ body {
 .viz-desc {
   height:auto;
   padding:5px 0px;
-  font-family:roboto;
-  font-size:0.7rem;
+  font-size:0.9rem;
   display:flex;
   flex-direction: column;
   align-items: start;
   overflow:hidden;
   transition: all 500ms;
-  color:	#505050;
+  color:	#303030;
+  @media only screen and (max-width: 1200px) {
+    font-size:0.8rem;
+  }
+  @media only screen and (max-width: 990px) {
+    font-size:0.7rem;
+  }
   @media only screen and (max-width: 768px) {
     height:0px;
     padding:0;
-    font-size:0.7rem;
+    font-size:0.75rem;
   }
   @media only screen and (max-width: 575px) {
     font-size:0.65rem;

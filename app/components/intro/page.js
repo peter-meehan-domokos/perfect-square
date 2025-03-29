@@ -6,14 +6,17 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { INTRO_SLIDES } from '@/app/static-content/intro-content';
 import profile from './profile.png';
+import { bokorFont, robotoFont, robotoBoldFont, robotoMonoFont } from '@/app/assets/fonts';
 
 //style overrides
 const titleStyle = {
     margin:"2% 0",
+    //fontFamily:robotoMonoFont
 }
 
 const paragraphStyle = {
     margin:"2% 2.5%",
+    //fontFamily:robotoMonoFont
 }
 
 const nextSlideButtonStyle = {
@@ -49,10 +52,10 @@ const Intro = ({ closeIntro }) => {
                                 <div className="slide-main-contents">
                                     <div className="intro-slide-text-container">
                                         {slide.title &&
-                                            <h2 className="slide-title" style={titleStyle}>{slide.title}</h2>
+                                            <h2 className={`slide-title ${robotoBoldFont.className}`} style={titleStyle}>{slide.title}</h2>
                                         }
                                         {slide.paragraphs.map((p,j) => 
-                                            <p className="slide-textline" key={`slide-${i}-para-${j}`} style={paragraphStyle}>{p}</p>
+                                            <p className={`slide-textline ${robotoFont.className}`} key={`slide-${i}-para-${j}`} style={paragraphStyle}>{p}</p>
                                         )}
                                     </div>
                                     {slide.visual &&
@@ -80,14 +83,14 @@ const Intro = ({ closeIntro }) => {
                                                     <li key={item.key}>
                                                         {item.url ?
                                                             <a 
-                                                                className="slide-footer-item url-item"
+                                                                className={`slide-footer-item url-item ${robotoMonoFont.className}`}
                                                                 href={item.url}
                                                                 target="_blank"
                                                             >
                                                                 {item.label}
                                                             </a>
                                                             :
-                                                            <h5 className="slide-footer-item">{item.label}</h5>
+                                                            <h5 className={`slide-footer-item ${robotoMonoFont.className}`}>{item.label}</h5>
                                                         } 
                                                     </li>
                                                 )}

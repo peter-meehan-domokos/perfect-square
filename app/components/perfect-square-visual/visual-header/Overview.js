@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, useEffect } from 'react';
 import Fade from '@mui/material/Fade';
+import { robotoFont, robotoBoldFont } from '@/app/assets/fonts';
 
 const Overview = ({ title=[], desc=[], headerExtended=false, toggleHeaderExtended }) => {
     return (
@@ -8,7 +9,7 @@ const Overview = ({ title=[], desc=[], headerExtended=false, toggleHeaderExtende
             <div className="viz-overview">
                 <div className="title-and-description" >
                 <div className="viz-title">
-                    {title?.map((line, i) => <div className="title-line" key={`title-line-${i}`}>{line}</div> )}
+                    {title?.map((line, i) => <div className={`title-line ${robotoBoldFont.className}`} key={`title-line-${i}`}>{line}</div> )}
                 </div>
                 {desc?.length > 0 &&
                     <div
@@ -19,7 +20,7 @@ const Overview = ({ title=[], desc=[], headerExtended=false, toggleHeaderExtende
                     </div>
                 }
                 <div className={`viz-desc ${headerExtended ? "extended" : ""}`}>
-                    {desc?.map((line, i) => <div className="desc-line" key={`desc-line-${i}`}>{line}</div> )}
+                    {desc?.map((line, i) => <div className={`desc-line ${robotoFont.className}`} key={`desc-line-${i}`}>{line}</div> )}
                 </div>
                 </div>
             </div> 
