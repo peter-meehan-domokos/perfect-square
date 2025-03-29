@@ -56,7 +56,7 @@ for seamless integration of these functions within standard D3 chaining.
 There is currently no React redux, context, or hooks used for state management and common tasks (eg container resize), these changes are coming soon. 
 
 
-### Optimisation
+### Performance ptimisation
 
 #### List (Virtualised) Rendering
 
@@ -71,6 +71,10 @@ There is currently no React redux, context, or hooks used for state management a
 I will optimise the fetch for ds, by only loading
 the mean and std dev values for each datapoint when nr ds > 1000.
 Because we know that the levelOfDetail will start as 0 (ie the new 1) anyway
+
+## Responsiveness
+
+Not fully testes on devices, not touch, sizes are ok, but non-chrome browsers not
 
 ## Some Known Issues
 
