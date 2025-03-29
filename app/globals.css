@@ -501,33 +501,26 @@ body {
 .viz-desc {
   height:auto;
   padding:5px 0px;
-  font-size:0.9rem;
+  font-size:0.8rem;
   display:flex;
   flex-direction: column;
   align-items: start;
   overflow:hidden;
   transition: all 500ms;
   color:#303030;
-  border:solid;
-  border-width:thin;
-  border-color:red;
   @media only screen and (max-width: 1200px) {
     font-size:0.7rem;
-    border-color:yellow;
   }
   @media only screen and (max-width: 990px) {
     font-size:0.65rem;
-    border-color:blue;
   }
   @media only screen and (max-width: 768px) {
     height:0px;
     padding:0;
     font-size:0.65rem;
-    border-color:pink;
   }
   @media only screen and (max-width: 575px) {
     font-size:0.65rem;
-    border-color:black;
   }
 }
 
@@ -685,23 +678,15 @@ body {
 
 .settings-lg-up {
   display:block;
-  border:solid;
-  border-width:thin;
-  border-color:red;
   @media only screen and (max-width: 768px) {
     display:none;
-    border-color:yellow;
   }
 }
 
 .settings-md-down {
   display:none;
-  border:solid;
-  border-width:thin;
-  border-color:pink;
   @media only screen and (max-width: 768px) {
     display:block;
-    border-color:black;
   }
 }
 
