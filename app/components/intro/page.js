@@ -20,7 +20,7 @@ const paragraphStyle = {
 }
 
 const nextSlideButtonStyle = {
-    border:"solid",
+    border:"solid", borderWidth:0.8
 }
 const playButtonStyle = {
     background:"#BF40BF"
