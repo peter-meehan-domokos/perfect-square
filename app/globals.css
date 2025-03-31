@@ -80,11 +80,13 @@ body {
 }
 
 .intro-slider-container{
+  /*border:solid;*/
   width:80%;
   height:80%;
   margin:auto;
   flex-direction:column;
   justify-content:center;
+  overflow:visible;
   @media only screen and (max-width: 575px) {
     width:90%;
   }
@@ -95,11 +97,12 @@ body {
   height:100%;
   padding-top:10vh;
   align-items:center;
+  overflow:visible;
 }
 
 .intro-slide-container.last-slide{
   padding-top:0;
-  margin-top:-30px;
+  margin-top:0px;
 }
 
 .intro-slide{
@@ -130,13 +133,15 @@ body {
 .last-slide-controls{
   margin-top:20px;
   margin-bottom:20px;
+  @media only screen and (max-width: 1200px) {
+    margin: 0 auto;
+  }
   @media only screen and (max-width: 990px) {
     margin-top:-20px;
   }
   @media only screen and (max-width: 768px) {
     margin-top:-80px;
     margin-bottom:50px;
-    border:none;
   }
   @media only screen and (max-width: 575px) {
    margin-top:20px;

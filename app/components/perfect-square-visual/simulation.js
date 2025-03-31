@@ -1,22 +1,23 @@
 import * as d3 from 'd3';
 
-const COLLISION_FORCE_RADIUS_FACTOR = 1.15;//0.65
+const COLLISION_FORCE_RADIUS_FACTOR = 1.15;
 const EXTRA_HORIZ_MARGIN_FACTOR_FOR_FORCE = 0.15;
-const EXTRA_VERT_MARGIN_FACTOR_FOR_FORCE = 0.25// 0.15;
-//const CENTRE_FORCE_STRENGTH = 1.3; //good for just nmena arranged
+const EXTRA_TOP_MARGIN_FACTOR_FOR_FORCE = 0.25
+const EXTRA_BOTTOM_MARGIN_FACTOR_FOR_FORCE = 0.25
 const CENTRE_FORCE_STRENGTH = 1.8;
 
 export function setupSimulation(sim, contentsWidth, contentsHeight, chartWidth, chartHeight, arrangeBy, nrDatapoints, dataInfo){
     const { mean, deviation } = dataInfo;
     const extraHorizMarginForForce = contentsWidth * EXTRA_HORIZ_MARGIN_FACTOR_FOR_FORCE;
-    const extraVertMarginForForce = contentsHeight * EXTRA_VERT_MARGIN_FACTOR_FOR_FORCE;
+    const extraTopMarginForForce = contentsHeight * EXTRA_TOP_MARGIN_FACTOR_FOR_FORCE;
+    const extraBottomMarginForForce = contentsHeight * EXTRA_BOTTOM_MARGIN_FACTOR_FOR_FORCE;
     const horizSpace = contentsWidth - 2 * extraHorizMarginForForce
-    const vertSpace = contentsHeight - 2 * extraVertMarginForForce;
+    const vertSpace = contentsHeight - extraTopMarginForForce - extraBottomMarginForForce;
     const horizSpacePerChart = horizSpace/nrDatapoints;
     const vertSpacePerChart = vertSpace/nrDatapoints;
 
     sim
-      .force("center", d3.forceCenter(contentsWidth / 2, contentsHeight / 2).strength(CENTRE_FORCE_STRENGTH))
+      .force("center", d3.forceCenter(contentsWidth / 2, contentsHeight/2).strength(CENTRE_FORCE_STRENGTH))
       .force("collide", d3.forceCollide().radius((chartWidth/2) * COLLISION_FORCE_RADIUS_FACTOR))
       .force("x", d3.forceX(d => {
         //need to centre each chart in its horizspaceperchart ie +(hozspacePerChart - chartWidth)/2
@@ -42,7 +43,7 @@ export function setupSimulation(sim, contentsWidth, contentsHeight, chartWidth, 
         return (contentsWidth - chartWidth)/2;
       })) 
       .force("y", d3.forceY(d => {
-        const adjuster = (vertSpacePerChart - chartHeight)/2 - extraVertMarginForForce;
+        const adjuster = (vertSpacePerChart - chartHeight)/2 - extraBottomMarginForForce;
         if(arrangeBy.y === "position" && d.date){
           //@todo - implement this similar to mean and deviation (and can just replace all 3 with d3 scales)
         }

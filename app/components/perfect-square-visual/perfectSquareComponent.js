@@ -2,10 +2,9 @@ import * as d3 from 'd3';
 import { header, quadrantsSummary, quadrants, chartOutlinePath } from './subComponents';
 import { quadrantsContainerTransform } from './d3DomHelpers';
 import { isNumber } from '../../helpers/dataHelpers';
-import { remove, fadeIn } from '../../helpers/domHelpers';
 import { calcLevelOfDetailFromBase, getDisabledLevelsForZoom } from './helpers';
 import { COLOURS } from "../../constants";
-import { DEFAULT_SETTINGS, APPEAR_TRANSITION_DURATION } from './constants';
+import { DEFAULT_SETTINGS } from './constants';
 
 const { BLUE, LIGHT_BLUE, GREY, DARK_GREY } = COLOURS;
 
@@ -83,7 +82,8 @@ export default function perfectSquare() {
     const _shouldShowBars = levelOfDetail => levelOfDetail >= 3;
     const _barsAreClickable = levelOfDetail => levelOfDetail >= 3;
     const _shouldShowQuadrantsSummary = levelOfDetail => levelOfDetail >= 3;
-    const _shouldShowSelectedQuadrantTitle = levelOfDetail => levelOfDetail >= 3;
+    //@optimise positioning. Turn off for now 
+    const _shouldShowSelectedQuadrantTitle = levelOfDetail => false//levelOfDetail >= 3;
 
     //level of detail related flags
     let shouldShowHeader;

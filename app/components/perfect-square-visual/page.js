@@ -113,7 +113,7 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
   //container or chart size change
   useEffect(() => {
     if (isFirstRenderRef.current || !contentsWidth) { return; }
-    sizesRef.current = calcChartSizesAndGridLayout(contentsWidth, contentsHeight, nrCols, nrRows, arrangeBy, CALC_CHART_MARGIN);
+    sizesRef.current = calcChartSizesAndGridLayout(contentsWidth, contentsHeight, nrCols, nrRows, nrDatapoints, arrangeBy, CALC_CHART_MARGIN);
   },[contentsWidth, contentsHeight, nrCols, nrRows, arrangeBy])
 
   //layout applied to data

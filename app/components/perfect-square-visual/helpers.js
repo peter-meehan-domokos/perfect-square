@@ -28,10 +28,16 @@ export const calcNrColsAndRows = (containerWidth, containerHeight, n) => {
 
   export const isArranged = arrangeBy => arrangeBy?.x || arrangeBy?.y || arrangeBy?.colour ? true : false;
 
-  const calcReductionFactor = arrangeBy => arrangeBy.x || arrangeBy.y || arrangeBy.colour ? CHART_SIZE_REDUCTION_FACTOR_FOR_SIM : 1;
+  const calcReductionFactor = (nrDatapoints, arrangeBy) => {
+    const dataIsArranged = isArranged(arrangeBy);
+    //@todo - apply a log scale instead so continually increases but never reaches limit
+    const extraReductionForDatapoints = d3.min([0.2, 0.002 * nrDatapoints]);
+    const nrDatapointsFactor = 1 - extraReductionForDatapoints;
+    return dataIsArranged ? nrDatapointsFactor * CHART_SIZE_REDUCTION_FACTOR_FOR_SIM : 1;
+  }
 
-  export const calcChartSizesAndGridLayout = (contentsWidth, contentsHeight, nrCols, nrRows, arrangeBy, _chartMargin={}) => {
-    const reductionFactor = calcReductionFactor(arrangeBy);
+  export const calcChartSizesAndGridLayout = (contentsWidth, contentsHeight, nrCols, nrRows, nrDatapoints, arrangeBy, _chartMargin={}) => {
+    const reductionFactor = calcReductionFactor(nrDatapoints, arrangeBy);
     const chartWidth = reductionFactor * contentsWidth / nrCols;
     const chartHeight = reductionFactor * contentsHeight / nrRows;
     const chartMarginValues = typeof _chartMargin === "function" ? _chartMargin(chartWidth, chartHeight) : _chartMargin;
