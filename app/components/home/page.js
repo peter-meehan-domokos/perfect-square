@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react';
-import { useFetch } from '@/app/api/hooks';
+import { useFetch } from '@/app/api/fetch-hooks';
 import Intro from '../intro/page';
 import Header from '../header/page';
 import Visual from '../visual/page';
