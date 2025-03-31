@@ -44,6 +44,8 @@ This is React plus D3 project, developed on a chrome browser, and is responsive 
 
 not optimised for mobile/tablet or non-chrome browsers yet, although can be viewed on it.
 
+The server is deployed to heroku. [Here is the server's github](https://github.com/peter-meehan-domokos/data-server)
+
 ### Architecture
 
 The data (currently mock) runs through two preparation functions. The first prepares the data to be applied to generic visualisations. The second is a [D3 layout function](https://github.com/petedomokos/The_Quadrants_Bar_Chart/blob/master/src/quadrantsBarChart/quadrantsBarChartLayout.js) to prepare it for the D3 quadrantsBarChartComponent.
@@ -56,7 +58,7 @@ for seamless integration of these functions within standard D3 chaining.
 There is currently no React redux, context, or hooks used for state management and common tasks (eg container resize), these changes are coming soon. 
 
 
-### Performance ptimisation
+### Performance Optimisation
 
 #### List (Virtualised) Rendering
 
