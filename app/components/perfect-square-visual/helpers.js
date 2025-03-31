@@ -31,9 +31,13 @@ export const calcNrColsAndRows = (containerWidth, containerHeight, n) => {
   const calcReductionFactor = (nrDatapoints, arrangeBy) => {
     const dataIsArranged = isArranged(arrangeBy);
     //@todo - apply a log scale instead so continually increases but never reaches limit
-    const extraReductionForDatapoints = d3.min([0.2, 0.002 * nrDatapoints]);
+    const extraReductionForDatapoints = d3.min([0.1, 0.002 * nrDatapoints]);
     const nrDatapointsFactor = 1 - extraReductionForDatapoints;
-    return dataIsArranged ? nrDatapointsFactor * CHART_SIZE_REDUCTION_FACTOR_FOR_SIM : 1;
+
+    //if data is arranged but with no x an dy, it will form a group around centre, so need more space
+    const extraReductionIfCentred = arrangeBy.colour && !arrangeBy.x && !arrangeBy.y ? 0.1 : 0;
+    const centredFactor = 1 - extraReductionIfCentred;
+    return dataIsArranged ? nrDatapointsFactor * centredFactor * CHART_SIZE_REDUCTION_FACTOR_FOR_SIM : 1;
   }
 
   export const calcChartSizesAndGridLayout = (contentsWidth, contentsHeight, nrCols, nrRows, nrDatapoints, arrangeBy, _chartMargin={}) => {
