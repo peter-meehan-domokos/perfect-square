@@ -76,13 +76,15 @@ It runs the data through a [D3 layout function](https://github.com/peter-meehan-
 
 It calls renderCharts inside a useEffect, which uses the D3 enter-update-exit pattern to call the [perfectSquareComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/perfectSquareComponent.js), passing it the selection of all charts.
 
+It handles callbacks such as for event handling, by updating its state, which then triggers the necessary dom updates via specific useEffects or via its own returned JSX. For example, the user selects a chart at the d3/dom level, this is passed to the React component which sets this in state, and this in turn triggers a useEffect which updates the dom via the d3 component, and also makes any other required updates, such as to the controls.
+
 #### The main D3 component: [perfectSquareComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/perfectSquareComponent.js)
 The D3 perfectSquareComponent utilises the standard D3 design pattern - it returns an inner function which can then be used to render and update each chart it receives as part of a selection of charts. It uses this inner function approach rather than classes, because this is more consistent with the implementation of D3 itself, allowing for seamless integration of these functions within standard D3 chaining.
 
-Settings at visual-level or chart-level
-Also as per D3 standard, there are settings variables that are applied and stored within the scope of the component, and can be accessed (get) when called with no argument, or modified (set) when passed an argument. The setter in some cases can be a function or a fixed amount. If it is a function, it is applied individually to each chart/datapoint, allowing datapoint level variations. This is the same as how d3 functions such as d3.force work.
+Settings and callbacks handled at visual-level or chart-level
+Also as per D3 standard, there are settings variables and callback functions that are applied and stored within the scope of the component, and can be accessed (get) when called with no argument, or modified (set) when passed an argument. The setter in some cases can be a function or a fixed amount. If it is a function, it is applied individually to each chart/datapoint, allowing datapoint level variations. This is the same as how d3 functions such as d3.force work.
 
-#### Other
+#### Todo
 
 State management is currently not handled outside of the peresentation components, for exampl is a redux store or context. This separation needs to be implemented.
 
@@ -90,45 +92,46 @@ The d3 [force simulation](https://github.com/peter-meehan-domokos/perfect-square
 
 ### Display Optimsations
 
-Its very important in dataviz that space is used effectively. In this implementation, the number of rows and columns will always be optimised according to two factors: (a) the number of charts, and (b) the aspect ratio of the display. 
+The number of rows and columns is dynamically optimised, see [calcNrColsAndRows](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/helpers.js), according to two factors: (a) the number of charts, and (b) the aspect ratio of the display. 
 
 ### Performance Optimisation
+   
+#### 1. Virtualised Rendering
 
-#### List (Virtualised) Rendering
+Only the datapoints on screen are rendered and this is updated on every zoom event, see [isChartOnScreenCheckerFunc](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/helpers.js).
 
-#### Semantic zoom
+#### 2. Semantic zoom
 
-#### D3 enter-update-exit
+We take advantage of what visual science tells us about the level of detail that the human eye can see at specifc distances and object sizes, and combine it with knowledge of the number of datapoints to display and the container size, to ensure that no unneccesarry elements are rendered. This means there can be thousands of datapoints on screen, or just a few, and in all cases, a similar number of dom elements will be rendered, keeping performance optimal throughout. See Levels Of Detail table further up.
 
-#### React optimisations
+#### 3. D3 enter-update-exit pattern
 
-#### Fetch Optimisations (not done yet)
+We make use od D3s in-built optimsation capabilities throughout all functions that render elements. This ensures elements are reused where possible, or discarded when appropriate. It also avoids the need for complex logic to handle dom updates, leaving it to D3s in-built methods.
 
-I will optimise the fetch for ds, by only loading
-the mean and std dev values for each datapoint when nr ds > 1000.
-Because we know that the levelOfDetail will start as 0 (ie the new 1) anyway
+#### 4. React optimisations
+
+The component life-cycle is untilised at various points to avoid unneccessary udpates. Ther eis scope to improe this further, as the data is currently being updated by calling the entire layout function on updates that only require one change, such as the gridX and gridY positions. This is a candidate for memoisation, and more targeted object put into the useEffect dependencies array.
+
+#### 5. Fetch Caching
+
+The useFetch hook caches the data.
+
+A further option, when handling a much larger number of datapoints eg many thousands, is to optimise the fetch, by only requiring
+the mean value and standard deviation for each datapoint. We know that with a large number of datapoints, the levelOfDetail will start as 0 and so the mean is all that is required, until the user zooms in or selects a datapoint.
 
 ## Responsiveness
 
-Not fully testes on devices, not touch, sizes are ok, but non-chrome browsers not
-
-## Some Known Issues
-
- - zoom ctrls zoom from 0,0 not centre...(note: if we go from centre, then need to adjust the isChartOnScreenChecker function)
- - BUG - zooming out with - can override translate extent, so need to put in a check for these bounds,
- - if user selects a chart whilst force is running, need to cut smoothly to the end position of the simulation before zooming in
-
+The grid and the content is already optimised for the container size and number of datapoints to display (see earlier).
+In additon, the description is hidden in smaller container sizes, with a button to slide it in. Another option is to hide the controls in a similar way.
 
 ## More functionality coming soon
 
    - A similarity score based on machine learning clustering of similar datapoints, visualised through the force-directed network.
    
-   - Hover or tap the bars for an info popup/tooltip
+   - Drilling down into bars (ie measures or dimensions)
 
    - Run an animation to see progress unfold alongside other info or videos (eg as part of a larger dashboard)
 
-   - Remove auto-ordering of bars to make tracking particular bars easier ( but tracking the overall shape becomes harder)
-     
    - Colour variations for each bar in each quadrant to aid individual tracking without having to lose the auto-ordering
 
 
