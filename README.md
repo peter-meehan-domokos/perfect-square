@@ -4,10 +4,12 @@
 
 ## Overview
 
-A novel 2D view multivariate data, or n-dimensional vectors. Yu can easily compare and group thousands of datapoints according to each point's individual shape. Especially good at showing comparison against an ideal state. Also good for visualising clustering and similarity ML algorithms.
+A novel 2D view multivariate data, or n-dimensional vectors, that p,laces particular focus on the shape of each datapoint. You can easily compare and group thousands of datapoints. Especially good at showing comparison against an ideal state. Also for visualising clustering and similarity ML algorithms, and for product quantization in a vector database search.
 
-For example, an injured sports star who is aiming to get back to their pre-injury levels (the ideal state).
-Or a recruitment algorithm which aims to find the person who most fits the required profile. Or an AI language model which aims to find a match for a word (token) based on similarity.
+## Examples
+ - An injured sports star who is aiming to get back to their pre-injury levels (the ideal state).
+ - Visualising a recruitment algorithm which aims to find the person who most fits the required profile.
+ - An AI language model which aims to find a match for a word (token) based on similarity.
 
 In these cases, the dataset is normalised by giving a value for each measure as a proporiton of the ideal value for that measure (eg a percentage of the target achieved).
  
@@ -15,22 +17,29 @@ In these cases, the dataset is normalised by giving a value for each measure as 
 
 ### Ordering of measures
 
-The highest bars, representing the best values, are always towards the centre of the overall square. This make it easier to see the shape of the overall progress, at the expense of the ability to track progress for a particular bar. User will soon be able to remove auto-ordering when they want to track several specific bars more than the overall progress.
-
-In our sports rehabilitation example, whereas an executive (or manager) may want to just know the overall shape for all injured players, a coach or physio would be more interested in the specific bars.
+The highest bars, representing the best values, are always towards the centre of the overall square. This makes it easier to see the shape of the overall progress, whilst clicking a bar (coming soon) will still allow tracking of individual measures.
 
 ### Categories
 
-It is particularly useful when each vector needs to be grouped into categories/subvectors (see rehab example below). 
-It can therefore also visualise the product quantization process in a vector database search.
+There are 4 quadrants to each chart, allowing measures or dimensions to be grouped and summarised as categories, if desired (eg product quantisation to speed up queries, whilst retaining some information which could be delivered in a later request). Up to 4 categories are currently possible, with more options coming soon.
 
-### Drilling down
+### Semantic zooming and drilling down
 
-User can select a quadrant, and it will enlarge. It is not yet possible to see info on bars or to drill down into bars.
+The user can select a datapoint to zoom in to it, or manually zoom in and pan to a location.
+As they zoom in, the user sees more detailed versions of the datapoint.
 
-### Zooming and panning
+Levels Of Detail
+| 	header1	 | 	header2	 | 	header3	 | 
+| 	:-----:	 | 	:-----:	 | 	:-----:	 | 
+| 	Value1	| 	Value2	| 	Value3	 | 
+| 	Value1	| 	Value2	| 	Value3	 | 
+| 	Value1	| 	Value2	| 	Value3	 | 
+| 	Value1	| 	Value2	| 	Value3	 | 
+| 	Value1	| 	Value2	| 	Value3	 | 
 
-In large datasets, like example 2, it is helpful for the user to zoom in (spreading fingers) and pan the data. (This will become more useful once drilling down is available).
+ - 0 - each datapoint is a single rectangle, with area proportional to the overall mean value of all measures or dimensions (not implemented yet).
+ - 1 - each datapoint is a single path which outlines the shape that all of the measures or dimensions make.
+ - 2 - 
 
 ### Grid display optimisation
 
