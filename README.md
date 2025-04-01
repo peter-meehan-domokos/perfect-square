@@ -64,30 +64,29 @@ It was developed on a chrome browser, and is responsive to all display sizes and
 #### Overview
 Each datapoint becomes a chart inside the visual. It is rendered as follows. (React components start with capitals, d3 components in camel case.)
 
-Visual (gets the data via a useFetch hook)
- -> PerfectSquareVisual (receives the data, and applies the d3 layout function to it)
-  -> renderCharts (it renders one g element per datapoint, inside the container, then calls perfectSqaurecomponent on this selection) 
-   ->  perfectSquareComponent (recieves a seleciton of gs, and renders/updates a chart on each one) 
-    -> subComponents (renders/updates a part of each chart)
+1. [Visual](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/visual/page.js) gets the data via a [useFetch](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/api/fetch-hooks.js) hook, and calls the specific visual required.
+2. [PerfectSquareVisual](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/page.js) applies the [layout function](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/perfectSquareLayout.js) to the data to prepare it for the perfectSquareComponent, and calls renderCharts.
+3. [renderCharts](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/d3RenderFunctions.js) renders one g element per datapoint, inside the container, then calls perfectSquareComponent on this selection of gs.
+4. [perfectSquareComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/perfectSquareComponent.js) receives a selection of gs, and renders/updates a chart on each one.
+5. [subComponents](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/subComponents.js) renders/updates a part of each chart.
 
-#### The main React component
-Perfect Square is a [React component]([https://github.com/petedomokos/The_Quadrants_Bar_Chart/blob/master/src/quadrantsBarChart/QuadrantsBarChart.js](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/page.js)). 
+#### The main React component [PerfectSquareVisual](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/page.js) 
 
 It runs the data through a [D3 layout function](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/perfectSquareLayout.js) to prepare it for the D3 perfectSquareComponent.
 
-It calls renderCharts inside a useEffect, which uses the D3 enter-update-exit pattern to call the [D3 component (perfectSquareComponent)](https://github.com/petedomokos/The_Quadrants_Bar_Chart/blob/master/src/quadrantsBarChart/quadrantsBarChartComponent.js](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/perfectSquareComponent.js)), passing it the selection of all charts.
+It calls renderCharts inside a useEffect, which uses the D3 enter-update-exit pattern to call the [perfectSquareComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/perfectSquareComponent.js), passing it the selection of all charts.
 
-The Main D3 component
-The D3 perfectSquareComponent utilises the standard D3 design pattern - it returns an inner function which can then be used to render and update each chart it receives as part of a selection of charts. 
+#### The main D3 component: [perfectSquareComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/perfectSquareComponent.js)
+The D3 perfectSquareComponent utilises the standard D3 design pattern - it returns an inner function which can then be used to render and update each chart it receives as part of a selection of charts. It uses this inner function approach rather than classes, because this is more consistent with the implementation of D3 itself, allowing for seamless integration of these functions within standard D3 chaining.
 
-Settings
-Also as per standard, there are settings variables that are applied and stored within the scope of the component. These settings can be accessed (get) when called with no argument, or modified (set) when passed an argument. Th
+Settings at visual-level or chart-level
+Also as per D3 standard, there are settings variables that are applied and stored within the scope of the component, and can be accessed (get) when called with no argument, or modified (set) when passed an argument. The setter in some cases can be a function or a fixed amount. If it is a function, it is applied individually to each chart/datapoint, allowing datapoint level variations. This is the same as how d3 functions such as d3.force work.
 
+#### Other
 
-uses inner functions rather than classes, because this is more consistent with the implementation of D3 itself, allowing
-for seamless integration of these functions within standard D3 chaining.
+State management is currently not handled outside of the peresentation components, for exampl is a redux store or context. This separation needs to be implemented.
 
-There is currently no React redux, context, or hooks used for state management and common tasks (eg container resize), these changes are coming soon. 
+The d3 [force simulation](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/simulation.js) and [zoom](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/zoom.js) components can be converted into hooks, rather than standard functions, to allow clearer separation and reusability.
 
 ### Display Optimsations
 
