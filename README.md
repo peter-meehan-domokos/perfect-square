@@ -4,7 +4,7 @@
 
 ## Overview
 
-A novel 2D view multivariate data, or n-dimensional vectors, that p,laces particular focus on the shape of each datapoint. You can easily compare and group thousands of datapoints. Especially good at showing comparison against an ideal state. Also for visualising clustering and similarity ML algorithms, and for product quantization in a vector database search.
+A novel 2D view of multivariate data, or n-dimensional vectors, that places particular focus on the shape of each datapoint. You can easily compare and group thousands of datapoints. Especially good at showing comparison against an ideal state. Also for visualising clustering and similarity ML algorithms, and for product quantization in a vector database search.
 
 ## Examples
  - An injured sports star who is aiming to get back to their pre-injury levels (the ideal state).
@@ -17,11 +17,11 @@ In these cases, the dataset is normalised by giving a value for each measure as 
 
 ### Ordering of values
 
-The highest bars, representing the best values of the measures or dimensions, are always towards the centre of the overall square. This makes it easier to see the shape of the overall progress, whilst clicking a bar (coming soon) will still allow tracking of individual measures.
+The highest bars, representing the best values of the measures or dimensions, are always towards the centre of the overall square. This makes it easier to see the shape of the overall progress, whilst clicking a bar (coming soon) will still allow tracking of individual measures/dimensions.
 
 ### Categories
 
-There are 4 quadrants to each chart, allowing measures or dimensions to be grouped and summarised as categories, if desired (eg product quantisation to speed up queries, whilst retaining some information which could be delivered in a later request). Up to 4 categories are currently possible, with more options coming soon.
+There are 4 quadrants to each chart, allowing measures/dimensions to be grouped and summarised as categories, if desired (eg product quantisation to speed up queries, whilst retaining some information which could be delivered in a later request). Up to 4 categories are currently possible.
 
 ### Arranging the data
 
@@ -48,13 +48,16 @@ note: level 0 not released yet
 
 ### Drilling down
 
-Not released yet. User can click a particular bar (which represents a measure or a dimension) to highlight that bar in all datapoints, and to see a secondary visual for it, such as a time series or histogram.
+User can click a particular bar (which represents a measure or a dimension) to highlight that bar in all datapoints, and to see a secondary visual for it, such as a time series or histogram. Not released yet. 
 
 ## Technical implementation and requirements
 
 ### Development Stack and set-up
 
-This is a client app built with Next.js, React and D3. It uses GraphQL to communicate with a server to retrieve data.
+This is a client app built with Next.js, React and D3. 
+
+It uses GraphQL to communicate with a server to retrieve data. GraphQL is a good candidate is it provides a clean way to avoid over-fetching of data, which will be an issue when a larger number of datapoints are involved.
+
 The server is deployed to heroku. [Here is the server's github](https://github.com/peter-meehan-domokos/data-server)
 
 It was developed on a chrome browser, and is responsive to all display sizes and devices, including touch. However, it hasn't been tested on other browsers or on mobile devices, so may be unstable if not using chrome on a laptop or PC.
@@ -62,13 +65,13 @@ It was developed on a chrome browser, and is responsive to all display sizes and
 ### Architecture of the Visual
 
 #### Overview
-Each datapoint becomes a chart inside the visual. It is rendered as follows. (React components start with capitals, d3 components in camel case.)
+Each datapoint becomes a chart inside the visual. It is rendered as follows. (React components start with capitals, d3 components in camelCase.)
 
-1. [Visual](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/visual/page.js) gets the data via a [useFetch](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/api/fetch-hooks.js) hook, and calls the specific visual required.
+1. [Visual](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/visual/page.js) gets the data via a [useFetch](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/api/fetch-hooks.js) hook, and calls the PerfectSquareVisual.
 2. [PerfectSquareVisual](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/page.js) applies the [layout function](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/perfectSquareLayout.js) to the data to prepare it for the perfectSquareComponent, and calls renderCharts.
 3. [renderCharts](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/d3RenderFunctions.js) renders one g element per datapoint, inside the container, then calls perfectSquareComponent on this selection of gs.
 4. [perfectSquareComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/perfectSquareComponent.js) receives a selection of gs, and renders/updates a chart on each one.
-5. [subComponents](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/subComponents.js) renders/updates a part of each chart.
+5. [subComponents](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/subComponents.js) renders/updates a part of each chart, returning the selection to allow chaining.
 
 #### The main React component [PerfectSquareVisual](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/page.js) 
 
@@ -86,7 +89,7 @@ Also as per D3 standard, there are settings variables and callback functions tha
 
 #### Todo
 
-State management is currently not handled outside of the peresentation components, for exampl is a redux store or context. This separation needs to be implemented.
+State management is currently not handled outside of the peresentation components, for example in a redux store or context. This separation needs to be implemented.
 
 The d3 [force simulation](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/simulation.js) and [zoom](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/zoom.js) components can be converted into hooks, rather than standard functions, to allow clearer separation and reusability.
 
@@ -100,24 +103,25 @@ The number of rows and columns is dynamically optimised, see [calcNrColsAndRows]
 
 Only the datapoints on screen are rendered and this is updated on every zoom event, see [isChartOnScreenCheckerFunc](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/helpers.js).
 
-#### 2. Semantic zoom
+#### 2. Semantic Zoom
 
 We take advantage of what visual science tells us about the level of detail that the human eye can see at specifc distances and object sizes, and combine it with knowledge of the number of datapoints to display and the container size, to ensure that no unneccesarry elements are rendered. This means there can be thousands of datapoints on screen, or just a few, and in all cases, a similar number of dom elements will be rendered, keeping performance optimal throughout. See Levels Of Detail table further up.
 
-#### 3. D3 enter-update-exit pattern
+#### 3. D3 Enter-Update-Exit Pattern
 
-We make use od D3s in-built optimsation capabilities throughout all functions that render elements. This ensures elements are reused where possible, or discarded when appropriate. It also avoids the need for complex logic to handle dom updates, leaving it to D3s in-built methods.
+We make use od D3s in-built optimsation capabilities throughout all functions that render elements. This ensures elements are reused where possible, or discarded when not used. It also avoids the need for complex logic to handle dom updates, leaving it to D3s in-built methods.
 
 #### 4. React optimisations
 
-The component life-cycle is untilised at various points to avoid unneccessary udpates. Ther eis scope to improe this further, as the data is currently being updated by calling the entire layout function on updates that only require one change, such as the gridX and gridY positions. This is a candidate for memoisation, and more targeted object put into the useEffect dependencies array.
+The component life-cycle is untilised at various points to avoid unneccessary pdpates. There is scope to improve this further, as the data is currently being updated by calling the entire layout function on updates that only require one change, such as the gridX and gridY positions. This is a candidate for memoisation, and more targeted object put into the useEffect dependencies array.
 
-#### 5. Fetch Caching
+More use of hooks for functionality such as the simulation and the zoom will yield more clarity and reduce the number of unnecessary updates too.
+
+#### 5. Fetch Caching & Avoiding Over-Fetching
 
 The useFetch hook caches the data.
 
-A further option, when handling a much larger number of datapoints eg many thousands, is to optimise the fetch, by only requiring
-the mean value and standard deviation for each datapoint. We know that with a large number of datapoints, the levelOfDetail will start as 0 and so the mean is all that is required, until the user zooms in or selects a datapoint.
+A further option is to reduce the over-fetching when handling a much larger number of datapoints eg many thousands. At this level of detail, we only require the mean value and standard deviation for each datapoint. We can use a secondary request to get the rest of the data, in anticipation that the user will zoom in or select a datapoint. GraphQL is a good choice for this reason.
 
 ## Responsiveness
 
