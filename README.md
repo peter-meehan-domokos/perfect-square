@@ -60,7 +60,7 @@ This is a client app built with Next.js, React and D3.
 
 It uses GraphQL to communicate with a server to retrieve data. GraphQL is a good choice as it provides a clean way to avoid over-fetching of data, which will be an issue when a larger number of datapoints are involved.
 
-The server is deployed to heroku. [Here is the server's github](https://github.com/peter-meehan-domokos/data-server)
+The server (written in node, and utilising python child processes) is deployed to heroku.
 
 It was developed on a chrome browser, and is responsive to all display sizes and devices, including touch. However, it hasn't been tested on other browsers or on mobile devices, so may be unstable if not using chrome on a laptop or PC.
 
