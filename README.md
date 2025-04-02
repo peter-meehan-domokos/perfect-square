@@ -106,9 +106,13 @@ State management is currently not handled outside of the presentation components
 The d3 [force simulation](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/simulation.js) and [zoom](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/zoom.js) components can be converted into hooks, rather than standard functions, to allow clearer separation and reusability.
 
 
-### Spatial Optimsations
+### Responsiveness
 
 The number of rows and columns is dynamically optimised, see [calcNrColsAndRows](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/helpers.js), according to two factors: (a) the number of charts, and (b) the aspect ratio of the display. 
+
+Also see semantic zoom(below).
+
+The description in the VisualHeader is hidden in smaller container sizes, with a button to slide it in. Another option is to hide the controls in a similar way.
 
 ### Performance Optimisations
    
@@ -135,11 +139,6 @@ More use of hooks for functionality such as the simulation and the zoom will yie
 The useFetch hook caches the data.
 
 A further option is to reduce the over-fetching when handling a much larger number of datapoints eg many thousands. At this level of detail, we only require the mean value and standard deviation for each datapoint. We can use a secondary request to get the rest of the data, in anticipation that the user will zoom in or select a datapoint. GraphQL is a good choice for this reason.
-
-## Responsiveness
-
-The grid and the content is already optimised for the container size and number of datapoints to display (see earlier).
-The description in the VisualHeader is hidden in smaller container sizes, with a button to slide it in. Another option is to hide the controls in a similar way.
 
 ## More functionality coming soon
 
