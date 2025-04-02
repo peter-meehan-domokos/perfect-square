@@ -23,7 +23,7 @@ The highest bars, representing the best values of the measures or dimensions, ar
 
 There are 4 quadrants to each chart, allowing measures/dimensions to be grouped and summarised as categories, if desired (eg product quantisation to speed up queries, whilst retaining some information which could be delivered in a later request). Up to 4 categories are currently possible.
 
-The user can click a category in the controls panel to highlight and enlarge a particular category. This allows many more datapoints to be glanced at and compared at once dure to the increase in what is known in dataviz as the 'data-to-ink' ratio.
+The user can click a category in the controls panel to highlight and enlarge a particular category. This allows many more datapoints to be glanced at and compared at once due to the increase in what is known in dataviz as the 'data-to-ink' ratio.
 
 ### Arranging the data
 
