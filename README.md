@@ -70,6 +70,7 @@ These are all being worked on for release very soon.
 ### Architecture of the Visual
 
 #### Overview
+
 Each datapoint becomes an instance of a chart inside the overall visual. It is rendered as follows. (React components start with capitals, d3 components and hooks in camelCase.)
 
 1. [Visual](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/visual/page.js) gets the data via a [useFetch](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/api/fetch-hooks.js) hook, and calls the PerfectSquareVisual.
@@ -78,7 +79,7 @@ Each datapoint becomes an instance of a chart inside the overall visual. It is r
 4. [perfectSquareComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/perfectSquareComponent.js) receives a selection of gs, and renders/updates a chart on each one.
 5. [subComponents](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/subComponents.js) renders/updates a part of each chart, returning the selection to allow chaining.
 
-#### The main React component [PerfectSquareVisual](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/page.js) 
+#### The main React component - [PerfectSquareVisual](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/page.js) 
 
 It runs the data through a [perfectSquareLayout](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/perfectSquareLayout.js) to prepare it for the perfectSquareComponent, utilising the D3 layout design pattern.
 
@@ -86,11 +87,17 @@ It calls renderCharts inside a useEffect, which uses the D3 enter-update-exit pa
 
 It handles callbacks such as for event handling, by updating its state, which then triggers the necessary dom updates via specific useEffects or via its own returned JSX. For example, the user selects a chart at the d3/dom level, this is passed to the React component which sets this in state, and this in turn triggers a useEffect which updates the dom via the d3 component, and also makes any other required updates, such as to the controls.
 
-#### The main D3 component: [perfectSquareComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/perfectSquareComponent.js)
+#### The main D3 component - [perfectSquareComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/perfectSquareComponent.js)
+
 The perfectSquareComponent utilises the D3 component design pattern - it returns an inner function which can then be used to render and update each chart it receives as part of a selection of charts. It uses this inner function approach rather than classes, because this is more consistent with the implementation of D3 itself, allowing for seamless integration of these functions within standard D3 chaining.
 
 #### Settings and callbacks handled at visual-level or chart-level
-Also as per the D3 component pattern, there are settings variables and callback functions that are applied and stored within the scope of some of the d3 components, and can be accessed (get) when called with no argument, or modified (set) when passed an argument. The setter in some cases can be a function or a fixed amount. If it is a function, it is applied individually to each chart/datapoint, allowing datapoint level variations. This is the same as how d3 functions such as d3.force work. For an example, see .width, .height and .styles in [tooltipComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/d3HelperComponents/tooltipComponent.js)
+
+As per the D3 component pattern, there are settings variables and callback functions that are applied and stored within the scope of some of the d3 components, and can be accessed (get) when called with no argument, or modified (set) when passed an argument. The setter in some cases can be a function or a fixed amount. If it is a function, it is applied individually to each chart/datapoint, allowing datapoint level variations. This is the same as how d3 functions such as d3.force work. For an example, see the width, height and styles settings in [tooltipComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/d3HelperComponents/tooltipComponent.js). This uses underscore convention for functions eg _width is a function.
+
+#### D3 Margin convention and dimensions
+WARNING TO NON-D3 DEVELOPERS - margin in SVG/D3 world acts as padding in HTML/CSS world, so we get, for example, contenstWidth = width - margin.elft - margin.right.
+This margin convention is applied throughout the svg code. Every rendering component is ignorant of it's container. It receives it's own dimensions either as settings (if its a full-on 'component') or as an argument (if its just a smaller rendering helper function). If it has a margin, this is applied to derive the contentsWidth and contentsHeight.
 
 #### A couple of todos
 
