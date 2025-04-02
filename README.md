@@ -146,7 +146,7 @@ A further option is to reduce the over-fetching when handling a much larger numb
    
    - Drilling down into bars (ie measures or dimensions)
 
-   - Run an animation to see progress unfold (for timestamps sets of data) alongside other info or videos (eg as part of a larger dashboard)
+   - Run an animation to see progress unfold (for temporal sets of data - eg a rehabilitation programme for an injury) alongside other info or videos (eg as part of a larger dashboard)
 
    - Colour variations for each bar in each quadrant to aid individual tracking without having to lose the auto-ordering
 
