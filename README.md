@@ -122,11 +122,11 @@ Only the datapoints on screen are rendered and this is updated on every zoom eve
 
 #### 2. Semantic Zoom
 
-We take advantage of what visual science tells us about the level of detail that the human eye can see at specifc distances and object sizes, and combine it with knowledge of the number of datapoints to display and the container size, to ensure that no unneccesarry elements are rendered. This means there can be thousands of datapoints on screen, or just a few, and in all cases, a similar number of dom elements will be rendered, keeping performance optimal throughout. See Levels Of Detail table further up.
+The app applies visual science in terms of the level of detail that the human eye can see at specific distances and sizes to ensure that no unneccesarry elements are rendered. This means there can be thousands of datapoints on screen, or just a few, and in all cases, a similar number of dom elements will be rendered, keeping performance optimal throughout. See Levels Of Detail table further up.
 
 #### 3. D3 Enter-Update-Exit Pattern
 
-We make use of D3s in-built optimsation capabilities throughout all functions that render elements. This ensures elements are reused where possible, or discarded when not used. It also avoids the need for complex logic to handle dom updates, leaving it to D3s in-built methods.
+Use is made of D3s in-built optimisation capabilities throughout all functions that render elements. This ensures elements are reused where possible, or discarded when not used. It also avoids the need for complex logic to handle dom updates, leaving it to D3s in-built methods.
 
 #### 4. React optimisations
 
