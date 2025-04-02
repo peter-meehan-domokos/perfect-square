@@ -4,7 +4,7 @@
 
 ## Overview
 
-A novel 2D view of multivariate data, or n-dimensional vectors, that places particular focus on the shape of each datapoint. You can easily compare and group thousands of datapoints. Especially good at showing comparison against an ideal state. Also for visualising clustering and similarity ML algorithms, and for product quantization in a vector database search.
+A novel 2D view of multivariate data, or n-dimensional vectors. It places particular focus on the shape of each datapoint, and how far away that shape is from an ideal standard. You can easily compare and group thousands of datapoints. Especially good at showing comparison against an ideal state. Also for visualising clustering and similarity ML algorithms, and for product quantization in a vector database search.
 
 ## Examples
  - An injured sports star who is aiming to get back to their pre-injury levels (the ideal state).
