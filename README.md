@@ -96,7 +96,7 @@ The perfectSquareComponent utilises the D3 component design pattern - it returns
 As per the D3 component pattern, there are settings variables and callback functions that are applied and stored within the scope of some of the d3 components, and can be accessed (get) when called with no argument, or modified (set) when passed an argument. The setter in some cases can be a function or a fixed amount. If it is a function, it is applied individually to each chart/datapoint, allowing datapoint level variations. This is the same as how d3 functions such as d3.force work. For an example, see the width, height and styles settings in [tooltipComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/d3HelperComponents/tooltipComponent.js). This uses underscore convention for functions eg _width is a function.
 
 #### D3 Margin convention and dimensions
-WARNING TO NON-D3 DEVELOPERS - margin in SVG/D3 world acts as padding in HTML/CSS world, so we get, for example, contenstWidth = width - margin.elft - margin.right.
+WARNING TO NON-D3 DEVELOPERS - margin in SVG/D3 world acts as padding in HTML/CSS world, so we get, for example, contentsWidth = width - margin.left - margin.right.
 This margin convention is applied throughout the svg code. Every rendering component is ignorant of it's container. It receives it's own dimensions either as settings (if its a full-on 'component') or as an argument (if its just a smaller rendering helper function). If it has a margin, this is applied to derive the contentsWidth and contentsHeight.
 
 #### A couple of todos
