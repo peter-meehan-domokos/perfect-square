@@ -139,7 +139,7 @@ A further option is to reduce the over-fetching when handling a much larger numb
 ## Responsiveness
 
 The grid and the content is already optimised for the container size and number of datapoints to display (see earlier).
-In additon, the description is hidden in smaller container sizes, with a button to slide it in. Another option is to hide the controls in a similar way.
+The description in the VisualHeader is hidden in smaller container sizes, with a button to slide it in. Another option is to hide the controls in a similar way.
 
 ## More functionality coming soon
 
