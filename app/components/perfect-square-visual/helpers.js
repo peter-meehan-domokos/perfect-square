@@ -14,13 +14,22 @@ export const calcLevelOfDetailFromBase = baseSize => (k, disabledLevels=[]) => {
 export const getDisabledLevelsForZoom = (initLevel, targLevel) =>
     initLevel && targLevel ? LEVELS_OF_DETAIL.slice(initLevel - 1, targLevel) : [];
 
-export const calcNrColsAndRows = (containerWidth, containerHeight, n) => {
+  /**
+ * @description Calculates the optimum number of rows and columns for a given number of cells within a space
+ *
+ * @param {object} width the width of the space
+ * @param {object} height the height of the space
+ * @param {object} nrCells the number of cells that are required to fit in the space
+ * 
+ * @returns {object} contains the values for the optimum number of rows and columns
+ */
+export const calcNrColsAndRows = (width, height, nrCells) => {
     //aspect ratio, a
-    const a = containerWidth / containerHeight;
-    const proportionOfNForWidth = Math.sqrt(n * a);
-    const nrCols = Math.round(proportionOfNForWidth);
+    const asp = width / height;
+    const proportionOfCellsForWidth = Math.sqrt(nrCells * asp);
+    const nrCols = Math.round(proportionOfCellsForWidth);
     //always round up the rows so there is enough cells
-    const nrRows = Math.ceil(n/nrCols);
+    const nrRows = Math.ceil(nrCells/nrCols);
     //@todo - consider adjusting cols if ther is an orphan on last row ie 
     //const nrOnLastRow = n - (nrRows-1) * nrCols;
     return { nrCols, nrRows }
@@ -60,6 +69,30 @@ export const calcNrColsAndRows = (containerWidth, containerHeight, n) => {
       }
   }
 
+  /**
+ * @description A higher-order function that returns a function that determines whether or not the chart of a particular
+ * datapoint is on screen, given the current zoom state. This will typically be called in two parts. 
+ * Initally it will be passed the first 5 parameters, to set up the checker,
+ * and then the returned function can be called on each datapoint.
+ *
+ * @param {Number} contentsWidth The width of the overall container of the svg visual, minus the margins
+ * @param {Number} contentsHeight The height of the overall container of the svg visual, minus the margins
+ * @param {Number} chartWidth The width of each individual chart (ie for each datapoint)
+ * @param {Number} chartHeight The height of each individual chart (ie for each datapoint)
+ * @param {boolean} dataIsArranged A flag that shows whether or not the force is being used. If not, it is a grid layout.
+ * 
+ * @return {function} returns the function described below
+ * 
+ * Documentation of the returned function
+ * 
+ * @description A function which calculates whether or not the chart of a given datapoint is currently on screen, given the zoom state
+ * This function has access to the above params too, via scoping
+ * 
+ * @param {object} d The datum (ie processed datapoint) of the particular chart being checked
+ * @param {D3ZoomTransformObject} zoomTranform an object that includes x,y, and k(scale) properties describing the current zoom state
+ * 
+ * @returns {boolean} true iff this chart is currently positioned within the viewbox of the container, given the current zoom state.
+ */
   export const isChartOnScreenCheckerFunc = (contentsWidth, contentsHeight, chartWidth, chartHeight, dataIsArranged) => (d, zoomTransform) => {
     const { x, y, k } = zoomTransform;
     const chartX1 = dataIsArranged ? d.x : d.gridX;
@@ -72,17 +105,41 @@ export const calcNrColsAndRows = (containerWidth, containerHeight, n) => {
     return isOnScreenHorizontally && isOnScreenVertically ? true : false;
   }
 
-  export const calcZoomTransformFunc = (contentsWidth, contentsHeight, margin, chartWidth, chartHeight, dataIsArranged) => chartD => {
+
+  /**
+ * @description A higher-order function that returns a function that calculates the required zoom state to zoom in to
+ * a selected chart/datapoint. 
+ * 
+ * (Note that the zoom is applied to the outer container, which is a design decision because
+ * it leads to a more immersive experience, as there are no artificial boundaries whilst the user zooms. It does mean
+ * that we must exclude the margin from the zooming calculation here, so the margin doesnt also enlarge)
+ *
+ * @param {Number} contentsWidth The width of the overall container of the svg visual, minus the margins
+ * @param {Number} contentsHeight The height of the overall container of the svg visual, minus the margins
+ * @param {Number} margin The margin of the container (needed so we can exclude it from zooming)
+ * @param {Number} chartWidth The width of each individual chart (ie for each datapoint)
+ * @param {Number} chartWidth The width of each individual chart (ie for each datapoint)
+ * @param {Number} chartHeight The height of each individual chart (ie for each datapoint)
+ * 
+ * @return {function} returns the function described below
+ * 
+ * Documentation of the returned function
+ * 
+ * @description A function which calculates the required zoom state to zoom in to a selected chart/datapoint. 
+ * @param {object} selectedChartD The datum (ie processed datapoint) of the selected chart
+ * 
+ * @returns {D3ZoomTransformObject} The D3 Transform that is ready to be applied to the zoom g in the dom.
+ * It contains the required x, y and k(scale) values to zoom into the selected chart
+ */
+  export const calcZoomTransformFunc = (contentsWidth, contentsHeight, margin, chartWidth, chartHeight, dataIsArranged) => selectedChartD => {
     const k = d3.min([contentsWidth/chartWidth, contentsHeight/chartHeight]);
-    //Must remove impact of zoom on margin. This is needed because we want teh chart to have a margin, 
-    //but when user zooms manually, we want it to disappear, which is more immersive (ie no artificial border)
-    //therefore zoom is on the margin aswell, so we must discount it so it isnt enlarged
+    //Remove impact of zoom on margin to keep it constant
     const marginLeftAdjustment = margin.left - k * margin.left;
     const marginTopAdjustment = margin.top - k * margin.top
 
     //zoom into selected chart
-    const xPos = dataIsArranged ? chartD.x : chartD.gridX;
-    const yPos = dataIsArranged ? chartD.y : chartD.gridY;
+    const xPos = dataIsArranged ? selectedChartD.x : selectedChartD.gridX;
+    const yPos = dataIsArranged ? selectedChartD.y : selectedChartD.gridY;
     const x = -(xPos * k) + (contentsWidth - (k * chartWidth))/2 + marginLeftAdjustment;
     const y = -(yPos * k) + (contentsHeight - (k * chartHeight))/2 + marginTopAdjustment;
 

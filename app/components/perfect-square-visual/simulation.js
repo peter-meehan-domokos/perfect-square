@@ -7,9 +7,16 @@ const EXTRA_BOTTOM_MARGIN_FACTOR_FOR_FORCE = 0.25
 const CENTRE_FORCE_STRENGTH = 1.8;
 
 /**
- * This component renders....
+ * @description Calculates and applies forces to the simulation for the required arrangeBy settings 
  *
- * @param {string} name .....
+ * @param {D3ForceSimulation} sim the d3 force simulation object
+ * @param {Number} contentsWidth the width of the container, minus the margins (d3 margin convention)
+ * @param {Number} contentsHeight the height of the container, minus the margins (d3 margin convention)
+ * @param {Number} chartWidth the width of each individual chart
+ * @param {Number} chartHeight the height of each individual chart
+ * @param {object} arrangeBy contains the arrangement settings, with x, y and colour values potentially
+ * @param {Number} nrDatapoints the number of datapoints/charts to display
+ * @param {object} dataInfo meta information about all the datapoints eg mean, deviation
  * 
  */
 export function setupSimulation(sim, contentsWidth, contentsHeight, chartWidth, chartHeight, arrangeBy, nrDatapoints, dataInfo){

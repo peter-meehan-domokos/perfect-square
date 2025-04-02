@@ -1,12 +1,19 @@
 import * as d3 from 'd3';
-import { remove, fadeIn } from '../../helpers/domHelpers';
-import { COLOURS } from "../../constants";
+import { remove } from '../../helpers/domHelpers';
 import textWrapComponent from './textWrap';
-
-const { BLUE, LIGHT_BLUE, GREY } = COLOURS;
 
 const TOOLTIP_OPACITY = 0.85;
 
+/**
+ * @description Renders a tooltip within each element in the selection it receives. Utilising the d3 component pattern, 
+ * it creates an inner function, called "component", which renders and updates each tooltip. 
+ * This function is returned upon initialisation, so it can be called to render/update the tooltips.
+ * This design sets up an outer scope which contains settings, aswell as callbacks, that can be get/set via helper functions 
+ * that are attached to the (returned) inner function, forming an api.
+ * 
+ * @returns {function} the function which will render/update the tooltips whenever it is called, 
+ * and which has settings and callbacks attached to it
+ */
 export default function tooltip() {
     // settings that apply to all quadrantsBartcomponents, in case there is more than 1 eg a row of players
     let margin = { left:10, right:10, top: 10, bottom:10 };
@@ -76,14 +83,11 @@ export default function tooltip() {
 
         selection.each(function (data,i) {
             const componentEnter = d3.select(this).selectAll("*").empty();
-            if(componentEnter){ init(this, data); }
+            if(componentEnter){ init(this); }
             update(this, data, componentEnter);
         })
 
-        function init(containerElement, data, settings={}){
-            const width = _width ? _width(data) : fixedWidth;
-            const height = _height ? _height(data) : fixedHeight;
-
+        function init(containerElement){
             //'this' is the container
             const container = d3.select(containerElement);
             //bg
