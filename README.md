@@ -90,19 +90,20 @@ It handles callbacks such as for event handling, by updating its state, which th
 The perfectSquareComponent utilises the D3 component design pattern - it returns an inner function which can then be used to render and update each chart it receives as part of a selection of charts. It uses this inner function approach rather than classes, because this is more consistent with the implementation of D3 itself, allowing for seamless integration of these functions within standard D3 chaining.
 
 #### Settings and callbacks handled at visual-level or chart-level
-Also as per teh D£ component pattern, there are settings variables and callback functions that are applied and stored within the scope of some of the d3 components (eg tootlitpComponent, perfectSquareComponent), and can be accessed (get) when called with no argument, or modified (set) when passed an argument. The setter in some cases can be a function or a fixed amount. If it is a function, it is applied individually to each chart/datapoint, allowing datapoint level variations. This is the same as how d3 functions such as d3.force work.
+Also as per the D3 component pattern, there are settings variables and callback functions that are applied and stored within the scope of some of the d3 components, and can be accessed (get) when called with no argument, or modified (set) when passed an argument. The setter in some cases can be a function or a fixed amount. If it is a function, it is applied individually to each chart/datapoint, allowing datapoint level variations. This is the same as how d3 functions such as d3.force work. For an example, see .width, .height and .styles in [tooltipComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/d3HelperComponents/tooltipComponent.js)
 
-#### Todo
+#### A couple of todos
 
-State management is currently not handled outside of the peresentation components, for example in a redux store or context. This separation needs to be implemented.
+State management is currently not handled outside of the presentation components, for example in a redux store or context. This separation needs to be implemented.
 
 The d3 [force simulation](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/simulation.js) and [zoom](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/zoom.js) components can be converted into hooks, rather than standard functions, to allow clearer separation and reusability.
 
-### Display Optimsations
+
+### Spatial Optimsations
 
 The number of rows and columns is dynamically optimised, see [calcNrColsAndRows](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/helpers.js), according to two factors: (a) the number of charts, and (b) the aspect ratio of the display. 
 
-### Performance Optimisation
+### Performance Optimisations
    
 #### 1. Virtualised Rendering
 
@@ -114,11 +115,11 @@ We take advantage of what visual science tells us about the level of detail that
 
 #### 3. D3 Enter-Update-Exit Pattern
 
-We make use od D3s in-built optimsation capabilities throughout all functions that render elements. This ensures elements are reused where possible, or discarded when not used. It also avoids the need for complex logic to handle dom updates, leaving it to D3s in-built methods.
+We make use of D3s in-built optimsation capabilities throughout all functions that render elements. This ensures elements are reused where possible, or discarded when not used. It also avoids the need for complex logic to handle dom updates, leaving it to D3s in-built methods.
 
 #### 4. React optimisations
 
-The component life-cycle is untilised at various points to avoid unneccessary pdpates. There is scope to improve this further, as the data is currently being updated by calling the entire layout function on updates that only require one change, such as the gridX and gridY positions. This is a candidate for memoisation, and more targeted object put into the useEffect dependencies array.
+The component life-cycle is untilised at various points to avoid unneccessary udpates. There is scope to improve this further, as the data is currently being updated by calling the entire layout function on updates that only require one change, such as the gridX and gridY positions. This is a candidate for memoisation, and more targeted object put into the useEffect dependencies array.
 
 More use of hooks for functionality such as the simulation and the zoom will yield more clarity and reduce the number of unnecessary updates too.
 
