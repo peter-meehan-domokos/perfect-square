@@ -4,97 +4,138 @@
 
 ## Overview
 
-A novel 2D view multivariate data, or n-dimensional vectors. Yu can easily compare and group thousands of datapoints according to each point's individual shape. Especially good at showing comparison against an ideal state. Also good for visualising clustering and similarity ML algorithms.
+A novel 2D view of multivariate data, or n-dimensional vectors, that places particular focus on the shape of each datapoint. You can easily compare and group thousands of datapoints. Especially good at showing comparison against an ideal state. Also for visualising clustering and similarity ML algorithms, and for product quantization in a vector database search.
 
-For example, an injured sports star who is aiming to get back to their pre-injury levels (the ideal state).
-Or a recruitment algorithm which aims to find the person who most fits the required profile. Or an AI language model which aims to find a match for a word (token) based on similarity.
+## Examples
+ - An injured sports star who is aiming to get back to their pre-injury levels (the ideal state).
+ - Visualising a recruitment algorithm which aims to find the person who most fits the required profile.
+ - An AI language model which aims to find a match for a word (token) based on similarity.
 
 In these cases, the dataset is normalised by giving a value for each measure as a proporiton of the ideal value for that measure (eg a percentage of the target achieved).
  
 ## Key features
 
-### Ordering of measures
+### Ordering of values
 
-The highest bars, representing the best values, are always towards the centre of the overall square. This make it easier to see the shape of the overall progress, at the expense of the ability to track progress for a particular bar. User will soon be able to remove auto-ordering when they want to track several specific bars more than the overall progress.
-
-In our sports rehabilitation example, whereas an executive (or manager) may want to just know the overall shape for all injured players, a coach or physio would be more interested in the specific bars.
+The highest bars, representing the best values of the measures or dimensions, are always towards the centre of the overall square. This makes it easier to see the shape of the overall progress, whilst clicking a bar (coming soon) will still allow tracking of individual measures/dimensions.
 
 ### Categories
 
-It is particularly useful when each vector needs to be grouped into categories/subvectors (see rehab example below). 
-It can therefore also visualise the product quantization process in a vector database search.
+There are 4 quadrants to each chart, allowing measures/dimensions to be grouped and summarised as categories, if desired (eg product quantisation to speed up queries, whilst retaining some information which could be delivered in a later request). Up to 4 categories are currently possible.
+
+### Arranging the data
+
+The default arrangement is a grid, with rows and columns optimised based on view dimensions.
+
+User can choose to arrange the data by position (x,y) and colour, based on different factors. This applies a d3 force to position each datapoint.
+
+They will soon also be able to group it according to an ML-driven clustering of datapoints based on similarity (back-end logic not released yet)
+
+### Semantic zooming
+
+The user can select a datapoint to zoom in to it, or manually zoom in and pan to a location.
+As they zoom in, the user sees more detailed versions of the datapoint.
+
+Levels Of Detail
+| 	Level	 | 	Approx number of datapoints | 	Description	of each datapoint | 
+| 	:-----:	 | 	:-----:	 | 	:-----:	 | 
+| 	0	| 	1000s	| 	A single rectangle, with area proportional to the overall mean value of all measures or dimensions	 | 
+| 	1	| 	1000	| 	A single path which outlines the shape that all of the measures or dimensions make	 | 
+| 	2	| 	60	| 	One path per quadrant, allowing the shape of each category to be easily identified	 | 
+| 	3	| 	30	| 	One bar per measure or dimension of the datapoint	 | 
+
+note: level 0 not released yet
 
 ### Drilling down
 
-User can select a quadrant, and it will enlarge. It is not yet possible to see info on bars or to drill down into bars.
-
-### Zooming and panning
-
-In large datasets, like example 2, it is helpful for the user to zoom in (spreading fingers) and pan the data. (This will become more useful once drilling down is available).
-
-### Grid display optimisation
-
-Its very important in dataviz that space is used effectively. In this implementation, the number of rows and columns will always be optimised according to two factors: (a) the number of charts, and (b) the aspect ratio of the display. 
+User can click a particular bar (which represents a measure or a dimension) to highlight that bar in all datapoints, and to see a secondary visual for it, such as a time series or histogram. Not released yet. 
 
 ## Technical implementation and requirements
 
-### Development Stack 
+### Development Stack and set-up
 
-This is React plus D3 project, developed on a chrome browser, and is responsive to all display sizes. However, it hasn't been tested on other browsers or mobile devices. 
+This is a client app built with Next.js, React and D3. 
 
-not optimised for mobile/tablet or non-chrome browsers yet, although can be viewed on it.
+It uses GraphQL to communicate with a server to retrieve data. GraphQL is a good candidate is it provides a clean way to avoid over-fetching of data, which will be an issue when a larger number of datapoints are involved.
 
 The server is deployed to heroku. [Here is the server's github](https://github.com/peter-meehan-domokos/data-server)
 
-### Architecture
+It was developed on a chrome browser, and is responsive to all display sizes and devices, including touch. However, it hasn't been tested on other browsers or on mobile devices, so may be unstable if not using chrome on a laptop or PC.
 
-The data (currently mock) runs through two preparation functions. The first prepares the data to be applied to generic visualisations. The second is a [D3 layout function](https://github.com/petedomokos/The_Quadrants_Bar_Chart/blob/master/src/quadrantsBarChart/quadrantsBarChartLayout.js) to prepare it for the D3 quadrantsBarChartComponent.
+### Architecture of the Visual
 
-D3 runs on an svg element that is rendered within a [React component](https://github.com/petedomokos/The_Quadrants_Bar_Chart/blob/master/src/quadrantsBarChart/QuadrantsBarChart.js).
+#### Overview
+Each datapoint becomes a chart inside the visual. It is rendered as follows. (React components start with capitals, d3 components in camelCase.)
 
-The [D3 component (quadrantsBarChartComponent)](https://github.com/petedomokos/The_Quadrants_Bar_Chart/blob/master/src/quadrantsBarChart/quadrantsBarChartComponent.js) uses inner functions rather than classes, because this is more consistent with the implementation of D3 itself, allowing
-for seamless integration of these functions within standard D3 chaining.
+1. [Visual](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/visual/page.js) gets the data via a [useFetch](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/api/fetch-hooks.js) hook, and calls the PerfectSquareVisual.
+2. [PerfectSquareVisual](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/page.js) applies the [layout function](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/perfectSquareLayout.js) to the data to prepare it for the perfectSquareComponent, and calls renderCharts.
+3. [renderCharts](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/d3RenderFunctions.js) renders one g element per datapoint, inside the container, then calls perfectSquareComponent on this selection of gs.
+4. [perfectSquareComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/perfectSquareComponent.js) receives a selection of gs, and renders/updates a chart on each one.
+5. [subComponents](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/subComponents.js) renders/updates a part of each chart, returning the selection to allow chaining.
 
-There is currently no React redux, context, or hooks used for state management and common tasks (eg container resize), these changes are coming soon. 
+#### The main React component [PerfectSquareVisual](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/page.js) 
 
+It runs the data through a [D3 layout function](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/perfectSquareLayout.js) to prepare it for the D3 perfectSquareComponent.
+
+It calls renderCharts inside a useEffect, which uses the D3 enter-update-exit pattern to call the [perfectSquareComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/perfectSquareComponent.js), passing it the selection of all charts.
+
+It handles callbacks such as for event handling, by updating its state, which then triggers the necessary dom updates via specific useEffects or via its own returned JSX. For example, the user selects a chart at the d3/dom level, this is passed to the React component which sets this in state, and this in turn triggers a useEffect which updates the dom via the d3 component, and also makes any other required updates, such as to the controls.
+
+#### The main D3 component: [perfectSquareComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/perfectSquareComponent.js)
+The D3 perfectSquareComponent utilises the standard D3 design pattern - it returns an inner function which can then be used to render and update each chart it receives as part of a selection of charts. It uses this inner function approach rather than classes, because this is more consistent with the implementation of D3 itself, allowing for seamless integration of these functions within standard D3 chaining.
+
+Settings and callbacks handled at visual-level or chart-level
+Also as per D3 standard, there are settings variables and callback functions that are applied and stored within the scope of the component, and can be accessed (get) when called with no argument, or modified (set) when passed an argument. The setter in some cases can be a function or a fixed amount. If it is a function, it is applied individually to each chart/datapoint, allowing datapoint level variations. This is the same as how d3 functions such as d3.force work.
+
+#### Todo
+
+State management is currently not handled outside of the peresentation components, for example in a redux store or context. This separation needs to be implemented.
+
+The d3 [force simulation](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/simulation.js) and [zoom](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/zoom.js) components can be converted into hooks, rather than standard functions, to allow clearer separation and reusability.
+
+### Display Optimsations
+
+The number of rows and columns is dynamically optimised, see [calcNrColsAndRows](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/helpers.js), according to two factors: (a) the number of charts, and (b) the aspect ratio of the display. 
 
 ### Performance Optimisation
+   
+#### 1. Virtualised Rendering
 
-#### List (Virtualised) Rendering
+Only the datapoints on screen are rendered and this is updated on every zoom event, see [isChartOnScreenCheckerFunc](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/helpers.js).
 
-#### Semantic zoom
+#### 2. Semantic Zoom
 
-#### D3 enter-update-exit
+We take advantage of what visual science tells us about the level of detail that the human eye can see at specifc distances and object sizes, and combine it with knowledge of the number of datapoints to display and the container size, to ensure that no unneccesarry elements are rendered. This means there can be thousands of datapoints on screen, or just a few, and in all cases, a similar number of dom elements will be rendered, keeping performance optimal throughout. See Levels Of Detail table further up.
 
-#### React optimisations
+#### 3. D3 Enter-Update-Exit Pattern
 
-#### Fetch Optimisations (not done yet)
+We make use od D3s in-built optimsation capabilities throughout all functions that render elements. This ensures elements are reused where possible, or discarded when not used. It also avoids the need for complex logic to handle dom updates, leaving it to D3s in-built methods.
 
-I will optimise the fetch for ds, by only loading
-the mean and std dev values for each datapoint when nr ds > 1000.
-Because we know that the levelOfDetail will start as 0 (ie the new 1) anyway
+#### 4. React optimisations
+
+The component life-cycle is untilised at various points to avoid unneccessary pdpates. There is scope to improve this further, as the data is currently being updated by calling the entire layout function on updates that only require one change, such as the gridX and gridY positions. This is a candidate for memoisation, and more targeted object put into the useEffect dependencies array.
+
+More use of hooks for functionality such as the simulation and the zoom will yield more clarity and reduce the number of unnecessary updates too.
+
+#### 5. Fetch Caching & Avoiding Over-Fetching
+
+The useFetch hook caches the data.
+
+A further option is to reduce the over-fetching when handling a much larger number of datapoints eg many thousands. At this level of detail, we only require the mean value and standard deviation for each datapoint. We can use a secondary request to get the rest of the data, in anticipation that the user will zoom in or select a datapoint. GraphQL is a good choice for this reason.
 
 ## Responsiveness
 
-Not fully testes on devices, not touch, sizes are ok, but non-chrome browsers not
-
-## Some Known Issues
-
- - zoom ctrls zoom from 0,0 not centre...(note: if we go from centre, then need to adjust the isChartOnScreenChecker function)
- - BUG - zooming out with - can override translate extent, so need to put in a check for these bounds,
- - if user selects a chart whilst force is running, need to cut smoothly to the end position of the simulation before zooming in
-
+The grid and the content is already optimised for the container size and number of datapoints to display (see earlier).
+In additon, the description is hidden in smaller container sizes, with a button to slide it in. Another option is to hide the controls in a similar way.
 
 ## More functionality coming soon
 
    - A similarity score based on machine learning clustering of similar datapoints, visualised through the force-directed network.
    
-   - Hover or tap the bars for an info popup/tooltip
+   - Drilling down into bars (ie measures or dimensions)
 
    - Run an animation to see progress unfold alongside other info or videos (eg as part of a larger dashboard)
 
-   - Remove auto-ordering of bars to make tracking particular bars easier ( but tracking the overall shape becomes harder)
-     
    - Colour variations for each bar in each quadrant to aid individual tracking without having to lose the auto-ordering
 
 
