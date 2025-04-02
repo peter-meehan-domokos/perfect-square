@@ -24,6 +24,12 @@ const FormControlLabelStyle = {
   '& .MuiFormControlLabel-label': { fontSize: "9px" }
 }
 
+/**
+ * @description This component renders....
+ *
+ * @param {string} name .....
+ * @returns {ReactNode} A React element that renders....
+ */
 const SettingsCtrls = ({ settings=DEFAULT_SETTINGS, setSettings, setTooltipsData }) => {
   const mouseOverRef = useRef("");
   const handleSettingsChange = (checkboxKey, checkboxValue) => {

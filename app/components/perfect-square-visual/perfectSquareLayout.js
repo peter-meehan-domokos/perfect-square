@@ -8,9 +8,15 @@ const calcColNr = (i, nrCols) => i % nrCols;
 const calcX = (colNr, chartWidth) => colNr * chartWidth;
 const calcY = (rowNr, chartHeight) => rowNr * chartHeight;
 
-/*
-    @todo rewrite as a proper d3 layout function instead of using settings as a parameter
-*/
+/**
+ * @description converts the data it receives into the format expected by the perfectSquareComponent (d3 layout pattern),
+ * for example adding grid positions of the datapoints, and percentage values for each measure
+ *
+ * @param {object} data an object containing an array of datapoints, the measures to be displayed, and various metadata
+ * @param {object} settings contains teh number of columns, and chart dimensions, needed to determine positions
+ * 
+ * @returns {object} the processed data object, in the format that the perfectSquareComponent can interpret
+ */
  function perfectSquareLayout(data, settings={}){
     const { measures, datapoints } = data;
     const { nrCols, chartWidth, chartHeight } = settings;

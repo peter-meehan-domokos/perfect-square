@@ -4,6 +4,12 @@ import { resetIcon } from "../../../assets/svgIcons";
 import { COLOURS } from "../../../constants";
 const { BLUE, GREY } = COLOURS;
 
+/**
+ * @description This component renders....
+ *
+ * @param {string} name .....
+ * @returns {ReactNode} A React element that renders....
+ */
 const ZoomCtrls = ({ zoomTransform={}, /*onClickZoom,*/ resetZoom }) => { 
   const { x, y, k } = zoomTransform;
   const isZoomedOrPanned = x || y || k > 1;

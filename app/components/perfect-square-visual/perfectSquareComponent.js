@@ -6,8 +6,19 @@ import { calcLevelOfDetailFromBase, getDisabledLevelsForZoom } from './helpers';
 import { COLOURS } from "../../constants";
 import { DEFAULT_SETTINGS } from './constants';
 
-const { BLUE, LIGHT_BLUE, GREY, DARK_GREY } = COLOURS;
+const { BLUE, GREY, DARK_GREY } = COLOURS;
 
+
+/**
+ * @description Renders a perfectSquare chart within each element in the selection it receives. Utilising the d3 component pattern, 
+ * it creates an inner function, called "chart", which renders and updates the visual. 
+ * This function is returned upon initialisation, so it can be called to render/update the charts.
+ * This design sets up an outer scope which contains settings, aswell as callbacks, that can be get/set via helper functions 
+ * that are attached to the (returned) inner function, forming an api. These settings apply to all charts equally.
+ * 
+ * @returns {function} the function which will render/update the chart whenever it is called, 
+ * and which has settings and callbacks attached to it
+ */
 export default function perfectSquare() {
     // settings that apply to all charts
     // Some settings need values as can be called before updateDimnsAndColourAccessors() function sets them
@@ -95,11 +106,13 @@ export default function perfectSquare() {
     let shouldShowChartOutline;
     let barsAreClickable;
  
+    //helpers to set the dimensions and colours
     function updateDimnsAndColourAccessors(selection){
         updateDimns(selection);
         updateColourAccessors();
     };
 
+    //sets the dimensions whenever a change occurs
     function updateDimns(selection){
         _scaleValue = value => value / zoomK;
 
@@ -139,8 +152,7 @@ export default function perfectSquare() {
         const maxGapBetweenQuadrants = gapBetweenQuadrants * 5;
         //note - the zoomed gap is the one displayed, but it doesnt affect any other calculations, so it can adjust with zoom
         //and not affect performance
-        //next - make this 0 when lost of charts on screen ir when width very small, and scale it up nicely
-        zoomedGapBetweenQuadrants = /*levelOfDetail === 1 ? 0 :*/ d3.min([maxGapBetweenQuadrants, gapBetweenQuadrants * zoomK ** 0.7]);
+        zoomedGapBetweenQuadrants = levelOfDetail === 1 ? 0 : d3.min([maxGapBetweenQuadrants, gapBetweenQuadrants * zoomK ** 0.7]);
 
         const extraHorizSpace = maxContentsWidth - contentsWidth;
         const extraVertSpace = maxContentsHeight - contentsHeight;
@@ -156,8 +168,6 @@ export default function perfectSquare() {
         //quadrant title is part of the quadrant, whereas chart title is not, so we subtract it
         quadrantHeight = (chartAreaHeight - gapBetweenQuadrants - zoomedGapBetweenQuadrants)/2;
         //Each bar area works out as a square because of the way dimns are done above
-        //barsAreaWidth = quadrantWidth;
-        //barsAreaHeight = quadrantHeight - quadrantTitleHeight;
         barsAreaHeight = quadrantHeight - quadrantTitleHeight;
 
         //bar widths for each quadrant
@@ -178,6 +188,7 @@ export default function perfectSquare() {
         styles.header.summary.fontSize = headerHeight * 0.15;
     }
 
+    //sets the colour of components whenever a change occurs
     function updateColourAccessors(){
         _chartColourWhenNotGreyedOut = d => {
             const summaryMeasureKey = arrangeBy.colour; //value, deviation or position
@@ -196,7 +207,7 @@ export default function perfectSquare() {
         _quadrantColour = (quadD, chartD) => {
             //Case 1. quadrant selected overrides other determinants
             if(quadD.i === selectedQuadrantIndex){ return _chartColourWhenNotGreyedOut(chartD); }
-            //quadrant isnt selcted, so depends on other issues
+            //quadrant isnt selected, so depends on other issues
             //Case 2. other quadrant selected greys it out
             const anotherQuadrantIsSelected = isNumber(selectedQuadrantIndex) && selectedQuadrantIndex !== quadDIndex;
             if(anotherQuadrantIsSelected){ return GREY; }
@@ -242,20 +253,29 @@ export default function perfectSquare() {
     let _headerTextColour;
     let _quadrantSummaryTextColour;
 
-    function chart(selection, options={}) {
-        //const levelChanged = levelOfDetail !== prevLevelOfDetail;
-        //if(levelChanged){ console.log("LEVEL CHANGED!!!!")}
+    /**
+     * @description an inner function that is returned to the user, and which will render/update the chart when it is called
+     *
+     * @param {D3SelectionObject} selection the d3 selection of chart gs, one per datapoint
+     * 
+     * @returns {D3SelectionObject} the original selection that is passed to it, to support chaining
+     */
+    function chart(selection) {
         nrCharts = selection.nodes().length;
         if(nrCharts === 0){ return; }
         updateDimnsAndColourAccessors(selection);
-        //console.log("UPDATE: nrCharts, LOD", nrCharts, /*levelOfDetail*/)
 
         selection
-            .filter(d => d.isOnScreen)
-            .call(init, options)
-            .call(update, options);
+            .filter(d => d.isOnScreen) //dont want unnecessary iterations of charts that arent actually displayed
+            .call(init)
+            .call(update);
 
-        function init(selection, options={}){
+        /**
+         * @description to each chart g in the selection, it appends some initial base elements
+         * @param {D3SelectionObject} selection  the d3 selection of chart gs, one per datapoint
+         * @returns {D3SelectionObject} the same selection is returned, as part of d3s call method, to support chaining
+         */
+        function init(selection){
             selection.each(function(){
                 const container = d3.select(this);
                 if(!container.selectAll("*").empty()){ return; }
@@ -285,8 +305,14 @@ export default function perfectSquare() {
             })
         }
 
-        //called for updates to data, core sizes, selectedQuadrantIndex
-        function update(options={}){
+         /**
+         * @description to each chart g in the selection, it adds some attributes, but also calls functions 
+         * which will enter, update and exit various inner components
+         * 
+         * @param {D3SelectionObject} selection  the d3 selection of chart gs, one per datapoint
+         * @returns {D3SelectionObject} the same selection is returned, as part of d3s call method, to support chaining
+         */
+        function update(selection){
             selection.each(function(chartData){
                 const container = d3.select(this);
                 //flags & values

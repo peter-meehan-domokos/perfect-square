@@ -3,6 +3,13 @@ import React, { useState, useEffect } from 'react';
 import Fade from '@mui/material/Fade';
 import { robotoFont, robotoBoldFont } from '@/app/assets/fonts';
 
+/**
+ * @description This component renders....
+ *
+ * @param {string} name .....
+ * @returns {ReactNode} A React element that renders....
+ * 
+ */
 const Overview = ({ title=[], desc=[], headerExtended=false, toggleHeaderExtended }) => {
     return (
         <Fade appear={true} in={true} timeout={{ enter: 1200, exit:400 }}>

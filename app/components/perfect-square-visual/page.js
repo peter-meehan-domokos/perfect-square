@@ -14,8 +14,24 @@ import { getElementDimns } from '@/app/helpers/domHelpers';
 import { setupSimulation } from './simulation';
 import { setupZoom } from './zoom';
 
+//initialise the main chart component for the charts in the visual (using d3 inner-function pattern)
+//@todo - move to state within the component (or context once its implemented)
 const perfectSquare = perfectSquareComponent();
 
+//@todo - move state into Redux or context
+/**
+ * @description  Prepares the data by passing it through the layout function, maintains the state of the visual 
+ * which is adjusted via event-driven callbacks (eg changes to zoom or to the simulation), and makes calls to the 
+ * main render function upon any state changes, passing it the container dom element, and new data if required.
+ *
+ * @param {object} data contains a ley, title etc, and the datapoints which will become charts, and metadata in an info property
+ * @param {object} initSelections contains three strings that represent any selections that should be applied to the initial render
+ * @param {object} initSettings contains any initial settings that should be applied to the visual before initial render
+ * @param {boolean} loading a flag to show if data is still loading
+ * 
+ * @returns {HTMLElement} A div that wraps VisualHeader component and an svg. The svg contains a g for the zoom 
+ * that is applied in a useEffect, and a g which contains the charts whcih are rendered in a useEffect.
+ */
 const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections={}, initSettings=DEFAULT_SETTINGS, loading=true }) => {
   const { initSelectedChartKey="", initSelectedMeasureKey="", initSelectedQuadrantIndex=null } = initSelections;
   //state
@@ -64,6 +80,12 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
   const loadingData = loading ? [LOADING_TOOLTIP] : [];
 
   //helper to set sizes
+  /**
+ * Outputs the event that happened
+ *
+ * @param {MyEvent} e - The observable event.
+ * @listens ResizeEvent - The visual container dimensions change, eg when the user adjusts the window, or presses the 'show description' button (on smaller screens)
+ */
   const setSizesAndTriggerDataRendering = useCallback((data) => {
     const setSizesAndGrid = () => {
       if(!containerDivRef.current){ return; }

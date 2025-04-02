@@ -14,6 +14,12 @@ const GET_EXAMPLES = `
     }
   }
 `
+
+/**
+ * @description Renders either the Intro, or the Header and Visual, depending on the introIsDisplayed flag state
+ *
+ * @returns {HTMLElement} A div containing either the Intro component, or the Header and Visual Components
+ */
 const Home = ({ }) => {
     const { data } = useFetch(GET_EXAMPLES);
     const [introIsDisplayed, setIntroIsDisplayed] = useState(true);

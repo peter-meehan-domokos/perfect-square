@@ -3,6 +3,15 @@ import { remove, fadeIn } from '../../helpers/domHelpers';
 import { CHART_IN_TRANSITION, CHART_OUT_TRANSITION } from '@/app/constants';
 import tooltipComponent from "../d3HelperComponents/tooltipComponent";
 
+/**
+ * @description  
+ *
+ * @param {object} data 
+ * @param {object} settings 
+ * 
+ * @modifies 
+ * @returns {object} 
+ */
 export function renderCharts(datapoints, perfectSquare, dataIsArranged, options={}){
     const { updateTransformTransition } = options;
     const chartG = d3.select(this).selectAll("g.chart").data(datapoints, d => d.key);
@@ -33,9 +42,18 @@ export function renderCharts(datapoints, perfectSquare, dataIsArranged, options=
     chartG.exit().call(remove, { transition:CHART_OUT_TRANSITION })
 }
 
+//initialise the tooltipComponent so it can be called in the renderToolitps function.
 const tooltip = tooltipComponent();
+/**
+ * @description  two types of tooltip entry
+ *
+ * @param {object} data 
+ * @param {object} settings 
+ * 
+ * @modifies 
+ * @returns {object} 
+ */
 
-//handles two types of tooltip
 export function renderTooltips(data, width, height){
     if(!width){ return; }
 

@@ -1,12 +1,18 @@
 import * as d3 from 'd3';
 import { remove, fadeIn } from '../../helpers/domHelpers';
-import { chartPathD, quadrantPathD, quadrantsContainerTransform, quadrantTransform } from './d3DomHelpers';
-import { isNumber } from '../../helpers/dataHelpers';
-import { COLOURS } from '@/app/constants';
+import { chartPathD, quadrantPathD, quadrantTransform } from './d3DomHelpers';
 import { FADE_IN_DURATION } from '@/app/constants';
 
-const { GREY } = COLOURS;
-
+/**
+ * @description  
+ *
+ * @param {object} selection 
+ * @param {object} width 
+ * @param {object} height 
+ * @param {object} settings
+ * 
+ * @returns {object} 
+ */
 export function header(selection, width, height, settings={}){
     const { summaryComponent, onClick=() => {}, styles, _scaleValue, _textColour, _quadrantSummaryTextColour=() => "none",
         shouldShowHeader, shouldShowSubtitle, shouldShowQuadrantsSummary } = settings;
@@ -88,11 +94,18 @@ export function header(selection, width, height, settings={}){
             headerG.exit().call(remove);           
         
     })
-
-    
-
 }
 
+/**
+ * @description  
+ *
+ * @param {object} selection  
+ * @param {object} width 
+ * @param {object} height
+ * @param {object} settings
+ *
+ * @returns {object} 
+ */
 export function quadrantsSummary(selection, width, height, settings={}){
     const { _scaleValue, styles={}, _textColour=() => "black" } = settings;
     selection.each(function(data){
@@ -167,6 +180,14 @@ export function quadrantsSummary(selection, width, height, settings={}){
     })                
 }
 
+/**
+ * @description  
+ *
+ * @param {object} selection 
+ * @param {object} settings 
+ * 
+ * @returns {object} 
+ */
 export function quadrants(selection, quadrantWidth, quadrantHeight, quadrantTitleHeight, settings={}){
     const { styles, _scaleValue, _colour=() => "none", getBarsAreaStrokeWidth=() => 1,
         selectedQuadrantIndex, shouldShowSelectedQuadrantTitle,
@@ -259,6 +280,14 @@ export function quadrants(selection, quadrantWidth, quadrantHeight, quadrantTitl
     })
 }
 
+/**
+ * @description  
+ *
+ * @param {object} selection 
+ * @param {object} settings 
+ * 
+ * @returns {object} 
+ */
 function bars(selection, barsAreaHeight, barWidth, gapBetweenBars, settings={}){
     const { styles, shouldShowBars, barsDirection="up", colour, onClick=() => {} } = settings;
     selection.each(function(data){
@@ -304,6 +333,14 @@ function bars(selection, barsAreaHeight, barWidth, gapBetweenBars, settings={}){
     })
 }
 
+/**
+ * @description  
+ *
+ * @param {object} selection 
+ * @param {object} settings 
+ * 
+ * @returns {object} 
+ */
 export function quadrantOutlinePath(selection, barsAreaHeight, barWidth, gapBetweenBars, settings={}){
     const { styles, shouldShowQuadrantPaths, colour } = settings;
     selection.each(function(quadD){
@@ -332,6 +369,14 @@ export function quadrantOutlinePath(selection, barsAreaHeight, barWidth, gapBetw
 
 }
 
+/**
+ * @description  
+ *
+ * @param {object} selection 
+ * @param {object} settings 
+ * 
+ * @returns {object} 
+ */
 export function chartOutlinePath(selection, quadrantBarWidths, barsAreaHeight, gapBetweenBars, settings={}){
     const { colour, onClick=() => {}, shouldShowChartOutline } = settings;
 

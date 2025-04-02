@@ -6,6 +6,12 @@ const EXTRA_TOP_MARGIN_FACTOR_FOR_FORCE = 0.25
 const EXTRA_BOTTOM_MARGIN_FACTOR_FOR_FORCE = 0.25
 const CENTRE_FORCE_STRENGTH = 1.8;
 
+/**
+ * This component renders....
+ *
+ * @param {string} name .....
+ * 
+ */
 export function setupSimulation(sim, contentsWidth, contentsHeight, chartWidth, chartHeight, arrangeBy, nrDatapoints, dataInfo){
     const { mean, deviation } = dataInfo;
     const extraHorizMarginForForce = contentsWidth * EXTRA_HORIZ_MARGIN_FACTOR_FOR_FORCE;
