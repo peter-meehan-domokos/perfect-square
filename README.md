@@ -89,8 +89,8 @@ It handles callbacks such as for event handling, by updating its state, which th
 #### The main D3 component: [perfectSquareComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/perfectSquareComponent.js)
 The perfectSquareComponent utilises the D3 component design pattern - it returns an inner function which can then be used to render and update each chart it receives as part of a selection of charts. It uses this inner function approach rather than classes, because this is more consistent with the implementation of D3 itself, allowing for seamless integration of these functions within standard D3 chaining.
 
-Settings and callbacks handled at visual-level or chart-level
-Also as per D3 standard, there are settings variables and callback functions that are applied and stored within the scope of the component, and can be accessed (get) when called with no argument, or modified (set) when passed an argument. The setter in some cases can be a function or a fixed amount. If it is a function, it is applied individually to each chart/datapoint, allowing datapoint level variations. This is the same as how d3 functions such as d3.force work.
+#### Settings and callbacks handled at visual-level or chart-level
+Also as per teh D£ component pattern, there are settings variables and callback functions that are applied and stored within the scope of some of the d3 components (eg tootlitpComponent, perfectSquareComponent), and can be accessed (get) when called with no argument, or modified (set) when passed an argument. The setter in some cases can be a function or a fixed amount. If it is a function, it is applied individually to each chart/datapoint, allowing datapoint level variations. This is the same as how d3 functions such as d3.force work.
 
 #### Todo
 
