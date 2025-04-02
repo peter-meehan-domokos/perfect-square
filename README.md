@@ -70,7 +70,7 @@ These are all being worked on for release very soon.
 ### Architecture of the Visual
 
 #### Overview
-Each datapoint becomes a chart inside the visual. It is rendered as follows. (React components start with capitals, d3 components in camelCase.)
+Each datapoint becomes an instance of a chart inside the overall visual. It is rendered as follows. (React components start with capitals, d3 components in camelCase.)
 
 1. [Visual](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/visual/page.js) gets the data via a [useFetch](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/api/fetch-hooks.js) hook, and calls the PerfectSquareVisual.
 2. [PerfectSquareVisual](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/page.js) applies the [layout function](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/perfectSquareLayout.js) to the data to prepare it for the perfectSquareComponent, and calls renderCharts.
