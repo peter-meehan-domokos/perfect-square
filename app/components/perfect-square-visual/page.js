@@ -14,13 +14,15 @@ import { getElementDimns } from '@/app/helpers/domHelpers';
 import { setupSimulation } from './simulation';
 import { setupZoom } from './zoom';
 
-//@todo - move state into Redux or context
+//@todo - move state into Redux or useContext
+//@todo - turn simulation and zoom into complete hooks instead of helper functions
+
 /**
- * @description  Prepares the data by passing it through the layout function, maintains the state of the visual 
+ * @description  Prepares the data by passing it through the layout function, maintains the state of the visual
  * which is adjusted via event-driven callbacks (eg changes to zoom or to the simulation), and makes calls to the 
  * main render function upon any state changes, passing it the container dom element, and new data if required.
  *
- * @param {object} data contains a ley, title etc, and the datapoints which will become charts, and metadata in an info property
+ * @param {object} data contains the datapoints which will become charts, the measures to be displayed, and some metadata
  * @param {object} initSelections contains three strings that represent any selections that should be applied to the initial render
  * @param {object} initSettings contains any initial settings that should be applied to the visual before initial render
  * @param {boolean} loading a flag to show if data is still loading
