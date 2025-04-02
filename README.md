@@ -62,6 +62,9 @@ The server is deployed to heroku. [Here is the server's github](https://github.c
 
 It was developed on a chrome browser, and is responsive to all display sizes and devices, including touch. However, it hasn't been tested on other browsers or on mobile devices, so may be unstable if not using chrome on a laptop or PC.
 
+In general, the application is still in development, has some minor bugs, has not been through testing, and some functions are not yet documented.
+These are all being worked on for release very soon.
+
 ### Architecture of the Visual
 
 #### Overview
