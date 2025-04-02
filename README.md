@@ -19,9 +19,11 @@ In these cases, the dataset is normalised by giving a value for each measure as 
 
 The highest bars, representing the best values of the measures or dimensions, are always towards the centre of the overall square. This makes it easier to see the shape of the overall progress, whilst clicking a bar (coming soon) will still allow tracking of individual measures/dimensions.
 
-### Categories
+### Category selection
 
 There are 4 quadrants to each chart, allowing measures/dimensions to be grouped and summarised as categories, if desired (eg product quantisation to speed up queries, whilst retaining some information which could be delivered in a later request). Up to 4 categories are currently possible.
+
+The user can click a category in the controls panel to highlight and enlarge a particular category. This allows many more datapoints to be glanced at and compared at once dure to the increase in what is known in dataviz as the 'data-to-ink' ratio.
 
 ### Arranging the data
 
