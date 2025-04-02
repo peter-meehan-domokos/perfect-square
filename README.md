@@ -58,7 +58,7 @@ User can click a particular bar (which represents a measure or a dimension) to h
 
 This is a client app built with Next.js, React and D3. 
 
-It uses GraphQL to communicate with a server to retrieve data. GraphQL is a good candidate is it provides a clean way to avoid over-fetching of data, which will be an issue when a larger number of datapoints are involved.
+It uses GraphQL to communicate with a server to retrieve data. GraphQL is a good choice as it provides a clean way to avoid over-fetching of data, which will be an issue when a larger number of datapoints are involved.
 
 The server is deployed to heroku. [Here is the server's github](https://github.com/peter-meehan-domokos/data-server)
 
