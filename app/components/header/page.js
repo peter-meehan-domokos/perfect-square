@@ -1,3 +1,4 @@
+'use client'
 import { robotoFont, robotoBoldFont } from '@/app/assets/fonts';
 
 /**
