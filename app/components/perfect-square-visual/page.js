@@ -1,7 +1,7 @@
 /* eslint react-hooks/exhaustive-deps: 0 */
 
 'use client'
-import React, { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import * as d3 from 'd3';
 import VisualHeader from './visual-header/page';
 import perfectSquareLayout from './perfectSquareLayout';
@@ -13,10 +13,6 @@ import { isArranged, calcNrColsAndRows, calcChartSizesAndGridLayout, applyMargin
 import { getElementDimns } from '@/app/helpers/domHelpers';
 import { setupSimulation } from './simulation';
 import { setupZoom } from './zoom';
-
-//initialise the main chart component for the charts in the visual (using d3 inner-function pattern)
-//@todo - move to state within the component (or context once its implemented)
-const perfectSquare = perfectSquareComponent();
 
 //@todo - move state into Redux or context
 /**
@@ -34,6 +30,8 @@ const perfectSquare = perfectSquareComponent();
  */
 const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections={}, initSettings=DEFAULT_SETTINGS, loading=true }) => {
   const { initSelectedChartKey="", initSelectedMeasureKey="", initSelectedQuadrantIndex=null } = initSelections;
+  //set up the main vis component
+  const perfectSquare = useMemo(() => perfectSquareComponent(), []);
   //state
   const [headerExtended, setHeaderExtended] = useState(false);
   const [containerSizesAndGrid, setContainerSizesAndGrid] = useState({});
