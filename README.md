@@ -110,7 +110,7 @@ The d3 [force simulation](https://github.com/peter-meehan-domokos/perfect-square
 
 The number of rows and columns is dynamically optimised, see [calcNrColsAndRows](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/helpers.js), according to two factors: (a) the number of charts, and (b) the aspect ratio of the display. 
 
-Also see semantic zoom(below).
+Also see semantic zoom (below).
 
 The description in the VisualHeader is hidden in smaller container sizes, with a button to slide it in. Another option is to hide the controls in a similar way.
 
