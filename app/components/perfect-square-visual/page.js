@@ -6,6 +6,7 @@ import * as d3 from 'd3';
 import VisualHeader from './visual-header/page';
 import perfectSquareLayout from './perfectSquareLayout';
 import perfectSquareComponent from "./perfectSquareComponent";
+import tooltipComponent from "../d3HelperComponents/tooltipComponent";
 import { renderCharts, renderTooltips } from './d3RenderFunctions';
 import { DEFAULT_SETTINGS, SELECT_MEASURE_TOOLTIP, LOADING_TOOLTIP, CONTAINER_MARGIN, CALC_CHART_MARGIN } from "./constants.js";
 import { CHART_OUT_DURATION, ZOOM_AND_ARRANGE_TRANSITION_DURATION } from '@/app/constants';
@@ -32,8 +33,11 @@ import { setupZoom } from './zoom';
  */
 const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections={}, initSettings=DEFAULT_SETTINGS, loading=true }) => {
   const { initSelectedChartKey="", initSelectedMeasureKey="", initSelectedQuadrantIndex=null } = initSelections;
-  //set up the main vis component
+
+  //set up the vis components
   const perfectSquare = useMemo(() => perfectSquareComponent(), []);
+  const tooltip = useMemo(() => tooltipComponent(), []);
+
   //state
   const [headerExtended, setHeaderExtended] = useState(false);
   const [containerSizesAndGrid, setContainerSizesAndGrid] = useState({});
@@ -233,7 +237,7 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
       ...chartsViewboxTooltipsData,
       ...loadingData
     ];
-    renderTooltips.call(containerDivRef.current, tooltipsData, width, height);
+    renderTooltips.call(containerDivRef.current, tooltipsData, tooltip, width, height);
   }, [width, headerTooltipsData, chartsViewboxTooltipsData, loadingData])
 
   //Selected chart change

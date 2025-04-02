@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 import { sortAscending, sortDescending } from '../../helpers/ArrayHelpers';
 import { percentageScoreConverter } from '../../helpers/dataHelpers';
 
+//helper functions for calculating grid positions
 //note i starts at 0, as does rowNr and colNr
 const calcRowNr = (i, nrCols) => Math.floor(i / nrCols);
 const calcColNr = (i, nrCols) => i % nrCols;

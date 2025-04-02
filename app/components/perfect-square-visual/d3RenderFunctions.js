@@ -1,16 +1,15 @@
 import * as d3 from 'd3';
 import { remove, fadeIn } from '../../helpers/domHelpers';
 import { CHART_IN_TRANSITION, CHART_OUT_TRANSITION } from '@/app/constants';
-import tooltipComponent from "../d3HelperComponents/tooltipComponent";
 
 /**
- * @description  
+ * @description Runs the datapoints through a D3 enter-update-exit pattern to render the charts, and filters out those not on screen
  *
- * @param {object} data 
- * @param {object} settings 
+ * @param {Array} datapoints the datapoints that require to be displayed with a chart
+ * @param {function} perfectSquare the main component that will render a chart in each container g it receives
+ * @param {boolean} dataIsArranged a flag to show whether or not the force is applied, in which case the transform 
+ * to position each chart is applied by the force rather than here 
  * 
- * @modifies 
- * @returns {object} 
  */
 export function renderCharts(datapoints, perfectSquare, dataIsArranged, options={}){
     const { updateTransformTransition } = options;
@@ -42,19 +41,19 @@ export function renderCharts(datapoints, perfectSquare, dataIsArranged, options=
     chartG.exit().call(remove, { transition:CHART_OUT_TRANSITION })
 }
 
-//initialise the tooltipComponent so it can be called in the renderToolitps function.
-const tooltip = tooltipComponent();
 /**
- * @description  two types of tooltip entry
+ * @description Runs the tooltip data through a D3 enter-update-exit pattern to render the tooltip components
  *
  * @param {object} data 
- * @param {object} settings 
+ * @param {function} tooltip the component that renders a tooltip to each containing g in the selection it receives
+ * @param {Number} width the width of the container
+ * @param {Number} height the height of the container
  * 
  * @modifies 
  * @returns {object} 
  */
 
-export function renderTooltips(data, width, height){
+export function renderTooltips(data, tooltip, width, height){
     if(!width){ return; }
 
     const headerTooltipWidth = 150;
