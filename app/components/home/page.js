@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useFetch } from '@/app/api-requests/fetch-hooks';
 import Intro from '../intro/page';
-import Header from '../header/page';
+import VisualLayout from '../visual/layout';
 import Visual from '../visual/page';
 import { setUpDeviceDetection } from "@/app/helpers/deviceDetectionHelpers";
 
@@ -49,17 +49,14 @@ const Home = ({ }) => {
               closeIntro={() => setIntroIsDisplayed(false)}
             />
           :
-            <>
-              <Header 
-                menuItems={data?.examples} 
-                selected={selectedExampleKey} 
-                onSelect={setSelectedExampleKey}
-                openIntro={() => setIntroIsDisplayed(true)} 
-              />
-              <Visual 
-                exampleKey={selectedExampleKey} 
-              />
-            </>
+            <VisualLayout 
+              menuItems={data?.examples} 
+              selected={selectedExampleKey} 
+              onSelect={setSelectedExampleKey}
+              openIntro={() => setIntroIsDisplayed(true)}
+            >
+              <Visual exampleKey={selectedExampleKey} />
+            </VisualLayout>
           }
         </div>
     )

@@ -15,7 +15,7 @@ const GET_EXAMPLE_DATA = exampleKey => `
  * @description Fetches the data for the selected example, stores it, and renders the specific visual (PerfectSquareVisual)
  *
  * @param {string} exampleKey the selected example, which is passed to the server to retrieve the correct data
- * @returns {HTMLElement} A main element containing the PerfectSquareVisual component
+ * @returns {import('react').ReactNode} the PerfectSquareVisual component
  */
 const Visual = ({ exampleKey="" }) => {
     const { data, loading } = useFetch(GET_EXAMPLE_DATA(exampleKey));
@@ -28,9 +28,7 @@ const Visual = ({ exampleKey="" }) => {
     }, [data])
 
     return (
-        <main className="main">
-            <PerfectSquareVisual data={visData} loading={loading} />
-        </main>
+      <PerfectSquareVisual data={visData} loading={loading} />
     )
 }
   

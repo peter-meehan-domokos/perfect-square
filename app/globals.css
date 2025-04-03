@@ -278,7 +278,7 @@ body {
   position:relative;
 }
 
-.main {
+main {
   height: calc(100% - 80px);
   margin:0;
   padding:0 2.5%;
