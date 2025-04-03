@@ -3,7 +3,7 @@
 'use client'
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import * as d3 from 'd3';
-import VisualHeader from './visual-header/page';
+import PerfectSquareHeader from './header/page';
 import perfectSquareLayout from './perfectSquareLayout';
 import perfectSquareComponent from "./perfectSquareComponent";
 import tooltipComponent from "../d3HelperComponents/tooltipComponent";
@@ -348,7 +348,7 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
 
   return (
     <div className="viz-root">
-      <VisualHeader 
+      <PerfectSquareHeader 
         data={headerData} 
         settings={settings}
         zoomTransform={zoomTransformState}

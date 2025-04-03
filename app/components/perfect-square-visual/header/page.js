@@ -1,17 +1,16 @@
 'use client'
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import * as d3 from 'd3';
 import Overview from './Overview';
 import ZoomCtrls from './ZoomCtrls';
 import SettingsCtrls from './SettingsCtrls';
 import quadrantCtrlsComponent from "./quadrantCtrlsComponent";
 
-const quadrantCtrls = quadrantCtrlsComponent();
-
-const QuadrantsBarChartHeader = ({ data={}, settings, zoomTransform, headerExtended=false, selectedQuadrantIndex, onClickZoom, resetZoom, setSettings, setSelectedQuadrantIndex, setHeaderExtended, setTooltipsData }) => { 
+const PerfectSquareHeader = ({ data={}, settings, zoomTransform, headerExtended=false, selectedQuadrantIndex, onClickZoom, resetZoom, setSettings, setSelectedQuadrantIndex, setHeaderExtended, setTooltipsData }) => { 
     const { categories, nrDatapoints, title, desc } = data;
+    const quadrantCtrls = useMemo(() => quadrantCtrlsComponent(), []);
     //refs
-    const quadrantCtrlsRef = useRef(null);
+    const containerRef = useRef(null);
     //handler
     const toggleHeaderExtended = e => { setHeaderExtended(!headerExtended); }
     //render quadrantCtrls
@@ -19,7 +18,7 @@ const QuadrantsBarChartHeader = ({ data={}, settings, zoomTransform, headerExten
         const quadrantCtrlsData = categories;
         if(!quadrantCtrlsData){ return; }
 
-        d3.select(quadrantCtrlsRef.current)
+        d3.select(containerRef.current)
             ?.datum(quadrantCtrlsData)
             .call(quadrantCtrls
             .width(159)
@@ -38,7 +37,7 @@ const QuadrantsBarChartHeader = ({ data={}, settings, zoomTransform, headerExten
             <div className="quadrant-ctrls">
               <div className="ctrls-section-label">Select</div>
               <div className="quadrant-ctrls-diagram">
-                <svg ref={quadrantCtrlsRef}></svg>
+                <svg ref={containerRef}></svg>
               </div>
             </div>
             <ZoomCtrls zoomTransform={zoomTransform}  onClickZoom={onClickZoom} resetZoom={resetZoom} />
@@ -49,6 +48,6 @@ const QuadrantsBarChartHeader = ({ data={}, settings, zoomTransform, headerExten
   )
 }
 
-export default QuadrantsBarChartHeader;
+export default PerfectSquareHeader;
 
 
