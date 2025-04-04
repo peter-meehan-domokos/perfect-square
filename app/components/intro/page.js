@@ -5,18 +5,15 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import { INTRO_SLIDES } from '@/app/static-content/intro-content';
-import profile from './profile.png';
-import { bokorFont, robotoFont, robotoBoldFont, robotoMonoFont } from '@/app/assets/fonts';
+import { robotoFont, robotoBoldFont, robotoMonoFont } from '@/app/assets/fonts';
 
 //style overrides
 const titleStyle = {
     margin:"2% 0",
-    //fontFamily:robotoMonoFont
 }
 
 const paragraphStyle = {
     margin:"2% 2.5%",
-    //fontFamily:robotoMonoFont
 }
 
 const nextSlideButtonStyle = {
@@ -84,7 +81,7 @@ const Intro = ({ closeIntro }) => {
                                     <div className="slide-footer-container">
                                         <div className="slide-footer">
                                             <div className="slide-footer-visual">
-                                                <Image className="image" src={profile} alt="profile-photo" />
+                                                <Image className="image" src="/profile.png" alt="profile-photo" width={0} height={0} />
                                             </div>
                                             <ul className="slide-footer-items-list">
                                                 {slide.footer.items.map(item => 

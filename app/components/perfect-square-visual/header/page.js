@@ -27,7 +27,7 @@ const PerfectSquareHeader = ({ data={}, settings, zoomTransform, headerExtended=
             .selectedQuadrantIndex(selectedQuadrantIndex)
             .setSelectedQuadrantIndex(setSelectedQuadrantIndex));
 
-    }, [selectedQuadrantIndex, setSelectedQuadrantIndex, categories])
+    }, [quadrantCtrls, selectedQuadrantIndex, setSelectedQuadrantIndex, categories])
 
   return (
       <div className={`viz-header ${headerExtended ? "extended" : ""}`} >

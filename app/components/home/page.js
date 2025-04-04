@@ -1,4 +1,4 @@
-'use client'
+'use client';
 import { useEffect, useState } from 'react';
 import { useFetch } from '@/app/api-requests/fetch-hooks';
 import Intro from '../intro/page';

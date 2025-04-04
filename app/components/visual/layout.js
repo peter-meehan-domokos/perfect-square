@@ -1,3 +1,4 @@
+'use client';
 import Header from "../header/page"
 export default function VisualLayout({ menuItems=[], selected, onSelect=()=>{}, openIntro=()=>{}, children }) {
     return (
