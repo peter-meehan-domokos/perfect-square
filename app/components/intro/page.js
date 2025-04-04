@@ -1,20 +1,11 @@
 'use client'
 import { useRef } from 'react';
-import Image from 'next/image'
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import { INTRO_SLIDES } from '@/app/static-content/intro-content';
-import { robotoFont, robotoBoldFont, robotoMonoFont } from '@/app/assets/fonts';
-
-//style overrides
-const titleStyle = {
-    margin:"2% 0",
-}
-
-const paragraphStyle = {
-    margin:"2% 2.5%",
-}
+import { INTRO_SLIDES } from '@/app/assets/static-content/intro-content';
+import SlideLayout from './slide/layout';
+import Slide from './slide/page';
 
 const nextSlideButtonStyle = {
     border:"solid", borderWidth:0.8
@@ -24,7 +15,7 @@ const playButtonStyle = {
 }
 
 /**
- * @description Renders a third part Slider that contains the intro text to the app
+ * @description Renders a third party Slider that contains the intro text to the app
  * 
  * @param {function} closeIntro a handler that sets the state in the parent to close the intro and render the visual
  * 
@@ -42,7 +33,14 @@ const Intro = ({ closeIntro }) => {
 
     const goToNextSlide = () => {  sliderRef.current.slickNext(); }
 
-    const isLastSlide = i => i === INTRO_SLIDES.length - 1;
+    const _isLastSlide = i => i === INTRO_SLIDES.length - 1;
+
+    const _controlButtons = isLastSlide => [{
+        label:isLastSlide ? "Play" : "Next",
+        onClick:isLastSlide ? closeIntro : goToNextSlide,
+        className:`${isLastSlide ? "last-slide-controls" : "slide-controls"}`,
+        style:isLastSlide ? playButtonStyle : nextSlideButtonStyle
+    }]
 
     return (
         <div className="intro">
@@ -52,59 +50,19 @@ const Intro = ({ closeIntro }) => {
             <div className="intro-slider-container">
                 <Slider {...settings} ref={sliderRef} arrows={false}>
                     {INTRO_SLIDES.map((slide, i) => 
-                        <div className={`intro-slide-container ${isLastSlide(i) ? "last-slide" : ""}`} key={`slide-${i}`}>
-                            <div className="intro-slide">
-                                <div className="slide-main-contents">
-                                    <div className="intro-slide-text-container">
-                                        {slide.title &&
-                                            <h2 className={`slide-title ${robotoBoldFont.className}`} style={titleStyle}>{slide.title}</h2>
-                                        }
-                                        {slide.paragraphs.map((p,j) => 
-                                            <p className={`slide-textline ${robotoFont.className}`} key={`slide-${i}-para-${j}`} style={paragraphStyle}>{p}</p>
-                                        )}
-                                    </div>
-                                    {slide.visual &&
-                                        <div className="intro-slide-visual">
-                                            <div className="intro-vis-container">vis container</div>
-                                        </div>
-                                    }
-                                </div>
-                                <div className={`${isLastSlide(i) ? "last-slide-controls" : "slide-controls"}`}>
-                                    <button 
-                                        onClick={isLastSlide(i) ? closeIntro : goToNextSlide} 
-                                        style={isLastSlide(i) ? playButtonStyle : nextSlideButtonStyle}
-                                    >
-                                        {isLastSlide(i) ? "Play" : "Next"}
-                                    </button>
-                                </div>
-                                {slide.footer &&
-                                    <div className="slide-footer-container">
-                                        <div className="slide-footer">
-                                            <div className="slide-footer-visual">
-                                                <Image className="image" src="/profile.png" alt="profile-photo" width={0} height={0} />
-                                            </div>
-                                            <ul className="slide-footer-items-list">
-                                                {slide.footer.items.map(item => 
-                                                    <li key={item.key}>
-                                                        {item.url ?
-                                                            <a 
-                                                                className={`slide-footer-item url-item ${robotoMonoFont.className}`}
-                                                                href={item.url}
-                                                                target="_blank"
-                                                            >
-                                                                {item.label}
-                                                            </a>
-                                                            :
-                                                            <h5 className={`slide-footer-item ${robotoMonoFont.className}`}>{item.label}</h5>
-                                                        } 
-                                                    </li>
-                                                )}
-                                            </ul>
-                                        </div>
-                                    </div>
-                                }
-                            </div>
-                        </div>
+                        <SlideLayout 
+                            key={`slide-${i}`}
+                            containerClassNames={_isLastSlide(i) ? "last-slide" : ""}
+                            controlButtons={_controlButtons(_isLastSlide(i))} 
+                            footer={slide.footer}
+                        >
+                            <Slide 
+                                i={i}
+                                title={slide.title} 
+                                paragraphs={slide.paragraphs} 
+                                visual={slide.visual}
+                            />
+                        </SlideLayout>
                     )}
                 </Slider>
             </div>
