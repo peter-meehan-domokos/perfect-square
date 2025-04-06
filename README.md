@@ -83,15 +83,19 @@ Naming Conventions
 | 	:-----:	 | 	:-----:	 | 	:-----:	 | 	
 | 	e	| 		| 	A dom event - either a source event or a D3 pseudo event that may or may not contain a source event |
 | 	d, myComponentD	| chartD, tooltipD | Represents a datum, which is a datapoint that has been through a layout function and been binded to a dom element	| 	
-| 	x,y	| 	Horizontal and vertical dimensions	| 
+| 	x , y	| 	Horizontal and vertical dimensions	| 
 | _ underscore | _width | A function that takes a datapoint or datum and return the described value |
-| 	Dom Elements	| 	chartG	| 	Names that refer to dom elemets add the name of the element on the end |
+| 	Dom Elements	| 	chartG, contentsG	| 	Names that refer to dom elements should always add the name of the element on the end |
 | componentLayout (D3 not React) | perfectSquareLayout | Reserved for functions that take data and prepare it for the component of the same name |
 | component (D3 not React) | perfectSquareComponent | Reserved for functions that take a selection and render an svg component, and often have a settings api |
 
-#### Settings of D3 component functions
-In the settings api of functions that follow the D3 component pattern however (see further down), no underscore is added as the setting could be either.
-Eg myComponent.width can receive a value or a function that returns a value. The implementation of this within the component itself does use _width, and fixedWidth rather than width, in order to provide more clarity.
+#### Use of 'this'
+
+The D3 convention is followed that for any function that acts on an element, the element is not passd explicitly but is instead available as the 'this' context of the function. Function that don't use this wil in general be lamda/arrow functions.
+
+#### Use of selection.each
+
+Functions that act on elements, will generally be passed a d3 selection, rather than the raw element(s). This allows components to be used for multiple elements at once. Then, selection.each is used to iterate and extract each element (as 'this') and its datum.
 
 ### Architecture of the Visual
 
