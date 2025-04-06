@@ -22,7 +22,7 @@ const GET_EXAMPLES = `
  */
 const Home = ({ }) => {
     const { data } = useFetch(GET_EXAMPLES);
-    const [introIsDisplayed, setIntroIsDisplayed] = useState(true);
+    const [introIsDisplayed, setIntroIsDisplayed] = useState(false);
     const [selectedExampleKey, setSelectedExampleKey] = useState("");
     const [device, setDevice] = useState("");
 

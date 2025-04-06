@@ -14,26 +14,6 @@ export const calcLevelOfDetailFromBase = baseSize => (k, disabledLevels=[]) => {
 export const getDisabledLevelsForZoom = (initLevel, targLevel) =>
     initLevel && targLevel ? LEVELS_OF_DETAIL.slice(initLevel - 1, targLevel) : [];
 
-  /**
- * @description Calculates the optimum number of rows and columns for a given number of cells within a space
- *
- * @param {object} width the width of the space
- * @param {object} height the height of the space
- * @param {object} nrCells the number of cells that are required to fit in the space
- * 
- * @returns {object} contains the values for the optimum number of rows and columns
- */
-export const calcNrColsAndRows = (width, height, nrCells) => {
-    //aspect ratio, a
-    const asp = width / height;
-    const proportionOfCellsForWidth = Math.sqrt(nrCells * asp);
-    const nrCols = Math.round(proportionOfCellsForWidth);
-    //always round up the rows so there is enough cells
-    const nrRows = Math.ceil(nrCells/nrCols);
-    //@todo - consider adjusting cols if ther is an orphan on last row ie 
-    //const nrOnLastRow = n - (nrRows-1) * nrCols;
-    return { nrCols, nrRows }
-  }
 
   export const isArranged = arrangeBy => arrangeBy?.x || arrangeBy?.y || arrangeBy?.colour ? true : false;
 
@@ -63,6 +43,8 @@ export const calcNrColsAndRows = (width, height, nrCells) => {
 
   export const applyMargin = (width, height, margin) => {
       return {
+        width,
+        height,
           contentsWidth : width - margin.left - margin.right,
           contentsHeight : height - margin.top - margin.bottom,
           margin
@@ -93,10 +75,10 @@ export const calcNrColsAndRows = (width, height, nrCells) => {
  * 
  * @returns {boolean} true iff this chart is currently positioned within the viewbox of the container, given the current zoom state.
  */
-  export const isChartOnScreenCheckerFunc = (contentsWidth, contentsHeight, chartWidth, chartHeight, dataIsArranged) => (d, zoomTransform) => {
+  export const isChartOnScreenCheckerFunc = (contentsWidth, contentsHeight, chartWidth, chartHeight, _chartX = d=>d.x, _chartY = d=>d.y) => (chartD, zoomTransform) => {
     const { x, y, k } = zoomTransform;
-    const chartX1 = dataIsArranged ? d.x : d.gridX;
-    const chartY1 = dataIsArranged ? d.y : d.gridY;
+    const chartX1 = _chartX(chartD);
+    const chartY1 = _chartY(chartD);
     const chartX2 = chartX1 + chartWidth;
     const chartY2 = chartY1 + chartHeight;
 
@@ -131,18 +113,18 @@ export const calcNrColsAndRows = (width, height, nrCells) => {
  * @returns {D3ZoomTransformObject} The D3 Transform that is ready to be applied to the zoom g in the dom.
  * It contains the required x, y and k(scale) values to zoom into the selected chart
  */
-  export const calcZoomTransformFunc = (contentsWidth, contentsHeight, margin, chartWidth, chartHeight, dataIsArranged) => selectedChartD => {
+  export const calcZoomTransformFunc = (contentsWidth, contentsHeight, margin, chartWidth, chartHeight, _chartX=d=>d.x, _chartY=d=>d.y) => chartD => {
     const k = d3.min([contentsWidth/chartWidth, contentsHeight/chartHeight]);
     //Remove impact of zoom on margin to keep it constant
     const marginLeftAdjustment = margin.left - k * margin.left;
     const marginTopAdjustment = margin.top - k * margin.top
 
+    const chartX = _chartX(chartD);
+    const chartY = _chartY(chartD);
     //zoom into selected chart
-    const xPos = dataIsArranged ? selectedChartD.x : selectedChartD.gridX;
-    const yPos = dataIsArranged ? selectedChartD.y : selectedChartD.gridY;
-    const x = -(xPos * k) + (contentsWidth - (k * chartWidth))/2 + marginLeftAdjustment;
-    const y = -(yPos * k) + (contentsHeight - (k * chartHeight))/2 + marginTopAdjustment;
+    const translateX = -(chartX * k) + (contentsWidth - (k * chartWidth))/2 + marginLeftAdjustment;
+    const translateY = -(chartY * k) + (contentsHeight - (k * chartHeight))/2 + marginTopAdjustment;
 
-    return d3.zoomIdentity.translate(x, y).scale(k);
+    return d3.zoomIdentity.translate(translateX, translateY).scale(k);
 
   }

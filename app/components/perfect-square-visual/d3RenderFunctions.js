@@ -20,18 +20,19 @@ export function renderCharts(datapoints, perfectSquare, dataIsArranged, options=
             .attr("id", d => `chart-${d.key}`)
             .call(fadeIn, { transition:CHART_IN_TRANSITION })
             .attr("transform", function(d,i){
-                return dataIsArranged ? d3.select(this).attr("transform") : `translate(${d.gridX},${d.gridY})`
+                return dataIsArranged ? d3.select(this).attr("transform") : `translate(${d.cellX},${d.cellY})`
             })
             .merge(chartG)
             .each(function(d){
+                //console.log("d", d)
                 if(updateTransformTransition){
                     d3.select(this)
                         .transition()
                         .delay(updateTransformTransition.delay || 0)
                         .duration(updateTransformTransition.duration)
-                            .attr("transform", (d,i) => dataIsArranged ? null : `translate(${d.gridX},${d.gridY})`);
+                            .attr("transform", (d,i) => dataIsArranged ? null : `translate(${d.cellX},${d.cellY})`);
                 }else{
-                    d3.select(this).attr("transform", (d,i) => dataIsArranged ? null : `translate(${d.gridX},${d.gridY})`);
+                    d3.select(this).attr("transform", (d,i) => dataIsArranged ? null : `translate(${d.cellX},${d.cellY})`);
                 }
             })
             .attr("display", d => d.isOnScreen ? null : "none")

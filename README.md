@@ -130,7 +130,7 @@ Use is made of D3s in-built optimisation capabilities throughout all functions t
 
 #### 4. React optimisations
 
-The component life-cycle is utilised at various points to avoid unneccessary updates. There is scope to improve this further, as the data is currently being updated by calling the entire layout function on updates that only require one change, such as the gridX and gridY positions. This is a candidate for memoisation, and more targeted object put into the useEffect dependencies array.
+The component life-cycle is utilised at various points to avoid unneccessary updates. There is scope to improve this further, as the data is currently being updated by calling the entire layout function on updates that only require one change, such as the cellX and cellY positions. This is a candidate for memoisation, and more targeted object put into the useEffect dependencies array.
 
 More use of hooks for functionality such as the simulation and the zoom will yield more clarity and reduce the number of unnecessary updates too.
 

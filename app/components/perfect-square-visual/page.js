@@ -8,12 +8,13 @@ import perfectSquareLayout from './perfectSquareLayout';
 import perfectSquareComponent from "./perfectSquareComponent";
 import tooltipComponent from "../d3HelperComponents/tooltipComponent";
 import { renderCharts, renderTooltips } from './d3RenderFunctions';
-import { DEFAULT_SETTINGS, SELECT_MEASURE_TOOLTIP, LOADING_TOOLTIP, CONTAINER_MARGIN, CALC_CHART_MARGIN } from "./constants.js";
+import { DEFAULT_SETTINGS, SELECT_MEASURE_TOOLTIP, LOADING_TOOLTIP } from "./constants.js";
 import { CHART_OUT_DURATION, ZOOM_AND_ARRANGE_TRANSITION_DURATION } from '@/app/constants';
-import { isArranged, calcNrColsAndRows, calcChartSizesAndGridLayout, applyMargin, isChartOnScreenCheckerFunc, calcZoomTransformFunc } from './helpers';
-import { getElementDimns } from '@/app/helpers/domHelpers';
+import { isArranged } from './helpers';
 import { setupSimulation } from './simulation';
-import { setupZoom } from './zoom';
+import { useZoom } from './zoom';
+import { useContainerDimensions } from './containerDimensions';
+import { useGrid } from './grid'
 
 //@todo - move state into Redux or useContext
 //@todo - turn simulation and zoom into complete hooks instead of helper functions
@@ -32,43 +33,57 @@ import { setupZoom } from './zoom';
  * that is applied in a useEffect, and a g which contains the charts whcih are rendered in a useEffect.
  */
 const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections={}, initSettings=DEFAULT_SETTINGS, loading=true }) => {
+  //console.log("PerfectSquare key", data.key)
   const { initSelectedChartKey="", initSelectedMeasureKey="", initSelectedQuadrantIndex=null } = initSelections;
 
   //set up the vis components
   const perfectSquare = useMemo(() => perfectSquareComponent(), []);
   const tooltip = useMemo(() => tooltipComponent(), []);
-
-  //state
-  const [headerExtended, setHeaderExtended] = useState(false);
-  const [containerSizesAndGrid, setContainerSizesAndGrid] = useState({});
-  const [selectedChartKey, setSelectedChartKey] = useState(initSelectedChartKey);
-  const [selectedQuadrantIndex, setSelectedQuadrantIndex] = useState(initSelectedQuadrantIndex);
-  const [selectedMeasureKey, setSelectedMeasureKey] = useState(initSelectedMeasureKey);
-  const [settings, setSettings] = useState(initSettings || DEFAULT_SETTINGS)
-  const [headerTooltipsData, setHeaderTooltipsData] = useState([]);
-  const [chartsViewboxTooltipsData, setChartsViewboxTooltipsData] = useState([]);
-  //zoom state is only used for React children ie Header
-  const [zoomTransformState, setZoomTransformState] = useState(d3.zoomIdentity)
-
-  const { width, height, margin, contentsWidth, contentsHeight, nrDatapoints, nrCols, nrRows, visKey } = containerSizesAndGrid;
-  const { arrangeBy } = settings;
-  const dataIsArranged = isArranged(arrangeBy);
   //refs
   const isFirstRenderRef = useRef(true);
   const containerDivRef = useRef(null);
   const visContentsGRef = useRef(null);
   const viewGRef = useRef(null);
-  //store the actual zoom function so we can access its methods to get/set the transform
-  const zoomRef = useRef(null);
   const simRef = useRef(null);
   const simIsStartedRef = useRef(false);
   //other data that doesnt trigger re-renders
   const sizesRef = useRef(null);
-  const processedDataRef = useRef(null);
+  const perfectSquareDataRef = useRef(null);
   const cleanupInProgressRef = useRef(false);
-  const dataWaitingRef = useRef(null);
   const simTicksInProcessRef = useRef(false);
   const prevArrangeByRef = useRef(null);
+
+  const [visData, setVisData] = useState(null);
+  //console.log("visData.key nrDatapoints", visData?.key, visData?.datapoints?.length)
+  const containerDimns = useContainerDimensions(containerDivRef);
+  const { width, height, margin, contentsWidth, contentsHeight } = containerDimns;
+  //console.log("containerDimns", containerDimns)
+  const grid = useGrid(contentsWidth, contentsHeight, visData?.datapoints?.length);
+  const { cellWidth, cellHeight, cellMargin } = grid;
+  //console.log("grid", grid)
+
+  //state
+  const [headerExtended, setHeaderExtended] = useState(false);
+  const [selectedChartKey, setSelectedChartKey] = useState(initSelectedChartKey);
+  const [selectedQuadrantIndex, setSelectedQuadrantIndex] = useState(initSelectedQuadrantIndex);
+  const [selectedMeasureKey, setSelectedMeasureKey] = useState(initSelectedMeasureKey);
+  const [settings, setSettings] = useState(initSettings || DEFAULT_SETTINGS)
+  const [headerTooltipsData, setHeaderTooltipsData] = useState([]);
+  //const [chartsViewboxTooltipsData, setChartsViewboxTooltipsData] = useState([]);
+
+  //zoom
+  const { arrangeBy } = settings;
+  const dataIsArranged = isArranged(arrangeBy);
+  const onZoomStart = () => { setSelectedChartKey(""); }
+  //chart dimns and position accessors
+  //@todo - call the full reudction function here instead of 0.7 *
+  const chartWidth = dataIsArranged ? 0.7 * cellWidth : cellWidth;
+  const chartHeight = dataIsArranged ? 0.7 * cellHeight : cellHeight;
+  const chartMargin = cellMargin;
+  const _chartX = dataIsArranged ? d => d.x : d => d.cellX;
+  const _chartY = dataIsArranged ? d => d.y : d => d.cellY;
+
+  const { zoomTransformState, zoomTo, resetZoom } = useZoom(containerDivRef, viewGRef, containerDimns, chartWidth, chartHeight, perfectSquare, _chartX, _chartY, onZoomStart);
 
   const { key, title, desc, info, categories, datapoints } = data
 
@@ -90,28 +105,13 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
  * @param {MyEvent} e - The observable event.
  * @listens ResizeEvent - The visual container dimensions change, eg when the user adjusts the window, or presses the 'show description' button (on smaller screens)
  */
-  const setSizesAndTriggerDataRendering = useCallback((data) => {
-    const setSizesAndGrid = () => {
-      if(!containerDivRef.current){ return; }
-      const { width, height } = getElementDimns.call(containerDivRef.current);
-      const { contentsWidth, contentsHeight, margin } = applyMargin(width, height, CONTAINER_MARGIN)
-      const nrDatapoints = data.datapoints.length;
-      const { nrCols, nrRows } = !nrDatapoints ? { nrCols:1, nrRows:1 } : calcNrColsAndRows(contentsWidth, contentsHeight, nrDatapoints);
-      //visKey helps control the triggering of dom updates in useEffects
-      setContainerSizesAndGrid({ width, height, contentsWidth, contentsHeight, margin, nrCols, nrRows, nrDatapoints, visKey:data.key })
-    }
 
-    let resizeObserver = new ResizeObserver(() => { setSizesAndGrid(); }); 
-    resizeObserver.observe(containerDivRef.current);
-    //init
-    setSizesAndGrid();
-  }, [data])
 
   //data change/load
   useEffect(() => {
-    if (isFirstRenderRef.current) { return; }
+    //if (isFirstRenderRef.current) { return; }
     //reset perfectSquare component if required
-    const cleanupNeeded = !d3.select(visContentsGRef.current).selectAll(".chart").empty() && !cleanupInProgressRef.current;
+    const cleanupNeeded = visContentsGRef.current && !d3.select(visContentsGRef.current).selectAll(".chart").empty() && !cleanupInProgressRef.current;
     if(cleanupNeeded){
       cleanupInProgressRef.current = true;
       dataWaitingRef.current = data;
@@ -132,46 +132,50 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
       dataWaitingRef.current = data;
     }else{
       //safe to load new data immediately
-      setSizesAndTriggerDataRendering(data);
+      //setSizesAndTriggerDataRendering(data);
+      console.log("setting visData to.....", data)
+      setVisData(data);
     }
-  },[key])
+  },[data.key])
 
-  //container or chart size change
-  useEffect(() => {
-    if (isFirstRenderRef.current || !contentsWidth) { return; }
-    sizesRef.current = calcChartSizesAndGridLayout(contentsWidth, contentsHeight, nrCols, nrRows, nrDatapoints, arrangeBy, CALC_CHART_MARGIN);
-  },[contentsWidth, contentsHeight, nrCols, nrRows, arrangeBy])
+  /*useEffect(() => {
+    console.log("init mount")
+  },[])
+
+  const initDone = useMemo(() => {
+    console.log("check init done")
+    return true;
+  }, []);*/
 
   //layout applied to data
-  useEffect(() => {
-    if (isFirstRenderRef.current || !contentsWidth) { return; }
-    const { chartWidth, chartHeight } = sizesRef.current;
-    processedDataRef.current = perfectSquareLayout(data, 
-      { nrCols, chartWidth, chartHeight }
-    );
+  //@todo - try putting curretnX, or an _x accessro on each d in here....do these ds themselves get mutated
+  //by the sim. if not, we need to start recognising teh difference between data that has been through the layout,
+  //and data that has then been binded to the dom and may be mutated by d3, so theres 3 layers of data, not just 2
+  const perfectSquareData = useMemo(() => perfectSquareLayout(visData, { grid, dataIsArranged }), 
+    [visData, JSON.stringify(grid), dataIsArranged]);
 
-  }, [contentsWidth, nrCols, visKey, nrDatapoints])
-
+  //console.log("perfectSquareData key selchart", perfectSquareData?.key, selectedChartKey)
   //simulation
+  /*
   useEffect(() => {
     if (isFirstRenderRef.current || !contentsWidth) { return; }
     const { chartWidth, chartHeight } = sizesRef.current;
     if(!dataIsArranged){ return; }
 
-    const processedData = processedDataRef.current;
-    const processedDatapoints = processedData.datapoints;
+    const perfectSquareData = perfectSquareDataRef.current;
+    const perfectSquareDatapoints = perfectSquareData.datapoints;
   
     //if moving from a grid (ie non-arranged), we set d.x and d.y properties so transitions starts from current position
     const dataWasAlreadyArranged = isArranged(prevArrangeByRef.current);
     if(!dataWasAlreadyArranged){
-      processedDatapoints.forEach(d => {
-        d.x = d.gridX;
-        d.y = d.gridY;
+      perfectSquareDatapoints.forEach(d => {
+        d.x = d.cellX;
+        d.y = d.cellY;
       })
     }
 
-    simRef.current = d3.forceSimulation(processedDatapoints);
-    setupSimulation(simRef.current, contentsWidth, contentsHeight, chartWidth, chartHeight, arrangeBy, nrDatapoints, processedData.info);
+    simRef.current = d3.forceSimulation(perfectSquareDatapoints);
+    setupSimulation(simRef.current, contentsWidth, contentsHeight, chartWidth, chartHeight, arrangeBy, nrDatapoints, perfectSquareData.info);
 
     simRef.current
       .on("tick", () => {
@@ -194,43 +198,70 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
       simIsStartedRef.current = true;
     }
   },[arrangeBy])
+  */
 
-  //render/update entire visual
+  //apply dimensions
+  useEffect(() => {
+    perfectSquare
+      .width(chartWidth)
+      .height(chartHeight)
+      .margin(chartMargin);
+
+  }, [chartWidth, chartHeight, chartMargin])
+  
+  //apply settings
+  useEffect(() => {
+    console.log("settings useEff", selectedChartKey)
+    perfectSquare
+      .metaData({ data: { info:perfectSquareData?.info } })
+      .selectedChartKey(selectedChartKey)
+      .selectedQuadrantIndex(selectedQuadrantIndex)
+      .selectedMeasureKey(selectedMeasureKey)
+      .zoomK(zoomTransformState.k)
+      .arrangeBy(arrangeBy);
+
+  }, [perfectSquareData?.info, selectedChartKey, selectedQuadrantIndex, selectedMeasureKey, zoomTransformState?.k, arrangeBy])
+  
+  //apply handlers
+  useEffect(() => {
+    perfectSquare
+        .setSelectedChartKey(chartD => {
+          zoomTo(chartD, 
+            () => setSelectedChartKey(chartD.key));
+        })
+        .setSelectedMeasureKey(setSelectedMeasureKey);
+
+  }, [setSelectedChartKey, zoomTo, setSelectedMeasureKey])
+  
+  //render/update visual
   useEffect(() => {
     if (isFirstRenderRef.current || !contentsWidth) { return; }
     const arrangementHasChanged = prevArrangeByRef.current !== arrangeBy;
-    //data
-    const { datapoints, info } = processedDataRef.current;
 
-    //settings
-    perfectSquare
-        .width(sizesRef.current.chartWidth)
-        .height(sizesRef.current.chartHeight)
-        .margin(sizesRef.current.chartMargin)
-        .metaData({ data: { info } })
-        .selectedChartKey(selectedChartKey)
-        .selectedQuadrantIndex(selectedQuadrantIndex)
-        .selectedMeasureKey(selectedMeasureKey)
-        .setSelectedChartKey(chartKey => {
-          zoomTo(chartKey, 
-            () => setSelectedChartKey(chartKey));
-        })
-        .setSelectedMeasureKey(setSelectedMeasureKey)
-        .zoomK(d3.zoomTransform(containerDivRef.current).k)
-        .arrangeBy(arrangeBy)
+    //position the contentsG
+    d3.select(visContentsGRef.current).attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-    //position and call charts
-    d3.select(visContentsGRef.current).attr("transform", `translate(${margin.left}, ${margin.top})`)
-    renderCharts.call(visContentsGRef.current, datapoints, perfectSquare, dataIsArranged, {
+    //call charts
+    console.log("fullrender/update")
+    renderCharts.call(visContentsGRef.current, perfectSquareData.datapoints, perfectSquare, dataIsArranged, {
       updateTransformTransition: arrangementHasChanged ? { duration:ZOOM_AND_ARRANGE_TRANSITION_DURATION } : null
     });
 
-    //update flag that determines type of transition
+    //update flag for transition
     prevArrangeByRef.current = arrangeBy;
-  }, [visKey, contentsWidth, contentsHeight, nrDatapoints, arrangeBy])
 
+  }, [contentsWidth, contentsHeight, chartWidth, chartHeight, chartMargin, perfectSquare, perfectSquareData, arrangeBy])
+
+  //light update for settings changes - the changes are added separately beforehand - see useEffect higher up
+  //@todo - check whether this is optial as we are trigerring an update even though the useEffect itself doesnt use these settings 
+  useEffect(() => {
+    if (isFirstRenderRef.current) { return; }
+    console.log("light update")
+    d3.select(visContentsGRef.current).selectAll(".chart").call(perfectSquare)
+  }, [selectedChartKey, selectedQuadrantIndex, selectedMeasureKey])
 
   //render/update tooltips
+  /*
   useEffect(() => {
     const tooltipsData = [
       ...headerTooltipsData, 
@@ -239,20 +270,9 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
     ];
     renderTooltips.call(containerDivRef.current, tooltipsData, tooltip, width, height);
   }, [width, headerTooltipsData, chartsViewboxTooltipsData, loadingData])
+  */
 
-  //Selected chart change
-  useEffect(() => {
-    if (isFirstRenderRef.current) { return; }
-    d3.select(visContentsGRef.current).selectAll(".chart").call(perfectSquare
-      .selectedChartKey(selectedChartKey))
-  }, [selectedChartKey])
-
-  //Selected quadrant change
-  useEffect(() => {
-    if (isFirstRenderRef.current) { return; }
-    d3.select(visContentsGRef.current).selectAll(".chart").call(perfectSquare
-      .selectedQuadrantIndex(selectedQuadrantIndex))
-  }, [selectedQuadrantIndex])
+  /*
 
   //Selected measure change
   useEffect(() => {
@@ -266,83 +286,7 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
       }, 3000)
     }
   }, [selectedMeasureKey])
-
-  //ZOOM
-  const isChartOnScreenChecker = useCallback((d, zoomTransform) => {
-    const { chartWidth, chartHeight } = sizesRef.current;
-    const checker = isChartOnScreenCheckerFunc(contentsWidth, contentsHeight, chartWidth, chartHeight, dataIsArranged);
-    return checker(d, zoomTransform);
-  },[contentsWidth, contentsHeight, sizesRef, dataIsArranged])
-
-  const resetZoom = (withTransition=true) => { 
-    const zoom = zoomRef.current;
-    if(withTransition){
-      //tell d3comp we are zooming to a level 1, so it can ignore level 2 (if we are at level 3)
-      perfectSquare.zoomingInProgress({ targK: d3.zoomIdentity.k, sourceEvent:null })
-      d3.select(containerDivRef.current)
-        .transition()
-        .duration(ZOOM_AND_ARRANGE_TRANSITION_DURATION)
-          .call(zoom.transform, d3.zoomIdentity);
-    }else{
-      d3.select(containerDivRef.current).call(zoom.transform, d3.zoomIdentity);
-    }
-  }
-
-  const handleClickResetZoom = () => { resetZoom(); }
-
-  const zoomTo = useCallback((chartKey, cb=() => {}) => {
-    //when sim on, it still zooms in based on colnr
-    const { chartWidth, chartHeight } = sizesRef.current;
-    const zoom = zoomRef.current;
-    const chartD = processedDataRef.current.datapoints.find(d => d.key === chartKey);
-    const calcZoomTransform = calcZoomTransformFunc(contentsWidth, contentsHeight, margin, chartWidth, chartHeight, dataIsArranged);
-    const transform = calcZoomTransform(chartD);
-    
-    //tell d3comp we are zooming to a level 3, so it can ignore level 2 (if we are at level 1)
-    perfectSquare.zoomingInProgress({ targK:transform.k, sourceEvent:null })
-    
-    d3.select(containerDivRef.current)
-      .transition()
-      .duration(ZOOM_AND_ARRANGE_TRANSITION_DURATION)
-        .call(zoom.transform, transform)
-        .on("end", function(){ cb(); })
-  },[contentsWidth, contentsHeight, nrDatapoints, arrangeBy])
-
-  //zoom
-  useEffect(() => {
-    if (isFirstRenderRef.current || !contentsWidth) { return; }
-    if(!zoomRef.current){ zoomRef.current = d3.zoom(); }
-    const zoom = zoomRef.current;
-    const { chartWidth, chartHeight } = sizesRef.current;
-
-    setupZoom(zoom, width, height, chartWidth, chartHeight, {
-      onStart:() => { 
-        setSelectedChartKey(""); 
-      },
-      onZoom:zoomed
-    });
-
-    //call zoom
-    d3.select(containerDivRef.current).call(zoom);
-
-    function zoomed(e){
-      d3.select(viewGRef.current).attr("transform", e.transform);
-
-      //update semantic zoom and virtualisation in the dom
-      d3.select(containerDivRef.current).selectAll("g.chart")
-        .each(function(d){ 
-          d.isOnScreen = isChartOnScreenChecker(d, e.transform); 
-        })
-        .attr("display", d => d.isOnScreen ? null : "none")
-        .filter(d => d.isOnScreen)
-        .call(perfectSquare
-          .zoomK(e.transform.k, true));
-
-      //update react state
-      setZoomTransformState(e.transform);
-    }
-    
-  },[width, height, contentsWidth, contentsHeight, visKey, nrDatapoints, arrangeBy])
+  */
 
   useEffect(() => { isFirstRenderRef.current = false; })
 
@@ -357,7 +301,7 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
         selectedQuadrantIndex={selectedQuadrantIndex}
         setSelectedQuadrantIndex={setSelectedQuadrantIndex}
         setSettings={setSettings}
-        resetZoom={handleClickResetZoom}
+        resetZoom={resetZoom}
         setTooltipsData={setHeaderTooltipsData}
       />
       <div className={`viz-container ${headerExtended ? "with-extended-header" : ""}`} >

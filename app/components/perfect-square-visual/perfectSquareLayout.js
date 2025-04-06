@@ -2,13 +2,6 @@ import * as d3 from 'd3';
 import { sortAscending, sortDescending } from '../../helpers/ArrayHelpers';
 import { percentageScoreConverter } from '../../helpers/dataHelpers';
 
-//helper functions for calculating grid positions
-//note i starts at 0, as does rowNr and colNr
-const calcRowNr = (i, nrCols) => Math.floor(i / nrCols);
-const calcColNr = (i, nrCols) => i % nrCols;
-const calcX = (colNr, chartWidth) => colNr * chartWidth;
-const calcY = (rowNr, chartHeight) => rowNr * chartHeight;
-
 /**
  * @description converts the data it receives into the format expected by the perfectSquareComponent (d3 layout pattern),
  * for example adding grid positions of the datapoints, and percentage values for each measure
@@ -19,15 +12,17 @@ const calcY = (rowNr, chartHeight) => rowNr * chartHeight;
  * @returns {object} the processed data object, in the format that the perfectSquareComponent can interpret
  */
  function perfectSquareLayout(data, settings={}){
+    console.log("layout", data?.key)
+    if(!data || !settings.grid) { return null; }
     const { measures, datapoints } = data;
-    const { nrCols, chartWidth, chartHeight } = settings;
+    const { grid:{ _cellX, _cellY, _rowNr, _colNr }, dataIsArranged } = settings;
+    console.log("grid", settings.grid)
 
     const datapointsWithOrderedMeasures = datapoints.map((datapoint,i) => {
-        const rowNr = calcRowNr(i, nrCols);
-        const colNr = calcColNr(i, nrCols);
-        const gridX = calcX(colNr, chartWidth);
-        const gridY = calcY(rowNr, chartHeight);
-
+        const cellX =  _cellX(_rowNr(i));
+        //console.log("datapoint", datapoint)
+        //console.log("cellx", cellX)
+        //const cellY =  _cellY(_colNr(i));
         return {
             key:datapoint.key,
             title:datapoint.title,
@@ -59,10 +54,8 @@ const calcY = (rowNr, chartHeight) => rowNr * chartHeight;
                 }
             }),
             i,
-            rowNr,
-            colNr,
-            gridX,
-            gridY
+            cellX: _cellX(_colNr(i)),
+            cellY: _cellY(_rowNr(i))
         }
     })
 
@@ -116,6 +109,7 @@ const calcY = (rowNr, chartHeight) => rowNr * chartHeight;
         }))
 
     return {
+        ...data,
         measures, 
         datapoints: datapointsWithSummaryInfoAndPosition,
         info:{

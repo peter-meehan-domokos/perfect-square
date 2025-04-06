@@ -337,7 +337,7 @@ export default function perfectSquare() {
                 //header
                 contentsG.call(header, headerWidth, headerHeight, 
                     { 
-                        onClick:() => setSelectedChartKey(chartData.key),
+                        onClick:() => setSelectedChartKey(chartData),
                         summaryComponent:quadrantsSummary, 
                         styles:styles.header,
                         _scaleValue,
@@ -365,7 +365,7 @@ export default function perfectSquare() {
                     .attr("height", chartAreaHeight)
                     .attr("cursor", "pointer")
                     .attr("display", barsAreClickable ? "none" : null)
-                    .on("click", () => setSelectedChartKey(chartData.key))
+                    .on("click", () => setSelectedChartKey(chartData))
                     
                 chartAreaG.select("g.quadrants-container")
                     .call(quadrantsContainerTransform, chartAreaWidth, chartAreaHeight, selectedQuadrantIndex)
@@ -392,7 +392,7 @@ export default function perfectSquare() {
                 chartAreaG.call(chartOutlinePath, quadrantBarWidths, barsAreaHeight, gapBetweenBars, {
                     shouldShowChartOutline,
                     colour: anotherChartIsSelected ? GREY : chartColour,
-                    onClick:() => setSelectedChartKey(chartData.key)
+                    onClick:() => setSelectedChartKey(chartData)
                 })
             })
         }
