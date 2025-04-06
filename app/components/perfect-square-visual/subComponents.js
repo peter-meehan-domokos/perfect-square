@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import { remove, fadeIn } from '../../helpers/domHelpers';
 import { chartPathD, quadrantPathD, quadrantTransform } from './d3DomHelpers';
-import { FADE_IN_DURATION } from '@/app/constants';
+import { FADE_IN_OUT_DURATION } from '@/app/constants';
 
 /**
  * @description  
@@ -48,7 +48,7 @@ export function header(selection, width, height, settings={}){
                         const headerG = d3.select(this);
                         headerG.select("text.primary-title")
                             .transition()
-                            .duration(FADE_IN_DURATION.FAST)
+                            .duration(FADE_IN_OUT_DURATION.FAST)
                                 .attr("opacity", shouldShowHeader ? 0.45 : 0)
                                 .attr("font-size", styles.primaryTitle?.fontSize)
                                 .attr("stroke-width", _scaleValue(0.12))
@@ -58,7 +58,7 @@ export function header(selection, width, height, settings={}){
 
                         headerG.select("text.secondary-title")
                             .transition()
-                            .duration(FADE_IN_DURATION.FAST)
+                            .duration(FADE_IN_OUT_DURATION.FAST)
                                 .attr("opacity", shouldShowSubtitle ? 0.45 : 0)
                                 .attr("transform", `translate(0, ${height * 0.8})`)
                                 .attr("font-size", styles.secondaryTitle?.fontSize)

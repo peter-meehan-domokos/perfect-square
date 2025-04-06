@@ -6,8 +6,7 @@ export const COLOURS = {
     SMOKE_WHITE:"#F0F0F0"
 }
 
-export const FADE_IN_DURATION = { FAST:50, MED:200, SLOW:500 }
-export const FADE_OUT_DURATION = { FAST:50, MED:200, SLOW:500 }
+export const FADE_IN_OUT_DURATION = { FAST:50, MED:200, SLOW:500 }
 
 export const CHART_IN_DURATION = 500;
 export const CHART_OUT_DURATION = 500;

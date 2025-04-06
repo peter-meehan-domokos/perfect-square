@@ -1,10 +1,63 @@
+import { useEffect, useRef } from "react";
 import * as d3 from 'd3';
+import { isArranged } from './helpers';
 
 const COLLISION_FORCE_RADIUS_FACTOR = 1.15;
 const EXTRA_HORIZ_MARGIN_FACTOR_FOR_FORCE = 0.15;
 const EXTRA_TOP_MARGIN_FACTOR_FOR_FORCE = 0.25
 const EXTRA_BOTTOM_MARGIN_FACTOR_FOR_FORCE = 0.25
 const CENTRE_FORCE_STRENGTH = 1.8;
+
+export const useSimulation = (containerRef, data, contentsWidth, contentsHeight, chartWidth, chartHeight, arrangeBy, prevArrangeByRef) => {
+  const simRef = useRef(null);
+  const simIsStartedRef = useRef(false);
+  const simTicksInProcessRef = useRef(false);
+
+  const dataIsArranged = isArranged(arrangeBy);
+  const { datapoints=[], info } = data;
+
+  //simulation
+  useEffect(() => {
+    if(!dataIsArranged){ return; }
+  
+    //if moving from a grid (ie non-arranged), we set d.x and d.y properties so transitions starts from current position
+    const dataWasAlreadyArranged = isArranged(prevArrangeByRef.current);
+    if(!dataWasAlreadyArranged){
+      datapoints.forEach(d => {
+        d.x = d.cellX;
+        d.y = d.cellY;
+      })
+    }
+
+    simRef.current = d3.forceSimulation(datapoints);
+    setupSimulation(simRef.current, contentsWidth, contentsHeight, chartWidth, chartHeight, arrangeBy, datapoints.length, info);
+
+    simRef.current
+      .on("tick", () => {
+        if(!simTicksInProcessRef.current){ simTicksInProcessRef.current = true; }
+        if(!simIsStartedRef.current){ return; }
+        d3.select(containerRef.current).select("g.viz-contents").selectAll("g.chart")
+          .attr("transform", d => `translate(${d.x}, ${d.y})`)
+      })
+      .on("end", () => { simTicksInProcessRef.current = false; })
+
+  }, [contentsWidth, contentsHeight, datapoints.length, arrangeBy])
+
+  //start/stop sim
+  useEffect(() => {
+    if(!dataIsArranged){
+      simRef.current?.stop();
+      simIsStartedRef.current = false;
+    }else{
+      simRef.current?.restart();
+      simIsStartedRef.current = true;
+    }
+  },[arrangeBy])
+  
+  return {  }
+
+};
+
 
 /**
  * @description Calculates and applies forces to the simulation for the required arrangeBy settings 
@@ -19,7 +72,7 @@ const CENTRE_FORCE_STRENGTH = 1.8;
  * @param {object} dataInfo meta information about all the datapoints eg mean, deviation
  * 
  */
-export function setupSimulation(sim, contentsWidth, contentsHeight, chartWidth, chartHeight, arrangeBy, nrDatapoints, dataInfo){
+function setupSimulation(sim, contentsWidth, contentsHeight, chartWidth, chartHeight, arrangeBy, nrDatapoints, dataInfo){
     const { mean, deviation } = dataInfo;
     const extraHorizMarginForForce = contentsWidth * EXTRA_HORIZ_MARGIN_FACTOR_FOR_FORCE;
     const extraTopMarginForForce = contentsHeight * EXTRA_TOP_MARGIN_FACTOR_FOR_FORCE;

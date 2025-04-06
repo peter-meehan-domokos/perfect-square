@@ -1,6 +1,6 @@
 import * as d3 from "d3";
 import { isNumber } from './dataHelpers';
-import { FADE_IN_DURATION, FADE_OUT_DURATION } from "../constants";
+import { FADE_IN_OUT_DURATION } from "../constants";
 
 export function getElementDimns(){
     return {
@@ -26,7 +26,7 @@ export function fadeIn(selection, options={}){
                 .classed("fading-in", true)
                 .transition("fade-in")
                     .delay(transition?.delay || 0)
-                    .duration(isNumber(transition?.duration) ? transition.duration : FADE_IN_DURATION.MED) //WAS CONTENT_FADE_DURATION FOR KPIS
+                    .duration(isNumber(transition?.duration) ? transition.duration : FADE_IN_OUT_DURATION.MED) //WAS CONTENT_FADE_DURATION FOR KPIS
                     .style("opacity", opacity)
                     .style("display", display)
                     .on("end", function() { 
@@ -55,7 +55,7 @@ export function fadeOut(selection, options={}){
                 .transition("fade-out")
                     .delay(transition?.delay || 0)
                     //.duration(transition?.duration || CONTENT_FADE_DURATION) - OLD, FOR KPIS
-                    .duration(isNumber(transition?.duration) ? transition.duration : FADE_OUT_DURATION.MED)
+                    .duration(isNumber(transition?.duration) ? transition.duration : FADE_IN_OUT_DURATION.MED)
                     .style("opacity", opacity)
                     .on("end", function() { 
                         if(shouldRemove){ 

@@ -13,7 +13,7 @@ import { percentageScoreConverter } from '../../helpers/dataHelpers';
  */
  function perfectSquareLayout(data, settings={}){
     console.log("layout", data?.key)
-    if(!data || !settings.grid) { return null; }
+    if(!data || !settings.grid) { return {}; }
     const { measures, datapoints } = data;
     const { grid:{ _cellX, _cellY, _rowNr, _colNr }, dataIsArranged } = settings;
     console.log("grid", settings.grid)
