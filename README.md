@@ -109,6 +109,7 @@ The d3 [force simulation](https://github.com/peter-meehan-domokos/perfect-square
 ### Responsiveness
 
 The number of rows and columns is dynamically optimised, see [calcNrColsAndRows](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/helpers.js), according to two factors: (a) the number of charts, and (b) the aspect ratio of the display. 
+The main benefit of this approach over a css flexbox is that custom requirements can be set up, which is common in dataviz where the position of elements makes a huge difference to the interpretation of the visual.
 
 Also see semantic zoom (below).
 
