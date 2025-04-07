@@ -4,7 +4,7 @@ import { quadrantsContainerTransform } from './d3DomHelpers';
 import { isNumber } from '../../helpers/dataHelpers';
 import { calcLevelOfDetailFromBase, getDisabledLevelsForZoom } from './helpers';
 import { COLOURS } from "../../constants";
-import { DEFAULT_SETTINGS } from './constants';
+import { DEFAULT_SIMULATION_SETTINGS } from './constants';
 
 const { BLUE, GREY, DARK_GREY } = COLOURS;
 
@@ -79,7 +79,7 @@ export default function perfectSquare() {
     let calcLevelOfDetail = calcLevelOfDetailFromBase(baseSize);
     let zoomingInProgress = null;
     let zoomK = 1;
-    let arrangeBy = DEFAULT_SETTINGS.arrangeBy;
+    let arrangeBy = DEFAULT_SIMULATION_SETTINGS.arrangeBy;
     //let withBarLabels;
     let levelOfDetail;
     let prevLevelOfDetail;

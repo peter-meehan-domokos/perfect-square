@@ -7,9 +7,8 @@ import PerfectSquareHeader from './header/page';
 import perfectSquareLayout from './perfectSquareLayout';
 import perfectSquareComponent from "./perfectSquareComponent";
 import { renderCharts } from './d3RenderFunctions';
-import { DEFAULT_SETTINGS, SELECT_MEASURE_TOOLTIP, LOADING_TOOLTIP } from "./constants.js";
+import { DEFAULT_SIMULATION_SETTINGS, SELECT_MEASURE_TOOLTIP, LOADING_TOOLTIP } from "./constants.js";
 import { CHART_OUT_DURATION, ZOOM_AND_ARRANGE_TRANSITION_DURATION } from '@/app/constants';
-import { isArranged } from './helpers';
 import { useZoom } from './zoom';
 import { useContainerDimensions } from './containerDimensions';
 import { useGrid } from './grid'
@@ -19,6 +18,9 @@ import { useSimulation } from './simulation';
 //@todo - try putting curretnX, or an _x accessro on each d in here....do these ds themselves get mutated
   //by the sim. if not, we need to start recognising teh difference between data that has been through the layout,
   //and data that has then been binded to the dom and may be mutated by d3, so theres 3 layers of data, not just 2
+
+//next - finsih what i started - i moved settings into simulation, so rpevArrageByRef is th3re too, and so on, must get it working
+//need to move teh setting of prevArranegBy maybe or maybe not, as it can still be updated in te main render
 /*
 issues
  - flash at the start of render
@@ -44,21 +46,21 @@ issues
  * @returns {HTMLElement} A div that wraps VisualHeader component and an svg. The svg contains a g for the zoom 
  * that is applied in a useEffect, and a g which contains the charts whcih are rendered in a useEffect.
  */
-const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections={}, initSettings=DEFAULT_SETTINGS, loading=true }) => {
-  //console.log("PerfectSquare key", data.key)
+const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections={}, initSimulationSettings=DEFAULT_SIMULATION_SETTINGS, loading=true }) => {
   const { initSelectedChartKey="", initSelectedMeasureKey="", initSelectedQuadrantIndex=null } = initSelections;
-  //set up the vis components
+  //set up the vis component
   const perfectSquare = useMemo(() => perfectSquareComponent(), []);
-  //refs
+  //dom refs
   const containerDivRef = useRef(null);
   const visContentsGRef = useRef(null);
   const viewGRef = useRef(null);
 
   //other data that doesnt trigger re-renders
   const cleanupInProgressRef = useRef(false);
-  const prevArrangeByRef = useRef(null);
 
   const [visData, setVisData] = useState(null);
+  //@todo destructure, but check it doesnt affect the app elsewhere, as we will need to set visData to be {} not null
+  //const { datapoints, info } = visData
   console.log("visData", visData?.key, visData?.datapoints?.length)
   const containerDimns = useContainerDimensions(containerDivRef);
   const { width, height, margin, contentsWidth, contentsHeight } = containerDimns;
@@ -71,18 +73,25 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
   const [selectedChartKey, setSelectedChartKey] = useState(initSelectedChartKey);
   const [selectedQuadrantIndex, setSelectedQuadrantIndex] = useState(initSelectedQuadrantIndex);
   const [selectedMeasureKey, setSelectedMeasureKey] = useState(initSelectedMeasureKey);
-  const [settings, setSettings] = useState(initSettings || DEFAULT_SETTINGS)
+  
+  //layout applied to data
+  const perfectSquareData = useMemo(() => perfectSquareLayout(visData, { grid }), 
+    [visData, JSON.stringify(grid)]);
 
-  //some derived properties and functions
-  const { arrangeBy } = settings;
-  const dataIsArranged = isArranged(arrangeBy);
-  //chart dimns and position accessors
-  //@todo - call the full reudction function here instead of 0.7 *
-  const chartWidth = dataIsArranged ? 0.7 * cellWidth : cellWidth;
-  const chartHeight = dataIsArranged ? 0.7 * cellHeight : cellHeight;
+  //simulation
+  //issue - sim needs the prefectsquaredata as it has the metainfo eg mean, but layout needs to know if sim is on!
+  //change data to { nodesData, info }
+  const simulationData = { nodesData:perfectSquareData?.datapoints || [], info:perfectSquareData?.info || {} }
+  const { simulationSettings, setSimulationSettings, nodeWidth, nodeHeight, simulationIsOn, prevArrangeByRef } = useSimulation(containerDivRef, simulationData, contentsWidth, contentsHeight, cellWidth, cellHeight, initSimulationSettings)
+  const { arrangeBy } = simulationSettings;
+
+  //some derived properties and functions  
+  //chart dimns and position accessors - use node sizes if arrangement simulation is on
+  const chartWidth = simulationIsOn ? nodeWidth : cellWidth;
+  const chartHeight = simulationIsOn ? nodeHeight : cellHeight;
   const chartMargin = cellMargin;
-  const _chartX = dataIsArranged ? d => d.x : d => d.cellX;
-  const _chartY = dataIsArranged ? d => d.y : d => d.cellY;
+  const _chartX = simulationIsOn ? d => d.x : d => d.cellX;
+  const _chartY = simulationIsOn ? d => d.y : d => d.cellY;
   const { key, title, desc, info, categories, datapoints } = visData || {}
   const headerData = { key, title, categories, desc, info, nrDatapoints:datapoints?.length }
 
@@ -92,13 +101,6 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
 
   const { setHeaderTooltipsData, setChartsViewboxTooltipsData, setLoadingData } = useTooltips(containerDivRef, width, height);
 
-   //layout applied to data
-   const perfectSquareData = useMemo(() => perfectSquareLayout(visData, { grid, dataIsArranged }), 
-   [visData, JSON.stringify(grid), dataIsArranged]);
-
-  //simulation
-  const { } = useSimulation(containerDivRef, perfectSquareData, contentsWidth, contentsHeight, chartWidth, chartHeight, settings.arrangeBy, prevArrangeByRef)
-  
   //loading tooltip
   useEffect(() => {
     setLoadingData(loading ? [LOADING_TOOLTIP] : []);
@@ -176,7 +178,7 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
 
     //call charts
     console.log("fullrender/update")
-    renderCharts.call(visContentsGRef.current, perfectSquareData.datapoints, perfectSquare, dataIsArranged, {
+    renderCharts.call(visContentsGRef.current, perfectSquareData.datapoints, perfectSquare, simulationIsOn, {
       updateTransformTransition: arrangementHasChanged ? { duration:ZOOM_AND_ARRANGE_TRANSITION_DURATION } : null
     });
 
@@ -208,13 +210,13 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
     <div className="viz-root">
       <PerfectSquareHeader 
         data={headerData} 
-        settings={settings}
+        settings={simulationSettings}
         zoomTransform={zoomTransformState}
         headerExtended={headerExtended} 
         setHeaderExtended={setHeaderExtended} 
         selectedQuadrantIndex={selectedQuadrantIndex}
         setSelectedQuadrantIndex={setSelectedQuadrantIndex}
-        setSettings={setSettings}
+        setSettings={setSimulationSettings}
         resetZoom={resetZoom}
         setTooltipsData={setHeaderTooltipsData}
       />

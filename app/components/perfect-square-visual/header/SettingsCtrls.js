@@ -3,7 +3,7 @@ import React, { useRef } from 'react';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';
 import Checkbox from '@mui/material/Checkbox';
-import { DEFAULT_SETTINGS, SETTINGS_OPTIONS, ARRANGEMENT_OPTIONS } from "../constants.js";
+import { DEFAULT_SIMULATION_SETTINGS, SETTINGS_OPTIONS, ARRANGEMENT_OPTIONS } from "../constants.js";
 
 //these objects are applied to the checkbox and label roots, using the sx prop
 //see https://www.youtube.com/watch?v=gw30zyh3Irw&t=806s
@@ -30,7 +30,7 @@ const FormControlLabelStyle = {
  * @param {string} name .....
  * @returns {ReactNode} A React element that renders....
  */
-const SettingsCtrls = ({ settings=DEFAULT_SETTINGS, setSettings, setTooltipsData }) => {
+const SettingsCtrls = ({ settings=DEFAULT_SIMULATION_SETTINGS, setSettings, setTooltipsData }) => {
   const mouseOverRef = useRef("");
   const handleSettingsChange = (checkboxKey, checkboxValue) => {
     //remove tooltip as it has been clicked

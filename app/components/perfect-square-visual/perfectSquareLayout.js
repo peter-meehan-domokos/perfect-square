@@ -12,17 +12,11 @@ import { percentageScoreConverter } from '../../helpers/dataHelpers';
  * @returns {object} the processed data object, in the format that the perfectSquareComponent can interpret
  */
  function perfectSquareLayout(data, settings={}){
-    console.log("layout", data?.key)
     if(!data || !settings.grid) { return {}; }
     const { measures, datapoints } = data;
-    const { grid:{ _cellX, _cellY, _rowNr, _colNr }, dataIsArranged } = settings;
-    console.log("grid", settings.grid)
+    const { grid:{ _cellX, _cellY, _rowNr, _colNr } } = settings;
 
     const datapointsWithOrderedMeasures = datapoints.map((datapoint,i) => {
-        const cellX =  _cellX(_rowNr(i));
-        //console.log("datapoint", datapoint)
-        //console.log("cellx", cellX)
-        //const cellY =  _cellY(_colNr(i));
         return {
             key:datapoint.key,
             title:datapoint.title,
@@ -113,9 +107,10 @@ import { percentageScoreConverter } from '../../helpers/dataHelpers';
         measures, 
         datapoints: datapointsWithSummaryInfoAndPosition,
         info:{
+            ...data.info,
             mean:{ min:minMean, max:maxMean, range:meanRange, order:"low-to-high" },
             deviation:{ min:minDeviation, max: maxDeviation, range:deviationRange, order:"high-to-low" },
-            //date - this will be position if there are dates
+            //position will be used as a default date arrangement if there are dates
             position:{ min: 0, max: datapoints.length, range:datapoints.length, order:"low-to-high" },
         }
     }

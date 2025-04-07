@@ -6,8 +6,6 @@ export const LEVELS_OF_DETAIL = [1,2,3];
 //these values base_sizes (derived from the chart width and height essentially)
 export const LEVELS_OF_DETAIL_THRESHOLDS = [90, 220]; //note - level 2 below 90 has poor performance as too many charts
 
-export const CHART_SIZE_REDUCTION_FACTOR_FOR_SIM = 0.6;
-
 export const SETTINGS_OPTIONS = {
     arrangeBy:[
         { 
@@ -63,7 +61,7 @@ export const LOADING_TOOLTIP = {
     }
 }
 
-export const DEFAULT_SETTINGS = { 
+export const DEFAULT_SIMULATION_SETTINGS = { 
     arrangeBy:{ x: "", y:"", colour:"" }
 }
 
