@@ -34,7 +34,7 @@ export const useZoom = (containerElementRef, viewGRef, containerDimns, chartWidt
         .duration(ZOOM_AND_ARRANGE_TRANSITION_DURATION)
           .call(zoomRef.current.transform, d3.zoomIdentity);
     }else{
-      d3.select(containerElementRef.current).call(zoom.transform, d3.zoomIdentity);
+      d3.select(containerElementRef.current).call(zoomRef.current.transform, d3.zoomIdentity);
     }
   }
 

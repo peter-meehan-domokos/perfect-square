@@ -12,7 +12,7 @@ import { percentageScoreConverter } from '../../helpers/dataHelpers';
  * @returns {object} the processed data object, in the format that the perfectSquareComponent can interpret
  */
  function perfectSquareLayout(data, settings={}){
-    if(!data || !settings.grid) { return {}; }
+    if(!data || !settings.grid || !data.datapoints) { return data; }
     const { measures, datapoints } = data;
     const { grid:{ _cellX, _cellY, _rowNr, _colNr } } = settings;
 

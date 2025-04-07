@@ -8,7 +8,7 @@ import { FADE_IN_OUT_DURATION } from '@/app/constants';
 export const useTooltips = (containerRef, width, height) => {
     const [headerTooltipsData, setHeaderTooltipsData] = useState([]);
     const [chartsViewboxTooltipsData, setChartsViewboxTooltipsData] = useState([]);
-    const [loadingData, setLoadingData] = useState([]);
+    const [loadingTooltipsData, setLoadingTooltipsData] = useState([]);
 
     const tooltip = useMemo(() => tooltipComponent(), []);
 
@@ -16,12 +16,12 @@ export const useTooltips = (containerRef, width, height) => {
         const tooltipsData = [
         ...headerTooltipsData, 
         ...chartsViewboxTooltipsData,
-        ...loadingData
+        ...loadingTooltipsData
         ];
         renderTooltips.call(containerRef.current, tooltipsData, tooltip, width, height);
-    }, [width, headerTooltipsData, chartsViewboxTooltipsData, loadingData])
+    }, [width, headerTooltipsData, chartsViewboxTooltipsData, loadingTooltipsData])
     
-    return { setHeaderTooltipsData, setChartsViewboxTooltipsData, setLoadingData }
+    return { setHeaderTooltipsData, setChartsViewboxTooltipsData, setLoadingTooltipsData }
 
 };
 

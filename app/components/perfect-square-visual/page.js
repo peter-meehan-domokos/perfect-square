@@ -1,37 +1,20 @@
 /* eslint react-hooks/exhaustive-deps: 0 */
 
 'use client'
-import React, { useState, useEffect, useRef, useMemo } from 'react'
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import * as d3 from 'd3';
 import PerfectSquareHeader from './header/page';
 import perfectSquareLayout from './perfectSquareLayout';
 import perfectSquareComponent from "./perfectSquareComponent";
 import { renderCharts } from './d3RenderFunctions';
 import { DEFAULT_SIMULATION_SETTINGS, SELECT_MEASURE_TOOLTIP, LOADING_TOOLTIP } from "./constants.js";
-import { CHART_OUT_DURATION, ZOOM_AND_ARRANGE_TRANSITION_DURATION } from '@/app/constants';
+import { ZOOM_AND_ARRANGE_TRANSITION_DURATION } from '@/app/constants';
 import { useZoom } from './zoom';
 import { useContainerDimensions } from './containerDimensions';
 import { useGrid } from './grid'
 import { useTooltips } from './useTooltips';
 import { useSimulation } from './simulation';
-//@todo - move state into Redux or useContext
-//@todo - try putting curretnX, or an _x accessro on each d in here....do these ds themselves get mutated
-  //by the sim. if not, we need to start recognising teh difference between data that has been through the layout,
-  //and data that has then been binded to the dom and may be mutated by d3, so theres 3 layers of data, not just 2
-
-//next - finsih what i started - i moved settings into simulation, so rpevArrageByRef is th3re too, and so on, must get it working
-//need to move teh setting of prevArranegBy maybe or maybe not, as it can still be updated in te main render
-/*
-issues
- - flash at the start of render
- - there is some slight ovement at teh end of a zoom when a quad is selected
- - the newly on screen charts at teh end of reset zoom appear late you can see them render
- unless its others -> need o check teh checker is actually working aswell
-
- - need to check im not passing stuff to hooks that are coupled to tehe perfectsquare visual eg perfectSquare component
-
- - sort out filenaming ..should they all be useSimulation, or remove use form tooltips one. also folder for hooks and another for d4components like tooltip and pefectSqaure?
-*/
+import { useDataChangeManagement } from './data-change-management';
 
 /**
  * @description  Prepares the data by passing it through the layout function, maintains the state of the visual
@@ -48,93 +31,68 @@ issues
  */
 const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections={}, initSimulationSettings=DEFAULT_SIMULATION_SETTINGS, loading=true }) => {
   const { initSelectedChartKey="", initSelectedMeasureKey="", initSelectedQuadrantIndex=null } = initSelections;
-  //set up the vis component
-  const perfectSquare = useMemo(() => perfectSquareComponent(), []);
+  //header state - can be extended on smaller screens where it is not displayed in full
+  const [headerExtended, setHeaderExtended] = useState(false);
+  //selection state
+  const [selectedChartKey, setSelectedChartKey] = useState(initSelectedChartKey);
+  const [selectedQuadrantIndex, setSelectedQuadrantIndex] = useState(initSelectedQuadrantIndex);
+  const [selectedMeasureKey, setSelectedMeasureKey] = useState(initSelectedMeasureKey);
+
   //dom refs
   const containerDivRef = useRef(null);
   const visContentsGRef = useRef(null);
   const viewGRef = useRef(null);
 
-  //other data that doesnt trigger re-renders
-  const cleanupInProgressRef = useRef(false);
+  //managedData - control the way that a complete change of data is handled
+  const cleanup = () => {
+    setSelectedChartKey("");
+    setSelectedQuadrantIndex(null);
+    setSelectedMeasureKey("");
+    if(resetZoom){ resetZoom(false); } //needs a guard as not defined till further down
+  }
+  const { managedData } = useDataChangeManagement(visContentsGRef, data, cleanup);
+  const { key, title, desc, info, categories, datapoints } = managedData;
 
-  const [visData, setVisData] = useState(null);
-  //@todo destructure, but check it doesnt affect the app elsewhere, as we will need to set visData to be {} not null
-  //const { datapoints, info } = visData
-  console.log("visData", visData?.key, visData?.datapoints?.length)
+  //container dimensions
   const containerDimns = useContainerDimensions(containerDivRef);
   const { width, height, margin, contentsWidth, contentsHeight } = containerDimns;
 
-  const grid = useGrid(contentsWidth, contentsHeight, visData?.datapoints?.length);
+  //grid - the default display
+  const grid = useGrid(contentsWidth, contentsHeight, managedData?.datapoints?.length);
   const { cellWidth, cellHeight, cellMargin } = grid;
-
-  //state
-  const [headerExtended, setHeaderExtended] = useState(false);
-  const [selectedChartKey, setSelectedChartKey] = useState(initSelectedChartKey);
-  const [selectedQuadrantIndex, setSelectedQuadrantIndex] = useState(initSelectedQuadrantIndex);
-  const [selectedMeasureKey, setSelectedMeasureKey] = useState(initSelectedMeasureKey);
   
-  //layout applied to data
-  const perfectSquareData = useMemo(() => perfectSquareLayout(visData, { grid }), 
-    [visData, JSON.stringify(grid)]);
+  //layout function - puts data into format expected by perfectSquare component
+  const perfectSquareData = useMemo(() => perfectSquareLayout(managedData, { grid }), 
+    [managedData, JSON.stringify(grid)]);
 
-  //simulation
-  //issue - sim needs the prefectsquaredata as it has the metainfo eg mean, but layout needs to know if sim is on!
-  //change data to { nodesData, info }
+  //simulation - turns on when user selects an 'arrangeBy' setting
   const simulationData = { nodesData:perfectSquareData?.datapoints || [], info:perfectSquareData?.info || {} }
   const { simulationSettings, setSimulationSettings, nodeWidth, nodeHeight, simulationIsOn, prevArrangeByRef } = useSimulation(containerDivRef, simulationData, contentsWidth, contentsHeight, cellWidth, cellHeight, initSimulationSettings)
   const { arrangeBy } = simulationSettings;
 
-  //some derived properties and functions  
   //chart dimns and position accessors - use node sizes if arrangement simulation is on
   const chartWidth = simulationIsOn ? nodeWidth : cellWidth;
   const chartHeight = simulationIsOn ? nodeHeight : cellHeight;
   const chartMargin = cellMargin;
   const _chartX = simulationIsOn ? d => d.x : d => d.cellX;
   const _chartY = simulationIsOn ? d => d.y : d => d.cellY;
-  const { key, title, desc, info, categories, datapoints } = visData || {}
+
+  //data for the Header component
   const headerData = { key, title, categories, desc, info, nrDatapoints:datapoints?.length }
+
+  //main vis component
+  const perfectSquare = useMemo(() => perfectSquareComponent(), []);
 
   //zoom
   const onZoomStart = () => { setSelectedChartKey(""); }
   const { zoomTransformState, zoomTo, resetZoom } = useZoom(containerDivRef, viewGRef, containerDimns, chartWidth, chartHeight, perfectSquare, _chartX, _chartY, onZoomStart);
 
+  //tooltips
   const { setHeaderTooltipsData, setChartsViewboxTooltipsData, setLoadingData } = useTooltips(containerDivRef, width, height);
-
   //loading tooltip
   useEffect(() => {
-    setLoadingData(loading ? [LOADING_TOOLTIP] : []);
+    setLoadingTooltipsData(loading ? [LOADING_TOOLTIP] : []);
   },[loading])
-
-  //data change/load
-  useEffect(() => {
-    //reset perfectSquare component if required
-    const cleanupNeeded = visContentsGRef.current && !d3.select(visContentsGRef.current).selectAll(".chart").empty() && !cleanupInProgressRef.current;
-    if(cleanupNeeded){
-      cleanupInProgressRef.current = true;
-      dataWaitingRef.current = data;
-      setTimeout(() => {
-        setSelectedQuadrantIndex(null);
-        setSelectedChartKey("");
-        setSelectedMeasureKey("");
-        resetZoom(false);
-        cleanupInProgressRef.current = false;
-        //load the waiting data
-        const dataToRender = dataWaitingRef.current;
-        dataWaitingRef.current = null;
-        setSizesAndTriggerDataRendering(dataToRender);
-
-      }, CHART_OUT_DURATION);
-    }else if(cleanupInProgressRef.current){
-      //update dataWaiting to the latest
-      dataWaitingRef.current = data;
-    }else{
-      //safe to load new data immediately
-      //setSizesAndTriggerDataRendering(data);
-      setVisData(data);
-    }
-  },[data.key])
-
 
   //apply dimensions
   useEffect(() => {
