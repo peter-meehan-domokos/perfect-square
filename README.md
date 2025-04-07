@@ -84,7 +84,7 @@ Naming Conventions
 | 	e	| 		| 	A dom event - either a source event or a D3 pseudo event that may or may not contain a source event |
 | 	d, myComponentD	| chartD, tooltipD | Represents a datum, which is a datapoint that has been through a layout function and been binded to a dom element	| 	
 | 	x , y	| 	Horizontal and vertical dimensions	| 
-| _ underscore | _width | A function that takes a datapoint or datum and return the described value |
+| _ underscore | _width | Used for simple functions, esp to distinguish between variables of the same name. |
 | 	Dom Elements	| 	chartG, contentsG	| 	Names that refer to dom elements should always add the name of the element on the end |
 | componentLayout (D3 not React) | perfectSquareLayout | Reserved for functions that take data and prepare it for the component of the same name |
 | component (D3 not React) | perfectSquareComponent | Reserved for functions that take a selection and render an svg component, and often have a settings api |
