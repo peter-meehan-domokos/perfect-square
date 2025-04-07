@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
-import { isNumber } from '../../../helpers/dataHelpers';
-import { remove, fadeIn } from '../../../helpers/domHelpers';
+import { isNumber } from '../../../_helpers/dataHelpers';
+import { remove, fadeIn } from '../../../_helpers/domHelpers';
 import { COLOURS } from "../../../constants";
 import { CHART_IN_TRANSITION } from '../../../constants';
 import { resetIcon } from "../../../assets/svgIcons";

@@ -1,7 +1,7 @@
 'use client'
-import { useFetch } from '@/app/api-requests/fetch-hooks';
+import { useFetch } from '@/app/_api-requests/fetch-hooks';
 import { useEffect, useState } from "react";
-import PerfectSquareVisual from '../perfect-square-visual/page';
+import PerfectSquareVisual from '../_perfect-square-visual/page';
 
 const GET_EXAMPLE_DATA = exampleKey => `
   {

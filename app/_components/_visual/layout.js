@@ -1,5 +1,5 @@
 'use client';
-import Header from "../header/page"
+import Header from "../_header/page"
 export default function VisualLayout({ menuItems=[], selected, onSelect=()=>{}, openIntro=()=>{}, children }) {
   return (
     <>

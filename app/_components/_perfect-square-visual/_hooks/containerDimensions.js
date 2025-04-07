@@ -1,8 +1,8 @@
 'use client'
 import { useState, useEffect } from "react";
-import { CONTAINER_MARGIN } from "./constants.js";
-import { applyMargin } from './helpers';
-import { getElementDimns } from '@/app/helpers/domHelpers';
+import { CONTAINER_MARGIN } from "../constants.js";
+import { applyMargin } from '../helpers';
+import { getElementDimns } from '@/app/_helpers/domHelpers';
 
 export const useContainerDimensions = (containerRef) => {
   const [width, setWidth] = useState(0);

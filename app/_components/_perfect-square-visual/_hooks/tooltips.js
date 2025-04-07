@@ -1,8 +1,8 @@
 'use client'
 import * as d3 from "d3";
 import { useState, useEffect, useMemo } from "react";
-import tooltipComponent from "../d3HelperComponents/tooltipComponent";
-import { remove } from '../../helpers/domHelpers';
+import tooltipComponent from "../_svgComponents/_tooltip/component";
+import { remove } from '../../../_helpers/domHelpers';
 import { FADE_IN_OUT_DURATION } from '@/app/constants';
 
 export const useTooltips = (containerRef, width, height) => {

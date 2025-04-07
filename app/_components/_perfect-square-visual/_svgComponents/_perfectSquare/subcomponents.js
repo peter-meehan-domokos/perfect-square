@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
-import { remove, fadeIn } from '../../helpers/domHelpers';
-import { chartPathD, quadrantPathD, quadrantTransform } from './d3DomHelpers';
+import { remove, fadeIn } from '../../../../_helpers/domHelpers';
+import { chartPathD, quadrantPathD, quadrantTransform } from './helpers';
 import { FADE_IN_OUT_DURATION } from '@/app/constants';
 
 /**

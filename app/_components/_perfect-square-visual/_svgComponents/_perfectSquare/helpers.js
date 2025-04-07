@@ -1,7 +1,7 @@
 
 import * as d3 from 'd3';
-import { isNumber } from '../../helpers/dataHelpers';
-import { immutableReverse } from '@/app/helpers/ArrayHelpers';
+import { isNumber } from '../../../../_helpers/dataHelpers';
+import { immutableReverse } from '@/app/_helpers/arrayHelpers';
 
 export function quadrantsContainerTransform(selection, width, height, selectedQuadrantIndex){
     const chartTransformOrigin = 

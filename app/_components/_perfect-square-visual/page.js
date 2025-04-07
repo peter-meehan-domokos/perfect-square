@@ -1,20 +1,20 @@
 /* eslint react-hooks/exhaustive-deps: 0 */
 
 'use client'
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import * as d3 from 'd3';
-import PerfectSquareHeader from './header/page';
-import perfectSquareLayout from './perfectSquareLayout';
-import perfectSquareComponent from "./perfectSquareComponent";
-import { renderCharts } from './d3RenderFunctions';
+import PerfectSquareHeader from './_header/page';
+import perfectSquareLayout from './_svgComponents/_perfectSquare/layout';
+import perfectSquareComponent from "./_svgComponents/_perfectSquare/component";
+import renderCharts from './renderCharts';
 import { DEFAULT_SIMULATION_SETTINGS, SELECT_MEASURE_TOOLTIP, LOADING_TOOLTIP } from "./constants.js";
 import { ZOOM_AND_ARRANGE_TRANSITION_DURATION } from '@/app/constants';
-import { useZoom } from './zoom';
-import { useContainerDimensions } from './containerDimensions';
-import { useGrid } from './grid'
-import { useTooltips } from './useTooltips';
-import { useSimulation } from './simulation';
-import { useDataChangeManagement } from './data-change-management';
+import { useZoom } from './_hooks/zoom';
+import { useContainerDimensions } from './_hooks/containerDimensions';
+import { useGrid } from './_hooks/grid'
+import { useTooltips } from './_hooks/tooltips';
+import { useSimulation } from './_hooks/simulation';
+import { useDataChangeManagement } from './_hooks/dataChangeManagement';
 
 /**
  * @description  Prepares the data by passing it through the layout function, maintains the state of the visual
@@ -58,7 +58,7 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
   const { width, height, margin, contentsWidth, contentsHeight } = containerDimns;
 
   //grid - the default display
-  const grid = useGrid(contentsWidth, contentsHeight, managedData?.datapoints?.length);
+  const grid = useGrid(contentsWidth, contentsHeight, managedData.datapoints?.length);
   const { cellWidth, cellHeight, cellMargin } = grid;
   
   //layout function - puts data into format expected by perfectSquare component
@@ -70,7 +70,7 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
   const { simulationSettings, setSimulationSettings, nodeWidth, nodeHeight, simulationIsOn, prevArrangeByRef } = useSimulation(containerDivRef, simulationData, contentsWidth, contentsHeight, cellWidth, cellHeight, initSimulationSettings)
   const { arrangeBy } = simulationSettings;
 
-  //chart dimns and position accessors - use node sizes if arrangement simulation is on
+  //chart dimns and position accessors - use node sizes if simulation is on (ie arrangeBy has been set)
   const chartWidth = simulationIsOn ? nodeWidth : cellWidth;
   const chartHeight = simulationIsOn ? nodeHeight : cellHeight;
   const chartMargin = cellMargin;
@@ -80,7 +80,7 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
   //data for the Header component
   const headerData = { key, title, categories, desc, info, nrDatapoints:datapoints?.length }
 
-  //main vis component
+  //initialise the main vis component
   const perfectSquare = useMemo(() => perfectSquareComponent(), []);
 
   //zoom
@@ -88,11 +88,9 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
   const { zoomTransformState, zoomTo, resetZoom } = useZoom(containerDivRef, viewGRef, containerDimns, chartWidth, chartHeight, perfectSquare, _chartX, _chartY, onZoomStart);
 
   //tooltips
-  const { setHeaderTooltipsData, setChartsViewboxTooltipsData, setLoadingData } = useTooltips(containerDivRef, width, height);
-  //loading tooltip
-  useEffect(() => {
-    setLoadingTooltipsData(loading ? [LOADING_TOOLTIP] : []);
-  },[loading])
+  const { setHeaderTooltipsData, setChartsViewboxTooltipsData, setLoadingTooltipsData } = useTooltips(containerDivRef, width, height);
+  //set loading tooltip
+  useEffect(() => { setLoadingTooltipsData(loading ? [LOADING_TOOLTIP] : []); },[loading])
 
   //apply dimensions
   useEffect(() => {
@@ -134,8 +132,7 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
     //position the contentsG
     d3.select(visContentsGRef.current).attr("transform", `translate(${margin.left}, ${margin.top})`);
 
-    //call charts
-    console.log("fullrender/update")
+    //call charts, smoothly transitioning the chart positions if the arrangement has changed
     renderCharts.call(visContentsGRef.current, perfectSquareData.datapoints, perfectSquare, simulationIsOn, {
       updateTransformTransition: arrangementHasChanged ? { duration:ZOOM_AND_ARRANGE_TRANSITION_DURATION } : null
     });
@@ -147,16 +144,15 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
 
   //light update for settings changes (the changes are added in an earlier useEffect)
   useEffect(() => {
-    console.log("light update")
     d3.select(visContentsGRef.current).selectAll(".chart").call(perfectSquare)
   }, [selectedChartKey, selectedQuadrantIndex, selectedMeasureKey])
 
 
   //Selected measure change
   useEffect(() => {
-    //for now, just show a tooltip
     if(selectedMeasureKey){
       setChartsViewboxTooltipsData([SELECT_MEASURE_TOOLTIP])
+      //remove after 3 secs
       setTimeout(() => { 
         setChartsViewboxTooltipsData([]); 
         setSelectedMeasureKey("");

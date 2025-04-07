@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
-import { remove } from '../../helpers/domHelpers';
-import textWrapComponent from './textWrap';
+import { remove } from '../../../../_helpers/domHelpers';
+import textWrapComponent from '../_textWrap/component';
 
 const TOOLTIP_OPACITY = 0.85;
 

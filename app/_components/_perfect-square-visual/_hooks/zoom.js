@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect, useRef, useCallback } from "react";
 import * as d3 from 'd3';
-import { isArranged, isChartOnScreenCheckerFunc, calcZoomTransformFunc } from "./helpers";
+import { isArranged, isChartOnScreenCheckerFunc, calcZoomTransformFunc } from "../helpers";
 import { ZOOM_AND_ARRANGE_TRANSITION_DURATION } from '@/app/constants';
 
 /*

@@ -1,10 +1,10 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { useFetch } from '@/app/api-requests/fetch-hooks';
-import Intro from '../intro/page';
-import VisualLayout from '../visual/layout';
-import Visual from '../visual/page';
-import { setUpDeviceDetection } from "@/app/helpers/deviceDetectionHelpers";
+import { useFetch } from '@/app/_api-requests/fetch-hooks';
+import Intro from '../_intro/page';
+import VisualLayout from '../_visual/layout';
+import Visual from '../_visual/page';
+import { setUpDeviceDetection } from "@/app/_helpers/deviceDetectionHelpers";
 
 const GET_EXAMPLES = `
   query getExamples{

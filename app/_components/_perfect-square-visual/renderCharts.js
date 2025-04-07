@@ -1,7 +1,6 @@
 import * as d3 from 'd3';
-import { remove, fadeIn } from '../../helpers/domHelpers';
+import { remove, fadeIn } from '../../_helpers/domHelpers';
 import { CHART_IN_TRANSITION, CHART_OUT_TRANSITION } from '@/app/constants';
-import { isArray } from '@apollo/client/utilities';
 
 /**
  * @description Runs the datapoints through a D3 enter-update-exit pattern to render the charts, and filters out those not on screen
@@ -12,7 +11,7 @@ import { isArray } from '@apollo/client/utilities';
  * to position each chart is applied by the force rather than here 
  * 
  */
-export function renderCharts(datapoints, perfectSquare, dataIsArranged, options={}){
+function renderCharts(datapoints, perfectSquare, dataIsArranged, options={}){
     if(!Array.isArray(datapoints)){ return; }
     
     const { updateTransformTransition } = options;
@@ -44,3 +43,6 @@ export function renderCharts(datapoints, perfectSquare, dataIsArranged, options=
 
     chartG.exit().call(remove, { transition:CHART_OUT_TRANSITION })
 }
+
+
+export default renderCharts;

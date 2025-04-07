@@ -1,6 +1,6 @@
 'use client'
 import { useState, useCallback, useEffect } from "react";
-import { CALC_CELL_MARGIN } from "./constants";
+import { CALC_CELL_MARGIN } from "../constants";
 
 const _cellXCalculator = cellWidth => colNr => colNr * cellWidth;
 const _cellYCalculator = cellHeight => rowNr => rowNr * cellHeight;

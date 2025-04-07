@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
-import { sortAscending, sortDescending } from '../../helpers/ArrayHelpers';
-import { percentageScoreConverter } from '../../helpers/dataHelpers';
+import { sortAscending, sortDescending } from '../../../../_helpers/arrayHelpers';
+import { percentageScoreConverter } from '../../../../_helpers/dataHelpers';
 
 /**
  * @description converts the data it receives into the format expected by the perfectSquareComponent (d3 layout pattern),

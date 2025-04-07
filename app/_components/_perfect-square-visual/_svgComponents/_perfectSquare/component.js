@@ -1,10 +1,10 @@
 import * as d3 from 'd3';
-import { header, quadrantsSummary, quadrants, chartOutlinePath } from './subComponents';
-import { quadrantsContainerTransform } from './d3DomHelpers';
-import { isNumber } from '../../helpers/dataHelpers';
-import { calcLevelOfDetailFromBase, getDisabledLevelsForZoom } from './helpers';
-import { COLOURS } from "../../constants";
-import { DEFAULT_SIMULATION_SETTINGS } from './constants';
+import { header, quadrantsSummary, quadrants, chartOutlinePath } from './subcomponents';
+import { quadrantsContainerTransform } from './helpers';
+import { isNumber } from '../../../../_helpers/dataHelpers';
+import { calcLevelOfDetailFromBase, getDisabledLevelsForZoom } from '../../helpers';
+import { COLOURS } from "../../../../constants";
+import { DEFAULT_SIMULATION_SETTINGS } from '../../constants';
 
 const { BLUE, GREY, DARK_GREY } = COLOURS;
 
