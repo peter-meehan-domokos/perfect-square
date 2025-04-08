@@ -93,6 +93,9 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
   //set loading tooltip
   useEffect(() => { setLoadingTooltipsData(loading ? [LOADING_TOOLTIP] : []); },[loading])
 
+  //CHARTS RELATED USE-EFFECTS
+  //@todo - put all of these into a useCharts useEffect
+  
   //apply dimensions
   useEffect(() => {
     perfectSquare
@@ -149,7 +152,7 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
     });
   }, [arrangeBy])
 
-  //zooming in progress - note that dom will update due to zoom state changes
+  //zooming in progress flag - note that dom will update due to zoom state changes
   useEffect(() => {
     perfectSquare.zoomingInProgress(zoomingInProgress);
   }, [zoomingInProgress])
@@ -157,13 +160,9 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
   //update due to zoom
   useEffect(() => {
     if (!perfectSquareData || !perfectSquareData.datapoints) { return; }
-    //const onScreenChecker = isChartOnScreenCheckerFunc(contentsWidth, contentsHeight, chartWidth, chartHeight, _chartX, _chartY);
-    const datapointsOnScreen = perfectSquareData.datapoints
-      .filter(d => isChartOnScreenChecker(d, zoomTransformState))
-
+    const datapointsOnScreen = perfectSquareData.datapoints.filter(d => isChartOnScreenChecker(d, zoomTransformState))
     //call charts, with no transitions
     renderCharts.call(visContentsGRef.current, datapointsOnScreen, perfectSquare, simulationIsOn);
-
   }, [zoomTransformState])
 
   //light update for settings changes (the changes are added in an earlier useEffect)

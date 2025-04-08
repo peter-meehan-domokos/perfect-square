@@ -2,6 +2,8 @@
 
 [Live demo here](https://peter-meehan-domokos.github.io/perfect-square/) 
 
+Note: still under development. Some minor issues exist, especially around manual zooming when simulation is on.
+
 ## Overview
 
 A novel 2D view of multivariate data, or n-dimensional vectors. It places particular focus on the shape of each datapoint, and how far away that shape is from an ideal standard. You can easily compare and group thousands of datapoints. Especially good at showing comparison against an ideal state. Also for visualising clustering and similarity ML algorithms, and for product quantization in a vector database search.
