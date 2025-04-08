@@ -329,7 +329,7 @@ function bars(selection, barsAreaHeight, barWidth, gapBetweenBars, settings={}){
                             .attr("fill", colour)
                 })
 
-        barG.exit().call(remove);
+        barG.exit().remove()//call(remove);
     })
 }
 
@@ -342,9 +342,12 @@ function bars(selection, barsAreaHeight, barWidth, gapBetweenBars, settings={}){
  * @returns {object} 
  */
 export function quadrantOutlinePath(selection, barsAreaHeight, barWidth, gapBetweenBars, settings={}){
+    //console.log("quadOutlinePath", selection.data()[0].key, selection.data())
     const { styles, shouldShowQuadrantPaths, colour } = settings;
     selection.each(function(quadD){
         const container = d3.select(this);
+        //const isEmpty = container.selectAll("g.quadrant-outline").empty();
+        //if(!isEmpty){ console.log("not empty")}
         //outline paths
         const outlineData = shouldShowQuadrantPaths ? [quadD.values] : [];
         const outlineG = container.selectAll("g.quadrant-outline").data(outlineData)
@@ -352,6 +355,7 @@ export function quadrantOutlinePath(selection, barsAreaHeight, barWidth, gapBetw
             .append("g")
                 .attr("class", "quadrant-outline")
                 .each(function(values){
+                    //console.log("enter")
                     d3.select(this).append("path")
                         .attr("class", "quadrant-outline")
                 })
@@ -364,7 +368,7 @@ export function quadrantOutlinePath(selection, barsAreaHeight, barWidth, gapBetw
                         .attr("d", quadrantPathD(values, quadD.i, barsAreaHeight, barWidth, gapBetweenBars))
                 })
 
-        outlineG.exit().call(remove);
+        outlineG.exit().remove()//call(remove);
     })
 
 }
@@ -380,22 +384,32 @@ export function quadrantOutlinePath(selection, barsAreaHeight, barWidth, gapBetw
 export function chartOutlinePath(selection, quadrantBarWidths, barsAreaHeight, gapBetweenBars, settings={}){
     const { colour, onClick=() => {}, shouldShowChartOutline } = settings;
 
+    //console.log("chartOutlinePath", selection.data()[0].key, selection.data())
     selection.each(function(data, i){
         const container = d3.select(this);
+        //const isEmpty = container.select("path.chart-outline").empty();
+        //if(!isEmpty){ console.log("not empty")}
 
         const chartOutlineData = shouldShowChartOutline ? [data] : [];
+        //console.log("i datakey outlineData", i, data.key, chartOutlineData)
+        //error - when level changes from 2 to 1, sometimes there are about 6 ds that 
+        //run this function but dont enter a path even though when you lok at teh dom, 
+        //its not entered, snd it shouldnt be because it only just went to level 1 on this run!
         const outlinePath = container.selectAll("path.chart-outline").data(chartOutlineData, d => d.key);
         outlinePath.enter()
             .append("path")
                 .attr("class", "chart-outline")
+                .each(function(){
+                    //console.log("entered")
+                })
                 .attr("cursor", "pointer")
                 .on("click", onClick)
                 .merge(outlinePath)
-                 //need this if sizes change eg sim turned on
-                 .attr("d", chartPathD(data, quadrantBarWidths, barsAreaHeight, gapBetweenBars))
+                //need this if sizes change eg sim turned on
+                .attr("d", chartPathD(data, quadrantBarWidths, barsAreaHeight, gapBetweenBars))
                 .attr("fill", colour)
 
-        outlinePath.exit().call(remove);
+        outlinePath.exit().remove()//call(remove);
 
     })
 }

@@ -14,34 +14,31 @@ import { CHART_IN_TRANSITION, CHART_OUT_TRANSITION } from '@/app/constants';
 function renderCharts(datapoints, perfectSquare, dataIsArranged, options={}){
     if(!Array.isArray(datapoints)){ return; }
     
-    const { updateTransformTransition } = options;
+    const { transitions={} } = options;
     const chartG = d3.select(this).selectAll("g.chart").data(datapoints, d => d.key);
         chartG.enter()
         .append("g")
             .attr("class", "chart")
             .attr("id", d => `chart-${d.key}`)
-            .call(fadeIn, { transition:CHART_IN_TRANSITION })
+            .call(fadeIn, { transition:transitions.enter || null })
             .attr("transform", function(d,i){
                 return dataIsArranged ? d3.select(this).attr("transform") : `translate(${d.cellX},${d.cellY})`
             })
             .merge(chartG)
             .each(function(d){
-                //console.log("d", d)
-                if(updateTransformTransition){
+                if(transitions.update){
                     d3.select(this)
                         .transition()
-                        .delay(updateTransformTransition.delay || 0)
-                        .duration(updateTransformTransition.duration)
+                        .delay(transitions.update.delay || 0)
+                        .duration(transitions.update.duration || 0)
                             .attr("transform", (d,i) => dataIsArranged ? null : `translate(${d.cellX},${d.cellY})`);
                 }else{
                     d3.select(this).attr("transform", (d,i) => dataIsArranged ? null : `translate(${d.cellX},${d.cellY})`);
                 }
             })
-            .attr("display", d => d.isOnScreen ? null : "none")
-            .filter(d => d.isOnScreen)
-            .call(perfectSquare);
+            .call(perfectSquare, { transitions });
 
-    chartG.exit().call(remove, { transition:CHART_OUT_TRANSITION })
+    chartG.exit().call(remove, { transition:transitions.exit || null })
 }
 
 

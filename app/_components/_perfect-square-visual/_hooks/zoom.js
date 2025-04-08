@@ -1,27 +1,20 @@
 'use client'
 import { useState, useEffect, useRef, useCallback } from "react";
 import * as d3 from 'd3';
-import { isArranged, isChartOnScreenCheckerFunc, calcZoomTransformFunc } from "../helpers";
-import { ZOOM_AND_ARRANGE_TRANSITION_DURATION } from '@/app/constants';
+import { isChartOnScreenCheckerFunc, calcZoomTransformFunc } from "../helpers";
+import { ZOOM_AND_ARRANGE_TRANSITION_DURATION, RESET_ZOOM_DURATION } from '@/app/constants';
 
-/*
-
- - remove need to pass perfectSquare, instead we just have callbacks specified to the circumstances 
-*/
-
-export const useZoom = (containerElementRef, viewGRef, containerDimns, chartWidth, chartHeight, perfectSquare, _chartX, _chartY, onStart) => {
+export const useZoom = (containerElementRef, viewGRef, containerDimns, chartWidth, chartHeight, perfectSquare, _chartX, _chartY, onStart=()=>{}) => {
   //zoom state is only used for React children ie Header as its also store in d3 zoom behaviour object
   const [zoomTransformState, setZoomTransformState] = useState(d3.zoomIdentity);
   const zoomRef = useRef(null);
 
   const { width, height, margin, contentsWidth, contentsHeight } = containerDimns;
 
-  //const isChartOnScreenChecker = () => useCallback((d, zoomTransform) => {
-  const isChartOnScreenChecker = (d, zoomTransform) => {
+  const isChartOnScreenChecker = useCallback((d, zoomTransform) => {
     const checker = isChartOnScreenCheckerFunc(contentsWidth, contentsHeight, chartWidth, chartHeight, _chartX, _chartY);
     return checker(d, zoomTransform);
-  //},[contentsWidth, contentsHeight, _chartX, _chartY])
-  }
+  },[contentsWidth, contentsHeight, chartWidth, chartHeight, _chartX, _chartY])
 
   const resetZoom = (withTransition=true) => { 
     if(!containerElementRef || !containerElementRef.current){ return; }
@@ -31,7 +24,7 @@ export const useZoom = (containerElementRef, viewGRef, containerDimns, chartWidt
 
       d3.select(containerElementRef.current)
         .transition()
-        .duration(ZOOM_AND_ARRANGE_TRANSITION_DURATION)
+        .duration(RESET_ZOOM_DURATION)
           .call(zoomRef.current.transform, d3.zoomIdentity);
     }else{
       d3.select(containerElementRef.current).call(zoomRef.current.transform, d3.zoomIdentity);
@@ -39,13 +32,10 @@ export const useZoom = (containerElementRef, viewGRef, containerDimns, chartWidt
   }
 
   const zoomTo = useCallback((chartD, cb=() => {}) => {
-    console.log("zoomTo-------------------------------------")
     if(!containerElementRef || !containerElementRef.current){ return; }
-    //when sim on, it still zooms in based on colnr
     const calcZoomTransform = calcZoomTransformFunc(contentsWidth, contentsHeight, margin, chartWidth, chartHeight, _chartX, _chartY);
     const transform = calcZoomTransform(chartD);
-    
-    //tell d3comp we are zooming to a level 3, so it can ignore level 2 (if we are at level 1)
+    //tell perfectSqaure it is zooming to a level 3, so it can ignore level 2 (if it starts at level 1)
     perfectSquare.zoomingInProgress({ targK:transform.k, sourceEvent:null })
     
     d3.select(containerElementRef.current)
@@ -54,13 +44,12 @@ export const useZoom = (containerElementRef, viewGRef, containerDimns, chartWidt
         .call(zoomRef.current.transform, transform)
         .on("end", function(){ cb(); })
 
-  },[contentsWidth, contentsHeight, _chartX, _chartY])
+  },[contentsWidth, contentsHeight, chartWidth, chartHeight, _chartX, _chartY]);
 
   useEffect(() => {
     if(!containerElementRef || !containerElementRef.current){ return; }
-    if (/*isFirstRenderRef.current || */!contentsWidth) { return; }
     if(!zoomRef.current){ zoomRef.current = d3.zoom(); }
-
+ 
     setupZoom(zoomRef.current, width, height, chartWidth, chartHeight, {
       onStart:onStart,
       onZoom:zoomed
@@ -72,22 +61,11 @@ export const useZoom = (containerElementRef, viewGRef, containerDimns, chartWidt
 
     function zoomed(e){
       d3.select(viewGRef.current).attr("transform", e.transform);
-
-      //update semantic zoom and virtualisation in the dom
-      d3.select(containerElementRef.current).selectAll("g.chart")
-        .each(function(d){ 
-          d.isOnScreen = isChartOnScreenChecker(d, e.transform); 
-        })
-        .attr("display", d => d.isOnScreen ? null : "none")
-        .filter(d => d.isOnScreen)
-        .call(perfectSquare
-          .zoomK(e.transform.k, true));
-
-      //update react state
+      //update react state so it can trigger any other changes needed
       setZoomTransformState(e.transform);
     }
     
-  },[width, height, contentsWidth, contentsHeight, _chartX, _chartY])
+  },[width, height, contentsWidth, contentsHeight, chartWidth, chartHeight, JSON.stringify(_chartX), JSON.stringify(_chartY)])
   
   return { zoomTransformState, zoomTo, resetZoom };
 

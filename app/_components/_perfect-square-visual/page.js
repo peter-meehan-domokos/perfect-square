@@ -8,13 +8,14 @@ import perfectSquareLayout from './_svgComponents/_perfectSquare/layout';
 import perfectSquareComponent from "./_svgComponents/_perfectSquare/component";
 import renderCharts from './renderCharts';
 import { DEFAULT_SIMULATION_SETTINGS, SELECT_MEASURE_TOOLTIP, LOADING_TOOLTIP } from "./constants.js";
-import { ZOOM_AND_ARRANGE_TRANSITION_DURATION } from '@/app/constants';
+import { ZOOM_AND_ARRANGE_TRANSITION_DURATION, CHART_IN_TRANSITION, CHART_OUT_TRANSITION } from '@/app/constants';
 import { useZoom } from './_hooks/zoom';
 import { useContainerDimensions } from './_hooks/containerDimensions';
-import { useGrid } from './_hooks/grid'
+import calcGrid from './_hooks/grid'
 import { useTooltips } from './_hooks/tooltips';
 import { useSimulation } from './_hooks/simulation';
 import { useDataChangeManagement } from './_hooks/dataChangeManagement';
+import { isChartOnScreenCheckerFunc } from "./helpers";
 
 /**
  * @description  Prepares the data by passing it through the layout function, maintains the state of the visual
@@ -57,24 +58,25 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
   const containerDimns = useContainerDimensions(containerDivRef);
   const { width, height, margin, contentsWidth, contentsHeight } = containerDimns;
 
-  //grid - the default display
-  const grid = useGrid(contentsWidth, contentsHeight, managedData.datapoints?.length);
+  //grid
+  const grid = useMemo(() => calcGrid(contentsWidth, contentsHeight, managedData.datapoints?.length), 
+    [contentsWidth, contentsHeight, managedData.datapoints?.length]);
   const { cellWidth, cellHeight, cellMargin } = grid;
   
   //layout function - puts data into format expected by perfectSquare component
   const perfectSquareData = useMemo(() => perfectSquareLayout(managedData, { grid }), 
     [managedData, JSON.stringify(grid)]);
-
+  
   //simulation - turns on when user selects an 'arrangeBy' setting
   const simulationData = { nodesData:perfectSquareData?.datapoints || [], info:perfectSquareData?.info || {} }
-  const { simulationSettings, setSimulationSettings, nodeWidth, nodeHeight, simulationIsOn, prevArrangeByRef } = useSimulation(containerDivRef, simulationData, contentsWidth, contentsHeight, cellWidth, cellHeight, initSimulationSettings)
+  const { simulationSettings, setSimulationSettings, nodeWidth, nodeHeight, simulationIsOn } = useSimulation(containerDivRef, simulationData, contentsWidth, contentsHeight, cellWidth, cellHeight, initSimulationSettings)
   const { arrangeBy } = simulationSettings;
 
   //chart dimns and position accessors - use node sizes if simulation is on (ie arrangeBy has been set)
   const chartWidth = simulationIsOn ? nodeWidth : cellWidth;
   const chartHeight = simulationIsOn ? nodeHeight : cellHeight;
   const chartMargin = cellMargin;
-  const _chartX = simulationIsOn ? d => d.x : d => d.cellX;
+  const _chartX = simulationIsOn ? d => d?.x : d => d?.cellX;
   const _chartY = simulationIsOn ? d => d.y : d => d.cellY;
 
   //data for the Header component
@@ -122,25 +124,43 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
         })
         .setSelectedMeasureKey(setSelectedMeasureKey);
 
-  }, [setSelectedChartKey, zoomTo, setSelectedMeasureKey])
-  
-  //render/update visual
+  },[setSelectedChartKey, zoomTo, setSelectedMeasureKey, managedData.key])
+ 
+  //position the contentsG
   useEffect(() => {
-    if (!perfectSquareData) { return; }
-    const arrangementHasChanged = prevArrangeByRef.current !== arrangeBy;
-
-    //position the contentsG
     d3.select(visContentsGRef.current).attr("transform", `translate(${margin.left}, ${margin.top})`);
-
-    //call charts, smoothly transitioning the chart positions if the arrangement has changed
+  }, [margin])
+  
+  //main render/update visual
+  useEffect(() => {
+    if (!perfectSquareData || !perfectSquareData.datapoints) { return; }
+    //call charts
     renderCharts.call(visContentsGRef.current, perfectSquareData.datapoints, perfectSquare, simulationIsOn, {
-      updateTransformTransition: arrangementHasChanged ? { duration:ZOOM_AND_ARRANGE_TRANSITION_DURATION } : null
+      transitions:{ enter: CHART_IN_TRANSITION, exit:CHART_OUT_TRANSITION }
     });
 
-    //update flag for transition
-    prevArrangeByRef.current = arrangeBy;
+  }, [contentsWidth, contentsHeight, perfectSquare, perfectSquareData]);
 
-  }, [contentsWidth, contentsHeight, chartWidth, chartHeight, chartMargin, perfectSquare, perfectSquareData, arrangeBy])
+  //update due to arrangeBy changing
+  useEffect(() => {
+    if (!perfectSquareData || !perfectSquareData.datapoints) { return; }
+    //call charts, smoothly transitioning the chart positions
+    renderCharts.call(visContentsGRef.current, perfectSquareData.datapoints, perfectSquare, simulationIsOn, {
+      transitions:{ update: { duration:ZOOM_AND_ARRANGE_TRANSITION_DURATION }}
+    });
+  }, [arrangeBy])
+
+  //update due to zoom
+  useEffect(() => {
+    if (!perfectSquareData || !perfectSquareData.datapoints) { return; }
+    const onScreenChecker = isChartOnScreenCheckerFunc(contentsWidth, contentsHeight, chartWidth, chartHeight, _chartX, _chartY);
+    const datapointsOnScreen = perfectSquareData.datapoints
+      .filter(d => onScreenChecker(d, zoomTransformState))
+
+    //call charts, with no transitions
+    renderCharts.call(visContentsGRef.current, datapointsOnScreen, perfectSquare, simulationIsOn);
+
+  }, [zoomTransformState])
 
   //light update for settings changes (the changes are added in an earlier useEffect)
   useEffect(() => {

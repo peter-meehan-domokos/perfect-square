@@ -53,6 +53,9 @@ export const useSimulation = (containerRef, data, contentsWidth, contentsHeight,
   
     //if moving from a grid (ie non-arranged), we set d.x and d.y properties so transitions starts from current position
     const simulationWasAlreadyOn = _simulationIsOn(prevArrangeByRef.current);
+    //update flag for next time
+    prevArrangeByRef.current = arrangeBy;
+
     if(!simulationWasAlreadyOn){
       nodesData.forEach(d => {
         d.x = d.cellX;
@@ -88,7 +91,6 @@ export const useSimulation = (containerRef, data, contentsWidth, contentsHeight,
   return { 
     simulationSettings:settings, 
     setSimulationSettings:setSettings,
-    prevArrangeByRef,
     //use :   eg const { oldName: newName } = object to get it changed to nodeWidth and nodeheight
     nodeWidth,
     nodeHeight,

@@ -266,7 +266,6 @@ export default function perfectSquare() {
         updateDimnsAndColourAccessors(selection);
 
         selection
-            .filter(d => d.isOnScreen) //dont want unnecessary iterations of charts that arent actually displayed
             .call(init)
             .call(update);
 
@@ -324,8 +323,6 @@ export default function perfectSquare() {
                 container.select("rect.component-bg")
                     .attr("width", `${width}px`)
                     .attr("height", `${height}px`);
-                    //.attr("stroke", "black")
-                    //.attr("stroke-width", 0.05);
 
                 const contentsG = container.select("g.component-contents")
                     .attr("transform", `translate(${margin.left + extraHorizMargin}, ${margin.top + extraVertMargin})`);
@@ -365,7 +362,7 @@ export default function perfectSquare() {
                     .attr("height", chartAreaHeight)
                     .attr("cursor", "pointer")
                     .attr("display", barsAreClickable ? "none" : null)
-                    .on("click", () => setSelectedChartKey(chartData))
+                    .on("click", () => { setSelectedChartKey(chartData) })
                     
                 chartAreaG.select("g.quadrants-container")
                     .call(quadrantsContainerTransform, chartAreaWidth, chartAreaHeight, selectedQuadrantIndex)
@@ -392,7 +389,7 @@ export default function perfectSquare() {
                 chartAreaG.call(chartOutlinePath, quadrantBarWidths, barsAreaHeight, gapBetweenBars, {
                     shouldShowChartOutline,
                     colour: anotherChartIsSelected ? GREY : chartColour,
-                    onClick:() => setSelectedChartKey(chartData)
+                    onClick:() => { setSelectedChartKey(chartData) }
                 })
             })
         }

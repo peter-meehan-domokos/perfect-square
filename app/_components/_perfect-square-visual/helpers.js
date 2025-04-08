@@ -67,8 +67,10 @@ export const getDisabledLevelsForZoom = (initLevel, targLevel) =>
     const chartX2 = chartX1 + chartWidth;
     const chartY2 = chartY1 + chartHeight;
 
-    const isOnScreenHorizontally = chartX2 * k + x >= 0 && chartX1 * k + x <= contentsWidth;
-    const isOnScreenVertically = chartY2 * k + y >= 0 && chartY1 * k + y <= contentsHeight; 
+    const BUFFER = 200;
+
+    const isOnScreenHorizontally = chartX2 * k + x >= 0 - BUFFER && chartX1 * k + x <= contentsWidth + BUFFER;
+    const isOnScreenVertically = chartY2 * k + y >= 0 - BUFFER && chartY1 * k + y <= contentsHeight + BUFFER; 
     return isOnScreenHorizontally && isOnScreenVertically ? true : false;
   }
 
@@ -104,8 +106,10 @@ export const getDisabledLevelsForZoom = (initLevel, targLevel) =>
     const marginLeftAdjustment = margin.left - k * margin.left;
     const marginTopAdjustment = margin.top - k * margin.top
 
+    //chartx is wrong when we click 2nd d of 500ds first
     const chartX = _chartX(chartD);
     const chartY = _chartY(chartD);
+    
     //zoom into selected chart
     const translateX = -(chartX * k) + (contentsWidth - (k * chartWidth))/2 + marginLeftAdjustment;
     const translateY = -(chartY * k) + (contentsHeight - (k * chartHeight))/2 + marginTopAdjustment;

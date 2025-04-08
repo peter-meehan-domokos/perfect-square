@@ -93,13 +93,11 @@ import { percentageScoreConverter } from '../../../../_helpers/dataHelpers';
     const datapointsWithSummaryInfoAndPosition = datapointsWithSummaryInfo
         .map(d => ({ 
             ...d, 
-            info:datapointsOrderedBySummaryMean.find(datapoint => datapoint.key === d.key).info,
-            isOnScreen:true
+            info:datapointsOrderedBySummaryMean.find(datapoint => datapoint.key === d.key).info
         }))
         .map(d => ({ 
             ...d, 
             subtitle: `Mean ${d.info.mean} / Deviation ${d.info.deviation}`
-            //subtitle: `Position ${d.info.position} / ${datapoints.length}`
         }))
 
     return {
