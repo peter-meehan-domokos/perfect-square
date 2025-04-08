@@ -6,7 +6,7 @@ import * as d3 from 'd3';
 import PerfectSquareHeader from './_header/page';
 import perfectSquareLayout from './_svgComponents/_perfectSquare/layout';
 import perfectSquareComponent from "./_svgComponents/_perfectSquare/component";
-import renderCharts from './renderCharts';
+import renderCharts from './_hooks_and_modules/renderCharts';
 import { DEFAULT_SIMULATION_SETTINGS, SELECT_MEASURE_TOOLTIP, LOADING_TOOLTIP } from "./constants.js";
 import { ZOOM_AND_ARRANGE_TRANSITION_DURATION, CHART_IN_TRANSITION, CHART_OUT_TRANSITION } from '@/app/constants';
 import { useZoom } from './_hooks_and_modules/zoom';

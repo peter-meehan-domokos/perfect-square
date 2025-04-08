@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { remove, fadeIn } from '../../_helpers/domHelpers';
+import { remove, fadeIn } from '../../../_helpers/domHelpers';
 import { CHART_IN_TRANSITION, CHART_OUT_TRANSITION } from '@/app/constants';
 
 /**
