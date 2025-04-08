@@ -67,6 +67,36 @@ It was developed on a chrome browser, and is responsive to all display sizes and
 In general, the application is still in development, has some minor bugs, has not been through testing, and some functions are not yet documented.
 These are all being worked on for release very soon.
 
+### Some conventions
+
+#### Margin Convention
+
+WARNING TO NON-D3 DEVELOPERS - margin in SVG/D3 world acts as padding in HTML/CSS world, so we get, for example, contentsWidth = width - margin.left - margin.right.
+This margin convention is applied throughout the svg code. Every rendering component is ignorant of it's container. It receives it's own dimensions either as settings (if its a full-on 'component') or as an argument (if its just a smaller rendering helper function). If it has a margin, this is applied to derive the contentsWidth and contentsHeight.
+
+#### Naming conventions
+
+Data analytics code does make use of some shorthand names that, on balance, provide more benefits than costs. Mathematical expressiona nd formulae can become complex, and they need to be able to be seen as a whole, which is harder when names are vmultiple syllables. Further, most such people are used to working with mathe,matical conventions too, so shorthands can actually enhancce clarity. Therefore, the following conventions are applied in the code:
+
+Naming Conventions
+| 	Shorthand	 | Example | 	Explanation | 	
+| 	:-----:	 | 	:-----:	 | 	:-----:	 | 	
+| 	e	| 		| 	A dom event - either a source event or a D3 pseudo event that may or may not contain a source event |
+| 	d, myComponentD	| chartD, tooltipD | Represents a datum, which is a datapoint that has been through a layout function and been binded to a dom element	| 	
+| 	x , y	| 	Horizontal and vertical dimensions	| 
+| _ underscore | _width | Used for simple functions, esp to distinguish between variables of the same name. |
+| 	Dom Elements	| 	chartG, contentsG	| 	Names that refer to dom elements should always add the name of the element on the end |
+| componentLayout (D3 not React) | perfectSquareLayout | Reserved for functions that take data and prepare it for the component of the same name |
+| component (D3 not React) | perfectSquareComponent | Reserved for functions that take a selection and render an svg component, and often have a settings api |
+
+#### Use of 'this'
+
+The D3 convention is followed that for any function that acts on an element, the element is not passd explicitly but is instead available as the 'this' context of the function. Function that don't use this wil in general be lamda/arrow functions.
+
+#### Use of selection.each
+
+Functions that act on elements, will generally be passed a d3 selection, rather than the raw element(s). This allows components to be used for multiple elements at once. Then, selection.each is used to iterate and extract each element (as 'this') and its datum.
+
 ### Architecture of the Visual
 
 #### Overview
@@ -93,11 +123,7 @@ The perfectSquareComponent utilises the D3 component design pattern - it returns
 
 #### Settings and callbacks handled at visual-level or chart-level
 
-As per the D3 component pattern, there are settings variables and callback functions that are applied and stored within the scope of some of the d3 components, and can be accessed (get) when called with no argument, or modified (set) when passed an argument. The setter in some cases can be a function or a fixed amount. If it is a function, it is applied individually to each chart/datapoint, allowing datapoint level variations. This is the same as how d3 functions such as d3.force work. For an example, see the width, height and styles settings in [tooltipComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/d3HelperComponents/tooltipComponent.js). This uses underscore convention for functions eg _width is a function.
-
-#### D3 Margin convention and dimensions
-WARNING TO NON-D3 DEVELOPERS - margin in SVG/D3 world acts as padding in HTML/CSS world, so we get, for example, contentsWidth = width - margin.left - margin.right.
-This margin convention is applied throughout the svg code. Every rendering component is ignorant of it's container. It receives it's own dimensions either as settings (if its a full-on 'component') or as an argument (if its just a smaller rendering helper function). If it has a margin, this is applied to derive the contentsWidth and contentsHeight.
+As per the D3 component pattern, there are settings variables and callback functions that are applied and stored within the scope of some of the d3 components, and can be accessed (get) when called with no argument, or modified (set) when passed an argument. The setter in some cases can be a function or a fixed amount. If it is a function, it is applied individually to each chart/datapoint, allowing datapoint level variations. This is the same as how d3 functions such as d3.force work. For an example, see the width, height and styles settings in [tooltipComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/d3HelperComponents/tooltipComponent.js). The implementation uses the underscore convention for functions eg _width is a function, but the api itself does not, in line with D3 components, so .width in some components can take a fixed value or an accessor function.
 
 #### A couple of todos
 
@@ -109,6 +135,7 @@ The d3 [force simulation](https://github.com/peter-meehan-domokos/perfect-square
 ### Responsiveness
 
 The number of rows and columns is dynamically optimised, see [calcNrColsAndRows](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/helpers.js), according to two factors: (a) the number of charts, and (b) the aspect ratio of the display. 
+The main benefit of this approach over a css flexbox is that custom requirements can be set up, which is common in dataviz where the position of elements makes a huge difference to the interpretation of the visual.
 
 Also see semantic zoom (below).
 
