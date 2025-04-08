@@ -1,4 +1,4 @@
-export const CONTAINER_MARGIN = { left:10, right:10, top:10, bottom:10 };
+export const DEFAULT_CONTAINER_MARGIN = { left:10, right:10, top:10, bottom:10 };
 export const DEFAULT_CHART_MARGIN = { left:0, right:0, top:0, bottom:0 };
 export const CALC_CELL_MARGIN = (width, height) => ({ left:width * 0.1, right:width * 0.1, top:height * 0.1, bottom:height * 0.1 });
 

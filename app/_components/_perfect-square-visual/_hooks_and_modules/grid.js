@@ -4,6 +4,15 @@ import { CALC_CELL_MARGIN } from "../constants";
 const _cellXCalculator = cellWidth => colNr => colNr * cellWidth;
 const _cellYCalculator = cellHeight => rowNr => rowNr * cellHeight;
 
+/**
+ * @description A function that calculates the dimensions of grid that will havw the optimal aspect-ratio for
+ * displaying the given number of cells in the given space
+ * @param {Number} width the width of the space
+ * @param {Number} height the height of the space
+ * @param {Number} nrCells the number of cells to be displayed
+ * 
+ * @return {object} the properties of the grid, along with some utility functions
+ */
 const calcGrid = (width, height, nrCells=0) => {
     const { nrCols, nrRows } = calcNrColsAndRows(width, height, nrCells);
     const cellWidth = width/nrCols;

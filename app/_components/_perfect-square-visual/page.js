@@ -17,13 +17,13 @@ import { useSimulation } from './_hooks_and_modules/simulation';
 import { useDataChangeManagement } from './_hooks_and_modules/dataChangeManagement';
 
 /**
- * @description  Prepares the data by passing it through the layout function, maintains the state of the visual
- * which is adjusted via event-driven callbacks (eg changes to zoom or to the simulation), and makes calls to the 
- * main render function upon any state changes, passing it the container dom element, and new data if required.
+ * @description  Receives the data, passes it through various hooks and handles the 
+ * the rendering and updating of the perfectSquare component via useEffects. Also maintains the state of the visual
+ * based on callbacks from the component after user interactions.
  *
  * @param {object} data contains the datapoints which will become charts, the measures to be displayed, and some metadata
  * @param {object} initSelections contains three strings that represent any selections that should be applied to the initial render
- * @param {object} initSettings contains any initial settings that should be applied to the visual before initial render
+ * @param {object} initSimulationSettings contains any initial settings that determine what simulation, if any, is on
  * @param {boolean} loading a flag to show if data is still loading
  * 
  * @returns {HTMLElement} A div that wraps VisualHeader component and an svg. The svg contains a g for the zoom 

@@ -1,10 +1,18 @@
 'use client'
 import * as d3 from "d3";
-import { useState, useEffect, useMemo } from "react";
+import react, { useState, useEffect, useMemo } from "react";
 import tooltipComponent from "../_svgComponents/_tooltip/component";
 import { remove } from '../../../_helpers/domHelpers';
 import { FADE_IN_OUT_DURATION } from '@/app/constants';
 
+/**
+ * @description A hook that renders tooltips in various locations of a container, based on it's state
+ * @param {Ref} containerRef a ref to the container 
+ * @param {Number} width the container width
+ * @param {Number} height the container height
+ * 
+ * @return {object} getters and setters for the state - the arrays of tooltips required
+ */
 export const useTooltips = (containerRef, width, height) => {
     const [headerTooltipsData, setHeaderTooltipsData] = useState([]);
     const [chartsViewboxTooltipsData, setChartsViewboxTooltipsData] = useState([]);

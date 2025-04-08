@@ -1,8 +1,16 @@
-import { useEffect, useRef, useState } from "react";
+import react, { useEffect, useRef, useState } from "react";
 import * as d3 from 'd3';
 import { CHART_OUT_DURATION } from '@/app/constants';
 
-//hook
+/**
+ * @description A hook that manages the process of a change in a data object, determine by a key property of the data. 
+ * It performs cleanup, and ensures a smooth transition
+ * @param {Ref} visContentsGRef ref to the dom element that contains any visual of the data
+ * @param {object} data the latest version of the data
+ * @param {function} cleanup the function that should be called whenever old data is being removed
+ * 
+ * @return {object} the data that is ready to be loaded into the system that utilises this hook
+ */
 export const useDataChangeManagement = (visContentsGRef, data, cleanup=()=>{}) => {
   const [managedData, setManagedData] = useState({});
   const cleanupInProgressRef = useRef(false);
@@ -27,8 +35,6 @@ export const useDataChangeManagement = (visContentsGRef, data, cleanup=()=>{}) =
       //update dataWaiting to the latest
       dataWaitingRef.current = data;
     }else{
-      //safe to load new data immediately
-      //setSizesAndTriggerDataRendering(data);
       setManagedData(data);
     }
   },[data.key])

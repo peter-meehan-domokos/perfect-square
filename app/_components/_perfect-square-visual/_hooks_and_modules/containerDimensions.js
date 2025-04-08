@@ -1,14 +1,20 @@
 'use client'
 import { useState, useEffect } from "react";
-import { CONTAINER_MARGIN } from "../constants.js";
+import { DEFAULT_CONTAINER_MARGIN } from "../constants.js";
 import { applyMargin } from '../helpers';
 import { getElementDimns } from '@/app/_helpers/domHelpers';
 
-export const useContainerDimensions = (containerRef) => {
+/**
+ * @description A hook that calculates the dimensions of the given element and sets up a listener for any changes to it 
+ * @param {Ref} containerRef a ref to the element
+ * 
+ * @return {object} the dimensions - width, height, margin, contentsWidth, contentsHeight
+ */
+export const useContainerDimensions = (containerRef, margin) => {
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(0);
 
-  useEffect(() => {
+  useEffect(() => { 
     const updateDimensions = () => {
         const { width, height } = getElementDimns.call(containerRef.current);
         setWidth(width);
@@ -25,6 +31,6 @@ export const useContainerDimensions = (containerRef) => {
     return () => { resizeObserver.disconnect(); };
   },[])
   
-  return applyMargin(width, height, CONTAINER_MARGIN)
+  return applyMargin(width, height, margin || DEFAULT_CONTAINER_MARGIN)
 
 };

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo } from "react";
+import react, { useEffect, useRef, useState, useMemo } from "react";
 import * as d3 from 'd3';
 
 //constants
@@ -31,7 +31,18 @@ const calcNodeDimensions = (cellWidth, cellHeight, nrNodes, arrangeBy) => {
   }
 }
 
-//hook
+/**
+ * @description A hook that sets up a d3.force simulation to act on data, making use of a helper function to apply the required forces
+ * @param {Ref} containerRef a ref to the dom node on which to run the simulation
+ * @param {object} data the data for the simulation, including a nodesData array
+ * @param {} contentsWidth the width of the space that the simulation must fit into
+ * @param {} contentsHeight the height of the space that the simulation must fit into
+ * @param {} cellWidth the width of the node if it is in a normal grid display - which is the basis for the node width
+ * @param {} cellHeight the height of the node if it is in a normal grid display - which is the basis for the node height
+ * @param {} initSettings the initial settings (x,y,colour), which determine which simulation, if any, is on
+ * 
+ * @return {object} an object containing getter and setter for the settings, the node dimensions, and a simulationIsOn flag
+ */
 export const useSimulation = (containerRef, data, contentsWidth, contentsHeight, cellWidth, cellHeight, initSettings) => {
   const [settings, setSettings] = useState(initSettings || DEFAULT_SIMULATION_SETTINGS)
   
