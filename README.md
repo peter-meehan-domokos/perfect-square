@@ -2,7 +2,7 @@
 
 [Live demo here](https://peter-meehan-domokos.github.io/perfect-square/) 
 
-Note: still under development. Some minor issues exist, especially around combining different settings rapidly.
+Note: still under development. Some minor issues exist, especially around manual zooming when simulation is on.
 
 ## Overview
 
