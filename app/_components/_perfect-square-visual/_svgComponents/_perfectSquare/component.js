@@ -261,6 +261,7 @@ export default function perfectSquare() {
      * @returns {D3SelectionObject} the original selection that is passed to it, to support chaining
      */
     function chart(selection) {
+        console.log("chart zoomingInProg", zoomingInProgress)
         nrCharts = selection.nodes().length;
         if(nrCharts === 0){ return; }
         updateDimnsAndColourAccessors(selection);
@@ -438,10 +439,10 @@ export default function perfectSquare() {
         zoomK = value;
         return chart;
     };
-    chart.zoomingInProgress = function (value) {
+    chart.zoomingInProgress = function (values) {
         if (!arguments.length) { return zoomingInProgress; }
-        zoomingInProgress = { 
-            ...value, initLevelOfDetail:levelOfDetail, targLevelOfDetail:calcLevelOfDetail(value.targK) 
+        zoomingInProgress = values === null ? null : { 
+            ...values, initLevelOfDetail:levelOfDetail, targLevelOfDetail:calcLevelOfDetail(values.targK) 
         }
         return chart;
     };

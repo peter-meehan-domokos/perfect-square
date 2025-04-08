@@ -4,28 +4,30 @@ import * as d3 from 'd3';
 import { isChartOnScreenCheckerFunc, calcZoomTransformFunc } from "../helpers";
 import { ZOOM_AND_ARRANGE_TRANSITION_DURATION, RESET_ZOOM_DURATION } from '@/app/constants';
 
-export const useZoom = (containerElementRef, viewGRef, containerDimns, chartWidth, chartHeight, perfectSquare, _chartX, _chartY, onStart=()=>{}) => {
+export const useZoom = (containerElementRef, viewGRef, containerDimns, chartWidth, chartHeight, _chartX, _chartY, onStart=()=>{}) => {
   //zoom state is only used for React children ie Header as its also store in d3 zoom behaviour object
   const [zoomTransformState, setZoomTransformState] = useState(d3.zoomIdentity);
+  const [zoomingInProgress, setZoomingInProgress] = useState(null);
   const zoomRef = useRef(null);
 
   const { width, height, margin, contentsWidth, contentsHeight } = containerDimns;
 
-  const isChartOnScreenChecker = useCallback((d, zoomTransform) => {
+  const isChartOnScreenChecker = useCallback((chartD, zoomTransformState) => {
     const checker = isChartOnScreenCheckerFunc(contentsWidth, contentsHeight, chartWidth, chartHeight, _chartX, _chartY);
-    return checker(d, zoomTransform);
+    return checker(chartD, zoomTransformState);
   },[contentsWidth, contentsHeight, chartWidth, chartHeight, _chartX, _chartY])
 
   const resetZoom = (withTransition=true) => { 
     if(!containerElementRef || !containerElementRef.current){ return; }
     if(withTransition){
       //tell d3comp we are zooming to a level 1, so it can ignore level 2 (if we are at level 3)
-      perfectSquare.zoomingInProgress({ targK: d3.zoomIdentity.k, sourceEvent:null })
+      setZoomingInProgress({ targK: d3.zoomIdentity.k, sourceEvent:null })
 
       d3.select(containerElementRef.current)
         .transition()
         .duration(RESET_ZOOM_DURATION)
-          .call(zoomRef.current.transform, d3.zoomIdentity);
+          .call(zoomRef.current.transform, d3.zoomIdentity)
+          .on("end", () => { setZoomingInProgress(null); });
     }else{
       d3.select(containerElementRef.current).call(zoomRef.current.transform, d3.zoomIdentity);
     }
@@ -36,13 +38,16 @@ export const useZoom = (containerElementRef, viewGRef, containerDimns, chartWidt
     const calcZoomTransform = calcZoomTransformFunc(contentsWidth, contentsHeight, margin, chartWidth, chartHeight, _chartX, _chartY);
     const transform = calcZoomTransform(chartD);
     //tell perfectSqaure it is zooming to a level 3, so it can ignore level 2 (if it starts at level 1)
-    perfectSquare.zoomingInProgress({ targK:transform.k, sourceEvent:null })
+    setZoomingInProgress({ targK:transform.k, sourceEvent:null })
     
     d3.select(containerElementRef.current)
       .transition()
       .duration(ZOOM_AND_ARRANGE_TRANSITION_DURATION)
         .call(zoomRef.current.transform, transform)
-        .on("end", function(){ cb(); })
+        .on("end", function(){ 
+          setZoomingInProgress(null);
+          cb(); 
+        })
 
   },[contentsWidth, contentsHeight, chartWidth, chartHeight, _chartX, _chartY]);
 
@@ -67,7 +72,7 @@ export const useZoom = (containerElementRef, viewGRef, containerDimns, chartWidt
     
   },[width, height, contentsWidth, contentsHeight, chartWidth, chartHeight, JSON.stringify(_chartX), JSON.stringify(_chartY)])
   
-  return { zoomTransformState, zoomTo, resetZoom };
+  return { zoomTransformState, zoomingInProgress, zoomTo, resetZoom, isChartOnScreenChecker };
 
 };
 

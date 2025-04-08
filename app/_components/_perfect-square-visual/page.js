@@ -15,7 +15,6 @@ import calcGrid from './_hooks_and_modules/grid'
 import { useTooltips } from './_hooks_and_modules/tooltips';
 import { useSimulation } from './_hooks_and_modules/simulation';
 import { useDataChangeManagement } from './_hooks_and_modules/dataChangeManagement';
-import { isChartOnScreenCheckerFunc } from "./helpers";
 
 /**
  * @description  Prepares the data by passing it through the layout function, maintains the state of the visual
@@ -87,7 +86,7 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
 
   //zoom
   const onZoomStart = () => { setSelectedChartKey(""); }
-  const { zoomTransformState, zoomTo, resetZoom } = useZoom(containerDivRef, viewGRef, containerDimns, chartWidth, chartHeight, perfectSquare, _chartX, _chartY, onZoomStart);
+  const { zoomTransformState, zoomingInProgress, zoomTo, resetZoom, isChartOnScreenChecker } = useZoom(containerDivRef, viewGRef, containerDimns, chartWidth, chartHeight, _chartX, _chartY, onZoomStart);
 
   //tooltips
   const { setHeaderTooltipsData, setChartsViewboxTooltipsData, setLoadingTooltipsData } = useTooltips(containerDivRef, width, height);
@@ -150,12 +149,17 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
     });
   }, [arrangeBy])
 
+  //zooming in progress - note that dom will update due to zoom state changes
+  useEffect(() => {
+    perfectSquare.zoomingInProgress(zoomingInProgress);
+  }, [zoomingInProgress])
+
   //update due to zoom
   useEffect(() => {
     if (!perfectSquareData || !perfectSquareData.datapoints) { return; }
-    const onScreenChecker = isChartOnScreenCheckerFunc(contentsWidth, contentsHeight, chartWidth, chartHeight, _chartX, _chartY);
+    //const onScreenChecker = isChartOnScreenCheckerFunc(contentsWidth, contentsHeight, chartWidth, chartHeight, _chartX, _chartY);
     const datapointsOnScreen = perfectSquareData.datapoints
-      .filter(d => onScreenChecker(d, zoomTransformState))
+      .filter(d => isChartOnScreenChecker(d, zoomTransformState))
 
     //call charts, with no transitions
     renderCharts.call(visContentsGRef.current, datapointsOnScreen, perfectSquare, simulationIsOn);
