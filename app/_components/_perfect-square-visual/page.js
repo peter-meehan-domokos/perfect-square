@@ -1,7 +1,10 @@
 /* eslint react-hooks/exhaustive-deps: 0 */
+//@todo - remove the 2 or 3 places where this disbalong is needed. They are due to the need to prevent
+//duplicate re-renders to the _svgComponents, but can be refactored to remove the need
+//to pass in some settings within the useEffects that we dont want to be triggered
 
 'use client'
-import React, { useState, useEffect, useRef, useMemo } from 'react'
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import * as d3 from 'd3';
 import PerfectSquareHeader from './_header/page';
 import perfectSquareLayout from './_svgComponents/_perfectSquare/layout';
@@ -44,12 +47,14 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
   const viewGRef = useRef(null);
 
   //managedData - control the way that a complete change of data is handled
-  const cleanup = () => {
+  const cleanup = useCallback(() => {
     setSelectedChartKey("");
     setSelectedQuadrantIndex(null);
     setSelectedMeasureKey("");
     if(resetZoom){ resetZoom(false); } //needs a guard as not defined till further down
-  }
+  //@todo - remove this disabling and find a better way to manage the fact that resetZoom is not yet defined
+  }, [setSelectedChartKey, setSelectedQuadrantIndex, setSelectedMeasureKey, /*resetZoom*/]);
+
   const { managedData } = useDataChangeManagement(visContentsGRef, data, cleanup);
   const { key, title, desc, info, categories, datapoints } = managedData;
 
@@ -91,7 +96,7 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
   //tooltips
   const { setHeaderTooltipsData, setChartsViewboxTooltipsData, setLoadingTooltipsData } = useTooltips(containerDivRef, width, height);
   //set loading tooltip
-  useEffect(() => { setLoadingTooltipsData(loading ? [LOADING_TOOLTIP] : []); },[loading])
+  useEffect(() => { setLoadingTooltipsData(loading ? [LOADING_TOOLTIP] : []); },[loading, setLoadingTooltipsData])
 
   //CHARTS RELATED USE-EFFECTS
   //@todo - put all of these into a useCharts useEffect
@@ -115,7 +120,7 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
       .zoomK(zoomTransformState.k)
       .arrangeBy(arrangeBy);
 
-  }, [perfectSquareData?.info, selectedChartKey, selectedQuadrantIndex, selectedMeasureKey, zoomTransformState?.k, arrangeBy])
+  }, [perfectSquare, perfectSquareData?.info, selectedChartKey, selectedQuadrantIndex, selectedMeasureKey, zoomTransformState?.k, arrangeBy])
   
   //apply handlers
   useEffect(() => {
@@ -126,7 +131,7 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
         })
         .setSelectedMeasureKey(setSelectedMeasureKey);
 
-  },[setSelectedChartKey, zoomTo, setSelectedMeasureKey, managedData.key])
+  },[perfectSquare, setSelectedChartKey, zoomTo, setSelectedMeasureKey, managedData.key])
  
   //position the contentsG
   useEffect(() => {
@@ -140,7 +145,8 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
     renderCharts.call(visContentsGRef.current, perfectSquareData.datapoints, perfectSquare, simulationIsOn, {
       transitions:{ enter: CHART_IN_TRANSITION, exit:CHART_OUT_TRANSITION }
     });
-
+  //@todo - find a better way to handle simulationIsOn...we dont want it to trigegr this useEffect because
+  //the next one handles changes ot simultionIsOn, but atm we still want to pass it to renderCharts
   }, [contentsWidth, contentsHeight, perfectSquare, perfectSquareData]);
 
   //update due to arrangeBy changing
@@ -150,12 +156,12 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
     renderCharts.call(visContentsGRef.current, perfectSquareData.datapoints, perfectSquare, simulationIsOn, {
       transitions:{ update: { duration:ZOOM_AND_ARRANGE_TRANSITION_DURATION }}
     });
-  }, [arrangeBy])
+  }, [perfectSquare, arrangeBy])
 
   //zooming in progress flag - note that dom will update due to zoom state changes
   useEffect(() => {
     perfectSquare.zoomingInProgress(zoomingInProgress);
-  }, [zoomingInProgress])
+  }, [perfectSquare, zoomingInProgress])
 
   //update due to zoom
   useEffect(() => {
@@ -163,12 +169,12 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
     const datapointsOnScreen = perfectSquareData.datapoints.filter(d => isChartOnScreenChecker(d, zoomTransformState))
     //call charts, with no transitions
     renderCharts.call(visContentsGRef.current, datapointsOnScreen, perfectSquare, simulationIsOn);
-  }, [zoomTransformState])
+  }, [perfectSquare, zoomTransformState, isChartOnScreenChecker])
 
   //light update for settings changes (the changes are added in an earlier useEffect)
   useEffect(() => {
     d3.select(visContentsGRef.current).selectAll(".chart").call(perfectSquare)
-  }, [selectedChartKey, selectedQuadrantIndex, selectedMeasureKey])
+  }, [perfectSquare, selectedChartKey, selectedQuadrantIndex, selectedMeasureKey])
 
 
   //Selected measure change

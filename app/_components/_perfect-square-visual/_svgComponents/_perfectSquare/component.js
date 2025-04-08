@@ -261,7 +261,6 @@ export default function perfectSquare() {
      * @returns {D3SelectionObject} the original selection that is passed to it, to support chaining
      */
     function chart(selection) {
-        console.log("chart zoomingInProg", zoomingInProgress)
         nrCharts = selection.nodes().length;
         if(nrCharts === 0){ return; }
         updateDimnsAndColourAccessors(selection);

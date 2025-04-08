@@ -86,7 +86,7 @@ export const useSimulation = (containerRef, data, contentsWidth, contentsHeight,
       })
       .on("end", () => { simTicksInProcessRef.current = false; })
 
-  }, [contentsWidth, contentsHeight, nodesData.length, arrangeBy])
+  }, [contentsWidth, contentsHeight, nodesData.length, arrangeBy, containerRef, info, nodeWidth, nodeHeight, nodesData, simulationIsOn])
 
   //start/stop sim
   useEffect(() => {

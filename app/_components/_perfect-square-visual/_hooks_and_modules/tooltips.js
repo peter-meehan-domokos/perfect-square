@@ -27,7 +27,7 @@ export const useTooltips = (containerRef, width, height) => {
         ...loadingTooltipsData
         ];
         renderTooltips.call(containerRef.current, tooltipsData, tooltip, width, height);
-    }, [width, headerTooltipsData, chartsViewboxTooltipsData, loadingTooltipsData])
+    }, [headerTooltipsData, chartsViewboxTooltipsData, loadingTooltipsData, containerRef, width, height, tooltip])
     
     return { setHeaderTooltipsData, setChartsViewboxTooltipsData, setLoadingTooltipsData }
 

@@ -30,7 +30,7 @@ export const useZoom = (containerRef, viewGRef, containerDimns, chartWidth, char
     return checker(chartD, zoomTransformState);
   },[contentsWidth, contentsHeight, chartWidth, chartHeight, _chartX, _chartY])
 
-  const resetZoom = (withTransition=true) => { 
+  const resetZoom = useCallback((withTransition=true) => { 
     if(!containerRef || !containerRef.current){ return; }
     if(withTransition){
       //tell d3comp we are zooming to a level 1, so it can ignore level 2 (if we are at level 3)
@@ -44,7 +44,7 @@ export const useZoom = (containerRef, viewGRef, containerDimns, chartWidth, char
     }else{
       d3.select(containerRef.current).call(zoomRef.current.transform, d3.zoomIdentity);
     }
-  }
+  }, [containerRef])
 
   const zoomTo = useCallback((chartD, cb=() => {}) => {
     if(!containerRef || !containerRef.current){ return; }
@@ -62,7 +62,7 @@ export const useZoom = (containerRef, viewGRef, containerDimns, chartWidth, char
           cb(); 
         })
 
-  },[contentsWidth, contentsHeight, chartWidth, chartHeight, _chartX, _chartY]);
+  },[contentsWidth, contentsHeight, margin, chartWidth, chartHeight, _chartX, _chartY, containerRef]);
 
   useEffect(() => {
     if(!containerRef || !containerRef.current){ return; }
@@ -82,8 +82,10 @@ export const useZoom = (containerRef, viewGRef, containerDimns, chartWidth, char
       //update react state so it can trigger any other changes needed
       setZoomTransformState(e.transform);
     }
-    
-  },[width, height, contentsWidth, contentsHeight, chartWidth, chartHeight, JSON.stringify(_chartX), JSON.stringify(_chartY)])
+  
+  //@todo - remove disabling and remove the stringify functions on dep array - not needed
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  },[width, height, contentsWidth, contentsHeight, chartWidth, chartHeight, JSON.stringify(_chartX), JSON.stringify(_chartY), onStart, containerRef, viewGRef])
   
   return { zoomTransformState, zoomingInProgress, zoomTo, resetZoom, isChartOnScreenChecker };
 

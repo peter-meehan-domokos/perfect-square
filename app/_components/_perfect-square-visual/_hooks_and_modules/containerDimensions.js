@@ -29,7 +29,7 @@ export const useContainerDimensions = (containerRef, margin) => {
 
     //cleanup
     return () => { resizeObserver.disconnect(); };
-  },[])
+  },[containerRef])
   
   return applyMargin(width, height, margin || DEFAULT_CONTAINER_MARGIN)
 
