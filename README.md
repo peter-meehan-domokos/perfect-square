@@ -58,7 +58,7 @@ User can click a particular bar (which represents a measure or a dimension) to h
 
 ### Development Stack and set-up
 
-This is a client app built with Next.js, React and D3. 
+This is a client app built with Next.js, React and D3. (It currently uses javascript but typesceipt release is imminent, along with full testing and productionised codebase.)
 
 It uses GraphQL to communicate with a server to retrieve data. GraphQL is a good choice as it provides a clean way to avoid over-fetching of data, which will be an issue when a larger number of datapoints are involved.
 
