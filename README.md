@@ -107,36 +107,29 @@ Each datapoint becomes an instance of a chart inside the overall visual. It is r
 
 1. [Visual](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/_visual/page.js) gets the data via a [useFetch](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_api-requests/fetch-hooks.js) hook, and calls the PerfectSquareVisual.
 2. [PerfectSquareVisual](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/_perfect-square-visual/page.js) sets up the space, the [zooming](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/_perfect-square-visual/_hooks_and_modules/zoom.js), and the [simulation](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/_perfect-square-visual/_hooks_and_modules/simulation.js), and then applies the [perfectSquareLayout](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/_perfect-square-visual/_svgComponents/_perfectSquare/layout.js) to the data to prepare it for the perfectSquareComponent, and calls renderCharts.
-3. [renderCharts](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/d3RenderFunctions.js) renders one g element per datapoint, inside the container, then calls perfectSquareComponent on this selection of gs.
+3. [renderCharts](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/_perfect-square-visual/_hooks_and_modules/renderCharts.js) renders one g element per datapoint, inside the container, then calls perfectSquareComponent on this selection of gs.
 4. [perfectSquareComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/_perfect-square-visual/_svgComponents/_perfectSquare/component.js) receives a selection of gs, and renders/updates each one by calling various subComponents.
-5. [subComponents](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/_perfect-square-visual/_svgComponents/_perfectSquare/subcomponents.js) render/update a part of each chart, returning the selection to allow chaining.
+5. [subcomponents](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/_perfect-square-visual/_svgComponents/_perfectSquare/subcomponents.js) render/update a part of each chart, returning the selection to allow chaining.
 
-#### The main React component - [PerfectSquareVisual](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/page.js) 
+#### The main React component - [PerfectSquareVisual](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/_perfect-square-visual/page.js) 
 
-It runs the data through a [perfectSquareLayout](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/perfectSquareLayout.js) to prepare it for the perfectSquareComponent, utilising the D3 layout design pattern.
+It runs the data through a [perfectSquareLayout](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/_perfect-square-visual/_svgComponents/_perfectSquare/layout.js) to prepare it for the perfectSquareComponent, utilising the D3 layout design pattern.
 
-It calls renderCharts inside a useEffect, which uses the D3 enter-update-exit pattern to call the [perfectSquareComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/perfectSquareComponent.js), passing it the selection of all charts.
+It calls renderCharts inside a useEffect, which uses the D3 enter-update-exit pattern to call the [perfectSquareComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/_perfect-square-visual/_svgComponents/_perfectSquare/component.js), passing it the selection of all charts.
 
 It handles callbacks such as for event handling, by updating its state, which then triggers the necessary dom updates via specific useEffects or via its own returned JSX. For example, the user selects a chart at the d3/dom level, this is passed to the React component which sets this in state, and this in turn triggers a useEffect which updates the dom via the d3 component, and also makes any other required updates, such as to the controls.
 
-#### The main D3 component - [perfectSquareComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/perfectSquareComponent.js)
+#### The main D3 component - [perfectSquareComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/_perfect-square-visual/_svgComponents/_perfectSquare/component.js)
 
 The perfectSquareComponent utilises the D3 component design pattern - it returns an inner function which can then be used to render and update each chart it receives as part of a selection of charts. It uses this inner function approach rather than classes, because this is more consistent with the implementation of D3 itself, allowing for seamless integration of these functions within standard D3 chaining.
 
 #### Settings and callbacks handled at visual-level or chart-level
 
-As per the D3 component pattern, there are settings variables and callback functions that are applied and stored within the scope of some of the d3 components, and can be accessed (get) when called with no argument, or modified (set) when passed an argument. The setter in some cases can be a function or a fixed amount. If it is a function, it is applied individually to each chart/datapoint, allowing datapoint level variations. This is the same as how d3 functions such as d3.force work. For an example, see the width, height and styles settings in [tooltipComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/d3HelperComponents/tooltipComponent.js). The implementation uses the underscore convention for functions eg _width is a function, but the api itself does not, in line with D3 components, so .width in some components can take a fixed value or an accessor function.
-
-#### A couple of todos
-
-State management is currently not handled outside of the presentation components, for example in a redux store or context. This separation needs to be implemented.
-
-The d3 [force simulation](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/simulation.js) and [zoom](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/zoom.js) components can be converted into hooks, rather than standard functions, to allow clearer separation and reusability.
-
+As per the D3 component pattern, there are settings variables and callback functions that are applied and stored within the scope of some of the d3 components, and can be accessed (get) when called with no argument, or modified (set) when passed an argument. The setter in some cases can be a function or a fixed amount. If it is a function, it is applied individually to each chart/datapoint, allowing datapoint level variations. This is the same as how d3 functions such as d3.force work. For an example, see the width, height and styles settings in [tooltipComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/_perfect-square-visual/_svgComponents/_tooltip/component.js). The implementation uses the underscore convention for functions eg _width is a function, but the api itself does not, in line with D3 components, so .width in some components can take a fixed value or an accessor function.
 
 ### Responsiveness
 
-The number of rows and columns is dynamically optimised, see [calcNrColsAndRows](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/helpers.js), according to two factors: (a) the number of charts, and (b) the aspect ratio of the display. 
+The number of rows and columns is dynamically optimised in a [grid module](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/_perfect-square-visual/_hooks_and_modules/grid.js), according to two factors: (a) the number of charts, and (b) the aspect ratio of the display. 
 The main benefit of this approach over a css flexbox is that custom requirements can be set up, which is common in dataviz where the position of elements makes a huge difference to the interpretation of the visual.
 
 Also see semantic zoom (below).
@@ -147,7 +140,7 @@ The description in the VisualHeader is hidden in smaller container sizes, with a
    
 #### 1. Virtualised Rendering
 
-Only the datapoints on screen are rendered and this is updated on every zoom event, see [isChartOnScreenCheckerFunc](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/components/perfect-square-visual/helpers.js).
+Only the datapoints on screen are rendered and this is updated on every zoom event. Checking is provided by the zoom hook utility function [isChartOnScreenCheckerFunc](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/_perfect-square-visual/_hooks_and_modules/zoom.js).
 
 #### 2. Semantic Zoom
 
