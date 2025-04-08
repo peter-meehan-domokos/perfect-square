@@ -167,6 +167,8 @@ A further option is to reduce the over-fetching when handling a much larger numb
    - A similarity score based on machine learning clustering of similar datapoints, visualised through the force-directed network.
    
    - Drilling down into bars (ie measures or dimensions)
+     
+   - Import data by excel or csv
 
    - Run an animation to see progress unfold (for temporal sets of data - eg a rehabilitation programme for an injury) alongside other info or videos (eg as part of a larger dashboard)
 
