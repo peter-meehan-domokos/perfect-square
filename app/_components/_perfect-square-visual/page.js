@@ -9,12 +9,12 @@ import perfectSquareComponent from "./_svgComponents/_perfectSquare/component";
 import renderCharts from './renderCharts';
 import { DEFAULT_SIMULATION_SETTINGS, SELECT_MEASURE_TOOLTIP, LOADING_TOOLTIP } from "./constants.js";
 import { ZOOM_AND_ARRANGE_TRANSITION_DURATION, CHART_IN_TRANSITION, CHART_OUT_TRANSITION } from '@/app/constants';
-import { useZoom } from './_hooks/zoom';
-import { useContainerDimensions } from './_hooks/containerDimensions';
-import calcGrid from './_hooks/grid'
-import { useTooltips } from './_hooks/tooltips';
-import { useSimulation } from './_hooks/simulation';
-import { useDataChangeManagement } from './_hooks/dataChangeManagement';
+import { useZoom } from './_hooks_and_modules/zoom';
+import { useContainerDimensions } from './_hooks_and_modules/containerDimensions';
+import calcGrid from './_hooks_and_modules/grid'
+import { useTooltips } from './_hooks_and_modules/tooltips';
+import { useSimulation } from './_hooks_and_modules/simulation';
+import { useDataChangeManagement } from './_hooks_and_modules/dataChangeManagement';
 import { isChartOnScreenCheckerFunc } from "./helpers";
 
 /**
