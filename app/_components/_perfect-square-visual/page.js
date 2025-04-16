@@ -70,10 +70,10 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
   //layout function - puts data into format expected by perfectSquare component
   const perfectSquareData = useMemo(() => perfectSquareLayout(managedData, { grid }), 
     [managedData, JSON.stringify(grid)]);
-  
+
   //simulation - turns on when user selects an 'arrangeBy' setting
   const simulationData = { nodesData:perfectSquareData?.datapoints || [], info:perfectSquareData?.info || {} }
-  const { simulationSettings, setSimulationSettings, nodeWidth, nodeHeight, simulationIsOn } = useSimulation(containerDivRef, simulationData, contentsWidth, contentsHeight, cellWidth, cellHeight, initSimulationSettings)
+  const { simulationSettings, setSimulationSettings, nodeWidth, nodeHeight, simulationIsOn, simulationHasBeenTurnedOnOrOff } = useSimulation(containerDivRef, simulationData, contentsWidth, contentsHeight, cellWidth, cellHeight, initSimulationSettings)
   const { arrangeBy } = simulationSettings;
 
   //chart dimns and position accessors - use node sizes if simulation is on (ie arrangeBy has been set)
@@ -96,11 +96,12 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
   //tooltips
   const { setHeaderTooltipsData, setChartsViewboxTooltipsData, setLoadingTooltipsData } = useTooltips(containerDivRef, width, height);
   //set loading tooltip
-  useEffect(() => { setLoadingTooltipsData(loading ? [LOADING_TOOLTIP] : []); },[loading, setLoadingTooltipsData])
+  useEffect(() => { 
+    setLoadingTooltipsData(loading ? [LOADING_TOOLTIP] : []); 
+  },[loading, setLoadingTooltipsData])
 
   //CHARTS RELATED USE-EFFECTS
-  //@todo - put all of these into a useCharts useEffect
-  
+  //@todo - consider putting all of these into a useCharts useEffect
   //apply dimensions
   useEffect(() => {
     perfectSquare
@@ -140,6 +141,7 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
   
   //main render/update visual
   useEffect(() => {
+    //console.log("main useEff", simulationHasBeenTurnedOnOrOff, simulationIsOn)
     if (!perfectSquareData || !perfectSquareData.datapoints) { return; }
     //call charts
     renderCharts.call(visContentsGRef.current, perfectSquareData.datapoints, perfectSquare, simulationIsOn, {
@@ -152,11 +154,30 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
   //update due to arrangeBy changing
   useEffect(() => {
     if (!perfectSquareData || !perfectSquareData.datapoints) { return; }
+    //the issue now is when sim starts, they jump to teh position when the sim is beimg turned on for the 
+    //2nd toime, but not the first time, so need to clean up the sim
+    //simplest thing is to just create a completely new sim each time? nd wipe x,y,dx,dy from each node?
+    if(simulationIsOn){
+      d3.select(visContentsGRef.current).selectAll(".chart").call(perfectSquare)
+    }else{
+      //@todo - add transition to size of charts
+      renderCharts.call(visContentsGRef.current, perfectSquareData.datapoints, perfectSquare, simulationIsOn, {
+        transitions:{ update: { duration:ZOOM_AND_ARRANGE_TRANSITION_DURATION }}
+      });
+      /*
+      d3.select(visContentsGRef.current).selectAll(".chart")
+      .each(function(){
+        d3.select(this)
+          .transition()
+          .duration(ZOOM_AND_ARRANGE_TRANSITION_DURATION)
+          .attr("transform", (d,i) => `translate(${d.cellX},${d.cellY})`)
+      })
+      .call(perfectSquare)
+      */
+
+    }
     //call charts, smoothly transitioning the chart positions
-    renderCharts.call(visContentsGRef.current, perfectSquareData.datapoints, perfectSquare, simulationIsOn, {
-      transitions:{ update: { duration:ZOOM_AND_ARRANGE_TRANSITION_DURATION }}
-    });
-  }, [perfectSquare, arrangeBy])
+  }, [perfectSquare, simulationIsOn])
 
   //zooming in progress flag - note that dom will update due to zoom state changes
   useEffect(() => {
@@ -164,12 +185,14 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
   }, [perfectSquare, zoomingInProgress])
 
   //update due to zoom
-  useEffect(() => {
+  /*useEffect(() => {
+    console.log("zoomUseEff", simulationHasBeenTurnedOnOrOff, simulationIsOn)
+    
     if (!perfectSquareData || !perfectSquareData.datapoints) { return; }
     const datapointsOnScreen = perfectSquareData.datapoints.filter(d => isChartOnScreenChecker(d, zoomTransformState))
     //call charts, with no transitions
     renderCharts.call(visContentsGRef.current, datapointsOnScreen, perfectSquare, simulationIsOn);
-  }, [perfectSquare, zoomTransformState, isChartOnScreenChecker])
+  }, [perfectSquare, zoomTransformState, isChartOnScreenChecker])*/
 
   //light update for settings changes (the changes are added in an earlier useEffect)
   useEffect(() => {

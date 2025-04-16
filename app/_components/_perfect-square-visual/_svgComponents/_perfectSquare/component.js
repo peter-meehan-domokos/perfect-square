@@ -350,11 +350,13 @@ export default function perfectSquare() {
                     .attr("transform", `translate(0, ${headerHeight})`);
 
                 chartAreaG.select("rect.chart-area-bg")
-                    .attr("width", `${chartAreaWidth}px`)
-                    .attr("height", `${chartAreaHeight}px`)
-                    //we use chart-area-bg as the default border when no quadrants are showing (ie when its the chart path showing)
-                    .attr("stroke", shouldShowQuadrantOutlines || isNumber(selectedQuadrantIndex)  ? "none" : chartColour)
-                    .attr("stroke-width", _scaleValue(0.2));
+                    .transition()
+                    .duration(750)
+                        .attr("width", `${chartAreaWidth}px`)
+                        .attr("height", `${chartAreaHeight}px`)
+                        //we use chart-area-bg as the default border when no quadrants are showing (ie when its the chart path showing)
+                        .attr("stroke", shouldShowQuadrantOutlines || isNumber(selectedQuadrantIndex)  ? "none" : chartColour)
+                        .attr("stroke-width", _scaleValue(0.2));
 
                 //hitbox (title is always clickable, but chart itself is only clickable when bars are not)
                 chartAreaG.select("rect.chart-hitbox")

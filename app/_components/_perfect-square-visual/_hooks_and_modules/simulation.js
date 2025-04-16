@@ -45,7 +45,6 @@ const calcNodeDimensions = (cellWidth, cellHeight, nrNodes, arrangeBy) => {
  */
 export const useSimulation = (containerRef, data, contentsWidth, contentsHeight, cellWidth, cellHeight, initSettings) => {
   const [settings, setSettings] = useState(initSettings || DEFAULT_SIMULATION_SETTINGS)
-  
   const prevArrangeByRef = useRef(null);
   const simRef = useRef(null);
   const simIsStartedRef = useRef(false);
@@ -53,7 +52,19 @@ export const useSimulation = (containerRef, data, contentsWidth, contentsHeight,
 
   const { arrangeBy } = settings;
   const simulationIsOn = _simulationIsOn(arrangeBy);
+  const simulationWasAlreadyOn = _simulationIsOn(prevArrangeByRef.current);
+  const simulationHasBeenTurnedOnOrOff = simulationIsOn !== simulationWasAlreadyOn;
+  //update flag for next time
+  prevArrangeByRef.current = arrangeBy;
+
   const { nodesData, info } = data;
+  //if moving from a grid (ie non-arranged), we set d.x and d.y properties so transitions starts from current position
+  if(simulationIsOn && !simulationWasAlreadyOn){
+    nodesData.forEach(d => {
+      d.x = d.cellX;
+      d.y = d.cellY;
+    })
+  }
 
   const { nodeWidth, nodeHeight } = useMemo(() => calcNodeDimensions(cellWidth, cellHeight, nodesData.length, arrangeBy), 
     [cellWidth, cellHeight, nodesData.length, arrangeBy]);
@@ -61,19 +72,6 @@ export const useSimulation = (containerRef, data, contentsWidth, contentsHeight,
   //simulation
   useEffect(() => {
     if(!simulationIsOn){ return; }
-  
-    //if moving from a grid (ie non-arranged), we set d.x and d.y properties so transitions starts from current position
-    const simulationWasAlreadyOn = _simulationIsOn(prevArrangeByRef.current);
-    //update flag for next time
-    prevArrangeByRef.current = arrangeBy;
-
-    if(!simulationWasAlreadyOn){
-      nodesData.forEach(d => {
-        d.x = d.cellX;
-        d.y = d.cellY;
-      })
-    }
-
     simRef.current = d3.forceSimulation(nodesData);
     applyForces(simRef.current, contentsWidth, contentsHeight, nodeWidth, nodeHeight, arrangeBy, nodesData.length, info);
 
@@ -102,10 +100,10 @@ export const useSimulation = (containerRef, data, contentsWidth, contentsHeight,
   return { 
     simulationSettings:settings, 
     setSimulationSettings:setSettings,
-    //use :   eg const { oldName: newName } = object to get it changed to nodeWidth and nodeheight
     nodeWidth,
     nodeHeight,
-    simulationIsOn
+    simulationIsOn,
+    simulationHasBeenTurnedOnOrOff
   }
 
 };
