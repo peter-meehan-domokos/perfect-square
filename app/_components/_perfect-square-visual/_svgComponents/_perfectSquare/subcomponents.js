@@ -339,7 +339,6 @@ function bars(selection, barsAreaHeight, barWidth, gapBetweenBars, settings={}){
  */
 export function quadrantOutlinePath(selection, barsAreaHeight, barWidth, gapBetweenBars, settings={}){
     const { styles, shouldShowQuadrantPaths, colour } = settings;
-    console.log("paths", shouldShowQuadrantPaths)
     selection.each(function(quadD){
         const container = d3.select(this);
         //outline paths
@@ -349,7 +348,6 @@ export function quadrantOutlinePath(selection, barsAreaHeight, barWidth, gapBetw
             .append("g")
                 .attr("class", "quadrant-outline")
                 .each(function(){
-                    console.log("enter")
                     d3.select(this).append("path")
                         .attr("class", "quadrant-outline")
                         .attr("stroke", "none")
