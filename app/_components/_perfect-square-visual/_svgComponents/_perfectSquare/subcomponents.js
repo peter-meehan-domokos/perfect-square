@@ -253,12 +253,10 @@ export function quadrants(selection, quadrantWidth, quadrantHeight, quadrantTitl
                         .attr("transform", `translate(0, ${barAreaShiftVert})`);
 
                     barsAreaG.select("rect.bars-area-bg")
-                        .transition()
-                        .duration(500)
-                            .attr("width", quadrantWidth)
-                            .attr("height", barsAreaHeight)
-                            .attr("stroke", colour) 
-                            .attr("stroke-width", getBarsAreaStrokeWidth(quadD.i))
+                        .attr("width", quadrantWidth)
+                        .attr("height", barsAreaHeight)
+                        .attr("stroke", colour) 
+                        .attr("stroke-width", getBarsAreaStrokeWidth(quadD.i))
 
                     //bars and quadrant outline paths
                     const barsDirection = quadD.i < 2 ? "up" : "down";
@@ -341,6 +339,7 @@ function bars(selection, barsAreaHeight, barWidth, gapBetweenBars, settings={}){
  */
 export function quadrantOutlinePath(selection, barsAreaHeight, barWidth, gapBetweenBars, settings={}){
     const { styles, shouldShowQuadrantPaths, colour } = settings;
+    console.log("paths", shouldShowQuadrantPaths)
     selection.each(function(quadD){
         const container = d3.select(this);
         //outline paths
@@ -350,15 +349,17 @@ export function quadrantOutlinePath(selection, barsAreaHeight, barWidth, gapBetw
             .append("g")
                 .attr("class", "quadrant-outline")
                 .each(function(){
+                    console.log("enter")
                     d3.select(this).append("path")
                         .attr("class", "quadrant-outline")
+                        .attr("stroke", "none")
                 })
                 .merge(outlineG)
                 .each(function(values) {
                     //update content and fill
                     d3.select(this).select("path")
-                        .attr("fill", colour)
                         //need this here if sizes change eg sim turned on
+                        .attr("fill", colour)
                         .transition()
                         .duration(750)
                             .attr("d", quadrantPathD(values, quadD.i, barsAreaHeight, barWidth, gapBetweenBars))
@@ -390,6 +391,7 @@ export function chartOutlinePath(selection, quadrantBarWidths, barsAreaHeight, g
             .append("path")
                 .attr("class", "chart-outline")
                 .attr("cursor", "pointer")
+                .attr("stroke", "none")
                 .on("click", onClick)
                 .merge(outlinePath)
                 //need this if sizes change eg sim turned on

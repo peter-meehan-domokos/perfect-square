@@ -141,7 +141,6 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
   
   //main render/update visual
   useEffect(() => {
-    //console.log("main useEff", simulationHasBeenTurnedOnOrOff, simulationIsOn)
     if (!perfectSquareData || !perfectSquareData.datapoints) { return; }
     //call charts
     renderCharts.call(visContentsGRef.current, perfectSquareData.datapoints, perfectSquare, simulationIsOn, {
@@ -155,7 +154,7 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
   useEffect(() => {
     if (!perfectSquareData || !perfectSquareData.datapoints) { return; }
     //the issue now is when sim starts, they jump to teh position when the sim is beimg turned on for the 
-    //2nd toime, but not the first time, so need to clean up the sim
+    //2nd time, but not the first time, so need to clean up the sim
     //simplest thing is to just create a completely new sim each time? nd wipe x,y,dx,dy from each node?
     if(simulationIsOn){
       d3.select(visContentsGRef.current).selectAll(".chart").call(perfectSquare)
@@ -164,17 +163,6 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
       renderCharts.call(visContentsGRef.current, perfectSquareData.datapoints, perfectSquare, simulationIsOn, {
         transitions:{ update: { duration:ZOOM_AND_ARRANGE_TRANSITION_DURATION }}
       });
-      /*
-      d3.select(visContentsGRef.current).selectAll(".chart")
-      .each(function(){
-        d3.select(this)
-          .transition()
-          .duration(ZOOM_AND_ARRANGE_TRANSITION_DURATION)
-          .attr("transform", (d,i) => `translate(${d.cellX},${d.cellY})`)
-      })
-      .call(perfectSquare)
-      */
-
     }
     //call charts, smoothly transitioning the chart positions
   }, [perfectSquare, simulationIsOn])
@@ -185,14 +173,12 @@ const PerfectSquareVisual = ({ data={ datapoints:[], info:{ } }, initSelections=
   }, [perfectSquare, zoomingInProgress])
 
   //update due to zoom
-  /*useEffect(() => {
-    console.log("zoomUseEff", simulationHasBeenTurnedOnOrOff, simulationIsOn)
-    
+  useEffect(() => {
     if (!perfectSquareData || !perfectSquareData.datapoints) { return; }
     const datapointsOnScreen = perfectSquareData.datapoints.filter(d => isChartOnScreenChecker(d, zoomTransformState))
     //call charts, with no transitions
     renderCharts.call(visContentsGRef.current, datapointsOnScreen, perfectSquare, simulationIsOn);
-  }, [perfectSquare, zoomTransformState, isChartOnScreenChecker])*/
+  }, [perfectSquare, zoomTransformState, isChartOnScreenChecker]);
 
   //light update for settings changes (the changes are added in an earlier useEffect)
   useEffect(() => {

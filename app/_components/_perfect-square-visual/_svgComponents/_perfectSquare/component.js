@@ -139,7 +139,8 @@ export default function perfectSquare() {
         shouldShowChartOutline = !shouldShowQuadrantOutlines && !isNumber(selectedQuadrantIndex);
         barsAreClickable  = _barsAreClickable(levelOfDetail);
 
-        headerHeight = shouldShowHeader ? (maxContentsHeight * (shouldShowSubtitle ? 0.18 : 0.15)) : 0;
+        //keep headerheight even if no header, so smooth changes if user zooms in/
+        headerHeight = (maxContentsHeight * (shouldShowSubtitle ? 0.18 : 0.15));
 
         //contentsheight includes space for quad titles, whereas contenstWidth doesnt
         contentsWidth = d3.min([maxContentsWidth, maxContentsHeight - headerHeight - 2 * quadrantTitleHeight]);
@@ -152,7 +153,7 @@ export default function perfectSquare() {
         const maxGapBetweenQuadrants = gapBetweenQuadrants * 5;
         //note - the zoomed gap is the one displayed, but it doesnt affect any other calculations, so it can adjust with zoom
         //and not affect performance
-        zoomedGapBetweenQuadrants = levelOfDetail === 1 ? 0 : d3.min([maxGapBetweenQuadrants, gapBetweenQuadrants * zoomK ** 0.7]);
+        zoomedGapBetweenQuadrants = d3.min([maxGapBetweenQuadrants, gapBetweenQuadrants * zoomK ** 0.7]);
 
         const extraHorizSpace = maxContentsWidth - contentsWidth;
         const extraVertSpace = maxContentsHeight - contentsHeight;
@@ -350,8 +351,8 @@ export default function perfectSquare() {
                     .attr("transform", `translate(0, ${headerHeight})`);
 
                 chartAreaG.select("rect.chart-area-bg")
-                    .transition()
-                    .duration(750)
+                    //.transition()
+                    //.duration(750)
                         .attr("width", `${chartAreaWidth}px`)
                         .attr("height", `${chartAreaHeight}px`)
                         //we use chart-area-bg as the default border when no quadrants are showing (ie when its the chart path showing)
