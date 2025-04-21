@@ -39,7 +39,5 @@ export const useDataChangeManagement = (visContentsGRef, data, cleanup=()=>{}) =
     }
   },[data, visContentsGRef, cleanup])
   
-  return { 
-    managedData
-  }
+  return managedData || {};
 };

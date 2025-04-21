@@ -15,6 +15,8 @@ import renderCharts from './hooks_and_modules/renderCharts';
 import { DEFAULT_SIMULATION_SETTINGS, SELECT_MEASURE_TOOLTIP, LOADING_TOOLTIP } from "./constants.js";
 import { ZOOM_AND_ARRANGE_TRANSITION_DURATION, CHART_IN_TRANSITION, CHART_OUT_TRANSITION } from '@/app/constants';
 import { useSimulation } from './hooks_and_modules/simulation';
+import { useDataChangeManagement } from './hooks_and_modules/dataChangeManagement';
+
 
 /**
  * @description  Receives the data, passes it through various hooks and handles the 
@@ -34,6 +36,7 @@ import { useSimulation } from './hooks_and_modules/simulation';
 const PerfectSquare = ({ contentsWidth, contentsHeight, grid }) => {
   //@todo - remove the ={} once we have a loadingFallback
   const { visualData:{ data }={} } = useContext(AppContext);
+  console.log("PS", data)
   const { 
     selectedChartKey, selectedQuadrantIndex, selectedMeasureKey,
     setSelectedChartKey, setSelectedQuadrantIndex, setSelectedMeasureKey,
@@ -43,7 +46,7 @@ const PerfectSquare = ({ contentsWidth, contentsHeight, grid }) => {
     zoomTransformState, 
     //zoomingInProgress, 
     zoomTo, 
-    //resetZoom, 
+    resetZoom, 
     //isChartOnScreenChecker 
    } = useContext(ZoomContext);
 
@@ -51,11 +54,22 @@ const PerfectSquare = ({ contentsWidth, contentsHeight, grid }) => {
 
   //dom refs
   const contentsGRef = useRef(null);
+
+  //DATA PROCESSING
+  //managedData - control the way that a complete change of data is handled
+  const cleanup = useCallback(() => {
+    setSelectedChartKey("");
+    setSelectedQuadrantIndex(null);
+    setSelectedMeasureKey("");
+    resetZoom(false);
+  }, [setSelectedChartKey, setSelectedQuadrantIndex, setSelectedMeasureKey, resetZoom]);
+
+  const managedData = useDataChangeManagement(contentsGRef, data, cleanup);
+  console.log("managed", managedData)
   
-  //next - datapoints dont seem tohave stuff added..is the layout even running?
   //layout function - puts data into format expected by perfectSquare component
-  const perfectSquareData = useMemo(() => perfectSquareLayout(data, { grid }), 
-    [data, JSON.stringify(grid)]);
+  const perfectSquareData = useMemo(() => perfectSquareLayout(managedData, { grid }), 
+    [managedData, JSON.stringify(grid)]);
 
   //simulation - turns on when user selects an 'arrangeBy' setting
   /*const simulationData = { nodesData:perfectSquareData?.datapoints || [], info:perfectSquareData?.info || {} }
@@ -103,7 +117,7 @@ const PerfectSquare = ({ contentsWidth, contentsHeight, grid }) => {
         .setSelectedChartKey(chartD => {
           zoomTo(chartD, 
             () => setSelectedChartKey(chartD.key));
-        })
+        }) 
         .setSelectedMeasureKey(setSelectedMeasureKey);
 
   },[perfectSquare, setSelectedChartKey, zoomTo, setSelectedMeasureKey, data?.key])
