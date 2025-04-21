@@ -8,6 +8,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback, useContext } 
 import * as d3 from 'd3';
 import { AppContext } from "@/app/context";
 import { VisualContext } from "../visual/context";
+import { ZoomContext } from '../visual/SVGVisual/hooks_and_modules/zoomable-g/page';
 import perfectSquareLayout from './svgComponents/perfectSquare/layout';
 import perfectSquareComponent from "./svgComponents/perfectSquare/component";
 import renderCharts from './hooks_and_modules/renderCharts';
@@ -29,16 +30,22 @@ import { useSimulation } from './hooks_and_modules/simulation';
  * that is applied in a useEffect, and a g which contains the charts whcih are rendered in a useEffect.
  */
 
-//@todo - change to width and height - if all we use are cw and ch, may aswell not pass in containerdimns,
-// but just pass a width and height prop
+//@todo - change to width and height because this fits the design pattern: each compponent is doesnt care about higher up the chain
 const PerfectSquare = ({ contentsWidth, contentsHeight, grid }) => {
   //@todo - remove the ={} once we have a loadingFallback
   const { visualData:{ data }={} } = useContext(AppContext);
   const { 
     selectedChartKey, selectedQuadrantIndex, selectedMeasureKey,
     setSelectedChartKey, setSelectedQuadrantIndex, setSelectedMeasureKey,
-    zoomTransformState
   } = useContext(VisualContext);
+
+  const { 
+    zoomTransformState, 
+    //zoomingInProgress, 
+    zoomTo, 
+    //resetZoom, 
+    //isChartOnScreenChecker 
+   } = useContext(ZoomContext);
 
   const { cellWidth, cellHeight, cellMargin } = grid || {};
 
@@ -94,19 +101,12 @@ const PerfectSquare = ({ contentsWidth, contentsHeight, grid }) => {
   useEffect(() => {
     perfectSquare
         .setSelectedChartKey(chartD => {
-          //need a way to access zoomTo here, and resetZoom in Header
-          //essentially, the whole point in thhe zoom hook is that it exposes some utility functions, so 
-          //need to find out teh best way to make tehse available...do we have a ZoomContext as part of ZoomableG?
-          //or do we have a callback that passes these utlity functions up to the visualcontext, that seems way over the top
-          //but if the ZoomableG context is below teh Header, tehn how would it access resetZoom?
-          //maybe in that case, we would pass in a zoomoverride as a prop?
-          next: must look into this and decide
           zoomTo(chartD, 
             () => setSelectedChartKey(chartD.key));
         })
         .setSelectedMeasureKey(setSelectedMeasureKey);
 
-  },[perfectSquare, setSelectedChartKey, zoomTo, setSelectedMeasureKey, managedData.key])
+  },[perfectSquare, setSelectedChartKey, zoomTo, setSelectedMeasureKey, data?.key])
   
   //main render/update visual
   useEffect(() => {

@@ -1,6 +1,17 @@
 'use client'
-import ReactNode, { useRef } from 'react';
+import ReactNode, { useRef, createContext } from 'react';
 import { useZoom } from '@/app/_components/visual/SVGVisual/hooks_and_modules/zoomable-g/zoom';
+import * as d3 from 'd3';
+
+const initZoomState = {
+    zoomTransformState:d3.zoomIdentity, 
+    zoomingInProgress:false, 
+    zoomTo:() => {}, 
+    resetZoom:() => {}, 
+    isChartOnScreenChecker:() => true
+}
+
+export const ZoomContext = createContext(initZoomState);
 
 /**
  * @description Fetches the data for the selected example, stores it, and renders the specific visual (PerfectSquareVisual)
@@ -29,15 +40,23 @@ const ZoomableG = ({ contentsWidth, contentsHeight, margin, cellWidth, cellHeigh
         isChartOnScreenChecker 
     } = useZoom(zoomGRef, viewGRef, contentsWidth, contentsHeight, margin, chartWidth, chartHeight, _chartX, _chartY, onZoomStart, onZoom);
 
+    //expose the hooks values and utility functions as a context
     const context = {
-        
+        zoomTransformState, 
+        zoomingInProgress, 
+        zoomTo, 
+        resetZoom, 
+        isChartOnScreenChecker 
     }
+
     return (
-        <g className="zoom" ref={zoomGRef}>
-            <g className="view" ref={viewGRef}>
-                {children}
+        <ZoomContext.Provider value={context}>
+            <g className="zoom" ref={zoomGRef}>
+                <g className="view" ref={viewGRef}>
+                    {children}
+                </g>
             </g>
-        </g>
+        </ZoomContext.Provider>
     )
 }
   

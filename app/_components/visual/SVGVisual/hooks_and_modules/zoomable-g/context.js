@@ -6,14 +6,19 @@ const initPerfectSquareState = {
     selectedChartKey:"",
     selectedQuadrantIndex:null,
     selectedMeasureKey:"",
-    zoomTransformState:d3.zoomIdentity
+    zoomTransformState:d3.zoomIdentity,
+    setSelectedChartKey:() => {},
+    setSelectedQuadrantIndex:() => {},
+    setSelectedMeasureKey:() => {},
+    setZoomTransformState:() => {}
 }
 const initVisualState = {
     headerExtended:false,
+    setHeaderExtended:() => {},
     ...initPerfectSquareState
 }
 
-export const VisualContext = createContext(initVisualState);
+//export const ZoomContext = createContext(initVisualState);
 
 /**
  * @description Renders either the Intro, or the Header and Visual, depending on the introIsDisplayed flag state
@@ -24,9 +29,9 @@ export const VisualContext = createContext(initVisualState);
 //next - create the AppCobtextprovider component too, 
 //then continue to process stuff inside Visual
 
-export const VisualContextProvider = ({ children }) => {
-    const [headerExtended, setHeaderExtended] = useState(false);
-    const [selectedChartKey, setSelectedChartKey] = useState("");
+export const ZoomContextProvider = ({ children }) => {
+    const [zoomTransformState, setZoomTransformState] = useState(false);
+    const [zoomingInProgress, setZoomingInProgress] = useState("");
     const [selectedQuadrantIndex, setSelectedQuadrantIndex] = useState(null);
     const [selectedMeasureKey, setSelectedMeasureKey] = useState("");
     //copy of the state that is maintained in zoom hook. Needed here for Header.
@@ -40,8 +45,8 @@ export const VisualContextProvider = ({ children }) => {
         zoomTransformState, setZoomTransformState
     }
     return (
-        <VisualContext.Provider value={context}>
+        <ZoomContext.Provider value={context}>
             {children}
-        </VisualContext.Provider>
+        </ZoomContext.Provider>
     )
 }

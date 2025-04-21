@@ -6,10 +6,15 @@ const initPerfectSquareState = {
     selectedChartKey:"",
     selectedQuadrantIndex:null,
     selectedMeasureKey:"",
-    zoomTransformState:d3.zoomIdentity
+    zoomTransformState:d3.zoomIdentity,
+    setSelectedChartKey:() => {},
+    setSelectedQuadrantIndex:() => {},
+    setSelectedMeasureKey:() => {},
+    setZoomTransformState:() => {}
 }
 const initVisualState = {
     headerExtended:false,
+    setHeaderExtended:() => {},
     ...initPerfectSquareState
 }
 
