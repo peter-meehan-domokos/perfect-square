@@ -1,8 +1,9 @@
 'use client'
-import react, { useState, useEffect, useRef, useCallback } from "react";
+import react, { useState, useEffect, useRef, useCallback, useContext } from "react";
 import * as d3 from 'd3';
+import { VisualContext } from "../../../context";
 import { isChartOnScreenCheckerFunc, calcZoomTransformFunc } from "../../../../perfect-square/helpers";
-import { ZOOM_AND_ARRANGE_TRANSITION_DURATION, RESET_ZOOM_DURATION } from '@/app/constants';
+import { ZOOM_AND_ARRANGE_TRANSITION_DURATION, RESET_ZOOM_DURATION } from "@/app/constants";
 
 /**
  * @description A hook that applies zoom functionality to a container, which also includes charts
@@ -20,6 +21,7 @@ import { ZOOM_AND_ARRANGE_TRANSITION_DURATION, RESET_ZOOM_DURATION } from '@/app
  * @return {object} an object containing the current zoom state, and some utility functions
  */
 export const useZoom = (containerRef, viewGRef, contentsWidth, contentsHeight, margin, chartWidth, chartHeight, _chartX, _chartY, onStart=()=>{}, onZoom=()=>{}) => {
+  const { externallyRequiredZoomTransformObject, setExternallyRequiredZoomTransformObject } = useContext(VisualContext);
   //zoom state is only used for React children ie Header as its also store in d3 zoom behaviour object
   const [zoomTransformState, setZoomTransformState] = useState(d3.zoomIdentity);
   const [zoomingInProgress, setZoomingInProgress] = useState(null);
@@ -30,38 +32,36 @@ export const useZoom = (containerRef, viewGRef, contentsWidth, contentsHeight, m
     return checker(chartD, zoomTransformState);
   },[contentsWidth, contentsHeight, chartWidth, chartHeight, _chartX, _chartY])
 
-  const resetZoom = useCallback((withTransition=true) => { 
+  const applyZoom = useCallback((requiredTransform, requiredTransition, callback = () => {}) => { 
     if(!containerRef || !containerRef.current){ return; }
-    if(withTransition){
+    if(requiredTransition){
       //tell d3comp we are zooming to a level 1, so it can ignore level 2 (if we are at level 3)
-      setZoomingInProgress({ targK: d3.zoomIdentity.k, sourceEvent:null })
+      setZoomingInProgress({ targK: requiredTransform.k, sourceEvent:null })
 
       d3.select(containerRef.current)
         .transition()
-        .duration(RESET_ZOOM_DURATION)
-          .call(zoomRef.current.transform, d3.zoomIdentity)
-          .on("end", () => { setZoomingInProgress(null); });
+        .duration(requiredTransition?.duration || 200)
+          .call(zoomRef.current.transform, requiredTransform)
+          .on("end", () => { 
+            setZoomingInProgress(null); 
+            callback();
+          });
     }else{
-      d3.select(containerRef.current).call(zoomRef.current.transform, d3.zoomIdentity);
+      d3.select(containerRef.current).call(zoomRef.current.transform, requiredTransform);
     }
   }, [containerRef])
 
-  const zoomTo = useCallback((chartD, cb=() => {}) => {
+  const resetZoom = useCallback((withTransition=true) => { 
+    const requiredTransition = withTransition ? { duration: RESET_ZOOM_DURATION } : undefined;
+    applyZoom(d3.zoomIdentity, requiredTransition)
+  }, [])
+
+  const zoomTo = useCallback((chartD, callback=() => {}) => {
     if(!containerRef || !containerRef.current){ return; }
     const calcZoomTransform = calcZoomTransformFunc(contentsWidth, contentsHeight, margin, chartWidth, chartHeight, _chartX, _chartY);
-    const transform = calcZoomTransform(chartD);
-    //tell perfectSqaure it is zooming to a level 3, so it can ignore level 2 (if it starts at level 1)
-    setZoomingInProgress({ targK:transform.k, sourceEvent:null })
-    
-    d3.select(containerRef.current)
-      .transition()
-      .duration(ZOOM_AND_ARRANGE_TRANSITION_DURATION)
-        .call(zoomRef.current.transform, transform)
-        .on("end", function(){ 
-          setZoomingInProgress(null);
-          cb(); 
-        })
-
+    const requiredTransform = calcZoomTransform(chartD);
+    const requiredTransition = { duration: ZOOM_AND_ARRANGE_TRANSITION_DURATION };
+    applyZoom(requiredTransform, requiredTransition, callback)
   },[contentsWidth, contentsHeight, margin, chartWidth, chartHeight, _chartX, _chartY, containerRef]);
 
   useEffect(() => {
@@ -89,7 +89,14 @@ export const useZoom = (containerRef, viewGRef, contentsWidth, contentsHeight, m
   // eslint-disable-next-line react-hooks/exhaustive-deps
   },[contentsWidth, contentsHeight, chartWidth, chartHeight, JSON.stringify(_chartX), JSON.stringify(_chartY), onStart, containerRef, viewGRef])
   
-  return { zoomTransformState, zoomingInProgress, zoomTo, resetZoom, isChartOnScreenChecker };
+  useEffect(() => {
+    if(externallyRequiredZoomTransformObject){
+      const { requiredTransform, requiredTransition, callback } = externallyRequiredZoomTransformObject;
+      applyZoom(requiredTransform, requiredTransition, callback);
+      setExternallyRequiredZoomTransformObject(null);
+    }
+  }, [externallyRequiredZoomTransformObject])
+  return { zoomTransformState, zoomingInProgress, applyZoom, zoomTo, resetZoom, isChartOnScreenChecker };
 
 };
 

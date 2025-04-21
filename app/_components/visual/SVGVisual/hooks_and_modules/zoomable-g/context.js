@@ -26,10 +26,7 @@ const initVisualState = {
  * @returns {HTMLElement} A div containing either the Intro component, or the Header and Visual Components
  */
 
-//next - create the AppCobtextprovider component too, 
-//then continue to process stuff inside Visual
-
-export const ZoomContextProvider = ({ children }) => {
+/*export const ZoomContextProvider = ({ children }) => {
     const [zoomTransformState, setZoomTransformState] = useState(false);
     const [zoomingInProgress, setZoomingInProgress] = useState("");
     const [selectedQuadrantIndex, setSelectedQuadrantIndex] = useState(null);
@@ -49,4 +46,4 @@ export const ZoomContextProvider = ({ children }) => {
             {children}
         </ZoomContext.Provider>
     )
-}
+}*/

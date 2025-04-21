@@ -96,7 +96,7 @@ const PerfectSquare = ({ contentsWidth, contentsHeight, grid }) => {
       //.arrangeBy(arrangeBy);
 
   }, [perfectSquare, perfectSquareData?.info, selectedChartKey, selectedQuadrantIndex, selectedMeasureKey, zoomTransformState?.k/*, arrangeBy*/])
-  
+
   //apply handlers
   useEffect(() => {
     perfectSquare
@@ -115,9 +115,14 @@ const PerfectSquare = ({ contentsWidth, contentsHeight, grid }) => {
     renderCharts.call(contentsGRef.current, perfectSquareData.datapoints, perfectSquare, simulationIsOn, {
       transitions:{ enter: CHART_IN_TRANSITION, exit:CHART_OUT_TRANSITION }
     });
-  //@todo - find a better way to handle simulationIsOn...we dont want it to trigegr this useEffect because
+  //@todo - find a better way to handle simulationIsOn...we dont want it to trigger this useEffect because
   //the next one handles changes ot simultionIsOn, but atm we still want to pass it to renderCharts
   }, [contentsWidth, contentsHeight, perfectSquare, perfectSquareData]);
+
+  //light update for settings changes (the changes are added in an earlier useEffect)
+  useEffect(() => {
+    d3.select(contentsGRef.current).selectAll(".chart").call(perfectSquare)
+  }, [perfectSquare, selectedChartKey, selectedQuadrantIndex, selectedMeasureKey])
   
   return (
     <g className="perfect-square-contents" ref={contentsGRef}></g>

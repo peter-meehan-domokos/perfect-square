@@ -1,5 +1,5 @@
 'use client'
-import React, { useRef, useEffect, useMemo, useContext } from 'react';
+import React, { useRef, useEffect, useMemo, useContext, useCallback } from 'react';
 import { AppContext } from "@/app/context";
 import { VisualContext } from '../context';
 import * as d3 from 'd3';
@@ -7,13 +7,11 @@ import Overview from './Overview';
 import ZoomCtrls from './ZoomCtrls';
 import SettingsCtrls from './SettingsCtrls';
 import quadrantCtrlsComponent from "./quadrantCtrlsComponent";
+import { RESET_ZOOM_DURATION } from "@/app/constants";
 
 const VisualHeader = () => { 
   const { visualData:{ data }={} } = useContext(AppContext);
-  const { zoomTransformState } = useContext(VisualContext);
-
-  //@todo how to get this, or do we have our own func here for it
-  const resetZoom=()=>{};
+  const { zoomTransformState, setExternallyRequiredZoomTransformObject } = useContext(VisualContext);
   
   const { 
     headerExtended, setHeaderExtended, 
@@ -41,6 +39,11 @@ const VisualHeader = () => {
 
   }, [quadrantCtrls, selectedQuadrantIndex, setSelectedQuadrantIndex, data?.categories])
 
+  const handleExternalResetZoom = useCallback(() => {
+    const requiredTransition = { duration: RESET_ZOOM_DURATION };
+    setExternallyRequiredZoomTransformObject({ requiredTransform: d3.zoomIdentity, requiredTransition });
+  })
+
   return (
       <div className={`vis-header ${headerExtended ? "extended" : ""}`} >
         <Overview key={data?.key || ""} title={data?.title} desc={data?.desc} headerExtended={headerExtended} toggleHeaderExtended={toggleHeaderExtended} />
@@ -52,7 +55,7 @@ const VisualHeader = () => {
                 <svg ref={containerRef}></svg>
               </div>
             </div>
-            <ZoomCtrls zoomTransformState={zoomTransformState} resetZoom={resetZoom} />
+            <ZoomCtrls zoomTransformState={zoomTransformState} resetZoom={handleExternalResetZoom} />
           </div>
           {/**<SettingsCtrls settings={settings} setSettings={setSettings} setTooltipsData={setTooltipsData} />*/}
         </div>

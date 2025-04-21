@@ -35,6 +35,7 @@ const ZoomableG = ({ contentsWidth, contentsHeight, margin, cellWidth, cellHeigh
     const { 
         zoomTransformState, 
         zoomingInProgress, 
+        applyZoom,
         zoomTo, 
         resetZoom, 
         isChartOnScreenChecker 
@@ -44,6 +45,7 @@ const ZoomableG = ({ contentsWidth, contentsHeight, margin, cellWidth, cellHeigh
     const context = {
         zoomTransformState, 
         zoomingInProgress, 
+        applyZoom,
         zoomTo, 
         resetZoom, 
         isChartOnScreenChecker 

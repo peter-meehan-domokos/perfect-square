@@ -15,7 +15,7 @@ import ZoomableG from './hooks_and_modules/zoomable-g/page';
  */
 const SVGVisual = ({ render, withGrid=true }) => {
   const { visualData:{ data }={} } = useContext(AppContext);
-  const { setSelectedChartKey, setZoomTransformState } = useContext(VisualContext);
+  const { setSelectedChartKey, setZoomTransformState, requiredZoomTransform } = useContext(VisualContext);
 
   const containerDivRef = useRef(null);
 

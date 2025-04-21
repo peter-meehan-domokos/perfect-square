@@ -7,10 +7,12 @@ const initPerfectSquareState = {
     selectedQuadrantIndex:null,
     selectedMeasureKey:"",
     zoomTransformState:d3.zoomIdentity,
+    externallyRequiredZoomTransformObject:null,
     setSelectedChartKey:() => {},
     setSelectedQuadrantIndex:() => {},
     setSelectedMeasureKey:() => {},
-    setZoomTransformState:() => {}
+    setZoomTransformState:() => {},
+    setExternallyRequiredZoomTransformObject:() => {}
 }
 const initVisualState = {
     headerExtended:false,
@@ -36,13 +38,16 @@ export const VisualContextProvider = ({ children }) => {
     const [selectedMeasureKey, setSelectedMeasureKey] = useState("");
     //copy of the state that is maintained in zoom hook. Needed here for Header.
     const [zoomTransformState, setZoomTransformState] = useState(d3.zoomIdentity);
+    //@todo - change to applyZoom utility funciton in useZoom
+    const [externallyRequiredZoomTransformObject, setExternallyRequiredZoomTransformObject] = useState(null);
 
     const context = {
         headerExtended, setHeaderExtended,
         selectedChartKey, setSelectedChartKey,
         selectedQuadrantIndex, setSelectedQuadrantIndex,
         selectedMeasureKey, setSelectedMeasureKey,
-        zoomTransformState, setZoomTransformState
+        zoomTransformState, setZoomTransformState,
+        externallyRequiredZoomTransformObject, setExternallyRequiredZoomTransformObject
     }
     return (
         <VisualContext.Provider value={context}>
