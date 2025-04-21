@@ -1,11 +1,14 @@
 'use client'
 import React from "react";
-import Home from "./_components/_home/page";
+import AppContextProvider from "./context";
+import MainRouter from "./_components/main-router/page";
 
 export default function App() {
   return (
     <React.StrictMode>
-        <Home />
+      <AppContextProvider>
+        <MainRouter />
+      </AppContextProvider>
     </React.StrictMode>
   );
 }

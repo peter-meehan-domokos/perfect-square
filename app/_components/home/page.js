@@ -1,0 +1,39 @@
+'use client';
+import { useContext } from "react";
+import { AppContext } from "@/app/context";
+import DataLoader from "../utility/data-loader/page";
+import { VisualContextProvider } from "../visual/context";
+import VisualLayout from '../visual/layout';
+import Visual from '../visual/page';
+
+const GET_EXAMPLE_DATA = exampleKey => `
+  {
+    exampleData(key: "${exampleKey}"){
+      data
+    }
+  }
+`
+
+/**
+ * @description Renders either the Intro, or the Header and Visual, depending on the introIsDisplayed flag state
+ *
+ * @returns {HTMLElement} A div containing either the Intro component, or the Header and Visual Components
+ */
+const Home = () => {
+  const { selectedExample, setVisualData } = useContext(AppContext);
+    return (
+      <DataLoader
+        query={GET_EXAMPLE_DATA(selectedExample)}
+        save={setVisualData}
+        extractData={data => data.exampleData?.data ? JSON.parse(data.exampleData.data) : null}
+      >
+        <VisualContextProvider>
+          <VisualLayout >
+            <Visual />
+          </VisualLayout>
+        </VisualContextProvider>
+      </DataLoader>
+    )
+}
+  
+export default Home;

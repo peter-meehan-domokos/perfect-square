@@ -341,7 +341,7 @@ main {
   color:white;
 }
 
-.viz-root {
+.vis-root {
   width:100%;
   height:100%;
   background:#F5F5F5; /* smoke white */
@@ -351,7 +351,7 @@ main {
   }
 }
 
-.viz-header {
+.vis-header {
   width:100%;
   height:170px;
   display:flex;
@@ -373,14 +373,14 @@ main {
   overflow:hidden;
 }
 
-.viz-header.extended {
+.vis-header.extended {
   height:230px;
   @media only screen and (max-width: 575px) {
     height:305px;
   }
 }
 
-.viz-container {
+.vis-container {
   width:100%;
   height:calc(100% - 165px - 20px - 0px);
   /*padding:10px;*/
@@ -395,7 +395,7 @@ main {
   }
 }
 
-.viz-container.with-extended-header {
+.vis-container.with-extended-header {
   width:100%;
   height:calc(100% - 200px - 20px - 0px);
   @media only screen and (max-width: 575px) {
@@ -403,16 +403,16 @@ main {
   }
 }
 
-.viz-inner-container {
+.vis-layout {
   width:100%;
   height:100%;
 }
 
-.viz {
+.vis {
   overflow:hidden;
 }
 
-.viz-overview {
+.vis-overview {
   width:calc(100% - 310px);
   @media only screen and (max-width: 768px) {
     width:100%;
@@ -454,7 +454,7 @@ main {
   flex-direction: column;
 }
 
-.viz-title {
+.vis-title {
   width:100%;
   padding:10px 10px 0px;
   font-size:0.9rem;
@@ -472,7 +472,7 @@ main {
   }
 }
 
-.viz-title div {
+.vis-title div {
   margin-right: 4px;
   display:flex;
   text-align:left;
@@ -503,7 +503,7 @@ main {
   color:red;
 }
 
-.viz-desc {
+.vis-desc {
   height:auto;
   padding:5px 0px;
   font-size:0.8rem;
@@ -529,7 +529,7 @@ main {
   }
 }
 
-.viz-desc.extended {
+.vis-desc.extended {
   height:90px;
   padding:5px 0;
   @media only screen and (max-width: 575px) {
@@ -537,7 +537,7 @@ main {
   }
 }
 
-.viz-desc div{
+.vis-desc div{
   padding:7.5px 10px;
   text-align:left;
   @media only screen and (max-width: 768px) {
@@ -546,7 +546,7 @@ main {
   
 }
 
-.viz-info {
+.vis-info {
   display:flex;
   flex-direction: column;
   justify-content: space-between;
