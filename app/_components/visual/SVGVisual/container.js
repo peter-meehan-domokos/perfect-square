@@ -60,12 +60,12 @@ const SVGContainer = ({ withGridDimensions=false, withSimulationDimensions=true,
 
     const containerDivRef = useRef(null);
     const container = useSVGContainerContext(containerDivRef);
-    const { contentsWidth, contentsHeight, margin } = container;
+    const { width, contentsWidth, contentsHeight, margin } = container;
 
     //if consumer just needs a simulation, then grid is still needed to calculate the simulation dimensions
     const needGrid = withGridDimensions || withSimulationDimensions;
-    const grid = useMemo(() => needGrid && dataExists ? calcGrid(contentsWidth, contentsHeight, nrDatapoints) : null, 
-        [needGrid, contentsWidth, contentsHeight, nrDatapoints, dataExists]);
+    const grid = useMemo(() => width && needGrid && dataExists ? calcGrid(contentsWidth, contentsHeight, nrDatapoints) : null, 
+        [needGrid, width, contentsWidth, contentsHeight, nrDatapoints, dataExists]);
 
     const simulation = useMemo(() => withSimulationDimensions && grid?.cellWidth ? calcSimulationNodeDimensions(grid.cellWidth, grid.cellHeight, nrDatapoints, arrangeBy) : null, 
         [withSimulationDimensions, grid?.cellWidth, grid?.cellHeight, nrDatapoints, arrangeBy]);

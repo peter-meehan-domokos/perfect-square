@@ -124,6 +124,7 @@ body {
 
 .slide-controls{
   padding-top:40px;
+  margin: 0 auto;
   @media only screen and (max-width: 575px) {
     padding-top:15px;
     padding-bottom:20px;
@@ -170,6 +171,7 @@ body {
 .intro-slide-text-container .slide-textline {
   width:100%;
   font-size:1.2rem;
+  text-align:center;
   @media only screen and (max-width: 768px) {
     font-size: 0.9rem;
   }

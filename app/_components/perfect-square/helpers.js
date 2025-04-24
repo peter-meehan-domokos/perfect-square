@@ -30,8 +30,8 @@ export const getDisabledLevelsForZoom = (initLevel, targLevel) =>
       return {
         width,
         height,
-          contentsWidth : width - margin.left - margin.right,
-          contentsHeight : height - margin.top - margin.bottom,
+          contentsWidth : d3.max([width - margin.left - margin.right, 0]),
+          contentsHeight : d3.max([height - margin.top - margin.bottom, 0]),
           margin
       }
   }

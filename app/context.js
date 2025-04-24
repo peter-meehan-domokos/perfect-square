@@ -46,9 +46,10 @@ export default function AppContextProvider({ children }) {
       pendingVisualDataRef.current = newVisualData;
       setVisualData(nullVisualData);
       setTimeout(() => {
-        setVisualData(prevState => {
-          return pendingVisualDataRef.current
-        });
+        //guard against case of home page being re-mounted if user toggle between intro and home quickly
+        if(pendingVisualDataRef.current) {
+          setVisualData(pendingVisualDataRef.current)
+        }
         pendingVisualDataRef.current = null;
       }, CHART_OUT_TRANSITION.duration + DELAY_FOR_DOM_CLEAN_UP)
     }
