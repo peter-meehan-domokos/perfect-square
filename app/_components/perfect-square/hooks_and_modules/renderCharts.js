@@ -11,7 +11,7 @@ import { remove, fadeIn } from '../../../_helpers/domHelpers';
  * 
  */
 function renderCharts(datapoints=[], perfectSquare, simulationIsOn, options={}){
-    console.log("render", simulationIsOn)
+    console.log("render", datapoints.length)
     const { transitions={} } = options;
     const chartG = d3.select(this).selectAll("g.chart").data(datapoints, d => d.key);
         chartG.enter()
@@ -19,11 +19,11 @@ function renderCharts(datapoints=[], perfectSquare, simulationIsOn, options={}){
             .attr("class", "chart")
             .attr("id", d => `chart-${d.key}`)
             .call(fadeIn, { transition:transitions.enter || null })
-            .attr("transform", function(d,i){
-                return simulationIsOn ? d3.select(this).attr("transform") : `translate(${d.cellX},${d.cellY})`
-            })
+            //emtered nodes must all have transform added. This includes case where user zooms/pans to reveal new nodes
+            .attr("transform", d => simulationIsOn ? `translate(${d.x},${d.y})` : `translate(${d.cellX},${d.cellY})`)
             .merge(chartG)
             .each(function(d,i){
+                //updated nodes dont add transfomr as the simulation does it on tick
                 if(transitions.update){
                     d3.select(this)
                         .transition()
