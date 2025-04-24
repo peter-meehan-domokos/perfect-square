@@ -15,7 +15,7 @@ import { ZOOM_AND_ARRANGE_TRANSITION_DURATION, CHART_IN_TRANSITION, CHART_OUT_TR
 import { useZoom } from '../visual/SVGVisual/hooks_and_modules/zoomable-g/zoom';
 import { useSVGContainerContext } from '../visual/SVGVisual/hooks_and_modules/containerDimensions';
 import calcGrid from '../visual/SVGVisual/hooks_and_modules/grid'
-import { useTooltips } from './hooks_and_modules/tooltips';
+import { useTooltips } from '../visual/SVGVisual/hooks_and_modules/tooltips/renderTooltips';
 import { useSimulation } from '../visual/SVGVisual/hooks_and_modules/simulation/simulation';
 import { useDataChangeManagement } from './hooks_and_modules/dataChangeManagement';
 

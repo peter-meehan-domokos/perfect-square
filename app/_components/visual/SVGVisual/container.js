@@ -59,7 +59,7 @@ const SVGContainer = ({ withGridDimensions=false, withSimulationDimensions=true,
     //if consumer just needs a simulation, then grid is still needed to calculate the simulation dimensions
     const needGrid = withGridDimensions || withSimulationDimensions;
     const grid = useMemo(() => needGrid && dataExists ? calcGrid(contentsWidth, contentsHeight, nrDatapoints) : null, 
-        [withGridDimensions, contentsWidth, contentsHeight, nrDatapoints, dataExists]);
+        [needGrid, contentsWidth, contentsHeight, nrDatapoints, dataExists]);
 
     const simulation = useMemo(() => withSimulationDimensions && grid?.cellWidth ? calcSimulationNodeDimensions(grid.cellWidth, grid.cellHeight, nrDatapoints, arrangeBy) : null, 
         [withSimulationDimensions, grid?.cellWidth, grid?.cellHeight, nrDatapoints, arrangeBy]);
@@ -92,6 +92,11 @@ const SVGContainer = ({ withGridDimensions=false, withSimulationDimensions=true,
                     width={`${contentsWidth}px`} 
                     height={`${contentsHeight}px`}  >
                     {children}
+                    <defs>
+                        <clipPath id="slide-tooltip-clip">
+                            <rect></rect>
+                        </clipPath>
+                    </defs>
                 </svg>
             </div>
         </SVGContainerContext.Provider>

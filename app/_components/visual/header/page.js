@@ -2,6 +2,7 @@
 import React, { useRef, useEffect, useMemo, useContext, useCallback } from 'react';
 import { AppContext } from "@/app/context";
 import { VisualContext } from '../context';
+import { TooltipsContext } from '../SVGVisual/hooks_and_modules/tooltips/context';
 import * as d3 from 'd3';
 import Overview from './Overview';
 import ZoomCtrls from './ZoomCtrls';
@@ -10,14 +11,20 @@ import quadrantCtrlsComponent from "./quadrantCtrlsComponent";
 import { RESET_ZOOM_DURATION } from "@/app/constants";
 
 const VisualHeader = () => { 
-  const { visualData:{ data }={} } = useContext(AppContext);
-  const { zoomTransformState, setExternallyRequiredZoomTransformObject } = useContext(VisualContext);
-  
+  const { 
+    visualData:{ data }={} 
+  } = useContext(AppContext);
   const { 
     headerExtended, setHeaderExtended, 
     selectedQuadrantIndex, setSelectedQuadrantIndex,
-    displaySettings, setDisplaySettings
+    displaySettings, setDisplaySettings,
+    zoomTransformState, setExternallyRequiredZoomTransformObject
   } = useContext(VisualContext);
+
+  const { 
+    setHeaderTooltipsData 
+  } = useContext(TooltipsContext);
+  
 
   const quadrantCtrls = useMemo(() => quadrantCtrlsComponent(), []);
   //refs
@@ -43,7 +50,7 @@ const VisualHeader = () => {
   const handleExternalResetZoom = useCallback(() => {
     const requiredTransition = { duration: RESET_ZOOM_DURATION };
     setExternallyRequiredZoomTransformObject({ requiredTransform: d3.zoomIdentity, requiredTransition });
-  })
+  }, [setExternallyRequiredZoomTransformObject])
 
   return (
       <div className={`vis-header ${headerExtended ? "extended" : ""}`} >
@@ -61,7 +68,7 @@ const VisualHeader = () => {
           <SettingsCtrls 
             settings={displaySettings} 
             setSettings={setDisplaySettings} 
-            setTooltipsData={()=>{}/*setTooltipsData*/} />
+            setHeaderTooltipsData={setHeaderTooltipsData} />
         </div>
       </div>
   )

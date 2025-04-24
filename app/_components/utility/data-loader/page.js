@@ -1,3 +1,4 @@
+/* eslint react-hooks/exhaustive-deps: 0 */
 'use client'
 import { useEffect, useContext } from "react";
 import { useFetch } from '@/app/_api-requests/fetch-hooks';
@@ -12,7 +13,7 @@ const DataLoader = ({
   query, 
   save,
   extractData = data => data, 
-  successCallback= () => {}, 
+  successCallback = () => {}, 
   fallback,
   children 
 }) => {
@@ -24,7 +25,7 @@ const DataLoader = ({
       if(extractedData){ 
         successCallback(extractedData)
       };
-  }, [data, error, loading])
+  }, [data, error, loading, /*extractData,save, successCallback*/])
 
     return (
       <>

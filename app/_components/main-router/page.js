@@ -1,4 +1,4 @@
-import ReactNode, { useContext } from "react";
+import ReactNode, { useContext, useMemo, useCallback } from "react";
 import { AppContext } from "@/app/context";
 import DataLoader from "../utility/data-loader/page";
 import Intro from "../intro/page";
@@ -40,12 +40,15 @@ export default function MainRouter() {
  */
 const HomePage = () => {
   const { setIntroIsDisplayed, updateSelectedExample, setExamples } = useContext(AppContext);
+  const successCallback = useCallback((extractedData) => updateSelectedExample(extractedData[0]?.key),
+    [updateSelectedExample]);
+
   return (
     <DataLoader 
       query={GET_EXAMPLES} 
       save={setExamples}
       extractData={data => data.examples}
-      successCallback={extractedData => updateSelectedExample(extractedData[0]?.key)}
+      successCallback={successCallback}
     >
         <HomeLayout
             openIntro={() => setIntroIsDisplayed(true)}

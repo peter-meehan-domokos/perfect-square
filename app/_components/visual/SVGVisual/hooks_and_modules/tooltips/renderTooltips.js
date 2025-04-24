@@ -1,38 +1,7 @@
 'use client'
 import * as d3 from "d3";
-import react, { useState, useEffect, useMemo } from "react";
-import tooltipComponent from "../svgComponents/tooltip/component";
-import { remove } from '../../../_helpers/domHelpers';
+import { remove } from '../../../../../_helpers/domHelpers';
 import { FADE_IN_OUT_DURATION } from '@/app/constants';
-
-/**
- * @description A hook that renders tooltips in various locations of a container, based on it's state
- * @param {Ref} containerRef a ref to the container 
- * @param {Number} width the container width
- * @param {Number} height the container height
- * 
- * @return {object} getters and setters for the state - the arrays of tooltips required
- */
-export const useTooltips = (containerRef, width, height) => {
-    const [headerTooltipsData, setHeaderTooltipsData] = useState([]);
-    const [chartsViewboxTooltipsData, setChartsViewboxTooltipsData] = useState([]);
-    const [loadingTooltipsData, setLoadingTooltipsData] = useState([]);
-
-    const tooltip = useMemo(() => tooltipComponent(), []);
-
-    useEffect(() => {
-        const tooltipsData = [
-        ...headerTooltipsData, 
-        ...chartsViewboxTooltipsData,
-        ...loadingTooltipsData
-        ];
-        renderTooltips.call(containerRef.current, tooltipsData, tooltip, width, height);
-    }, [headerTooltipsData, chartsViewboxTooltipsData, loadingTooltipsData, containerRef, width, height, tooltip])
-    
-    return { setHeaderTooltipsData, setChartsViewboxTooltipsData, setLoadingTooltipsData }
-
-};
-
 
 /**
  * @description Runs the tooltip data through a D3 enter-update-exit pattern to render the tooltip components
@@ -46,7 +15,7 @@ export const useTooltips = (containerRef, width, height) => {
  * @returns {object} 
  */
 
-function renderTooltips(data, tooltip, width, height){
+export default function renderTooltips(data, tooltip, width, height){
     if(!width){ return; }
 
     const headerTooltipWidth = 150;
@@ -63,7 +32,7 @@ function renderTooltips(data, tooltip, width, height){
         height:d.area === "header" ? headerTooltipHeight : chartsViewboxTooltipHeight
     }))
 
-    const tooltipG = d3.select(this).select("svg.vis").selectAll("g.tooltip").data(tooltipsData, d => d.key);
+    const tooltipG = d3.select(this).selectAll("g.tooltip").data(tooltipsData, d => d.key);
     tooltipG.enter()
       .append("g")
         .attr("class", "tooltip")

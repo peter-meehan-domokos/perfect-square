@@ -51,13 +51,13 @@ export const useZoom = (containerRef, viewGRef, contentsWidth, contentsHeight, m
     }else{
       d3.select(containerRef.current).call(zoomRef.current.transform, requiredTransform);
     }
-  }, [containerRef, chartWidth, chartHeight])
+  }, [containerRef])
 
   const resetZoom = useCallback((withTransition=true) => { 
     if(!containerRef || !containerRef.current || !zoomRef.current){ return; }
     const requiredTransition = withTransition ? { duration: RESET_ZOOM_DURATION } : undefined;
     applyZoom(d3.zoomIdentity, requiredTransition)
-  }, [])
+  }, [applyZoom, containerRef])
 
   const zoomTo = useCallback((chartD, callback=() => {}) => {
     if(!chartWidth || !chartHeight){ return;}
@@ -66,7 +66,7 @@ export const useZoom = (containerRef, viewGRef, contentsWidth, contentsHeight, m
     const requiredTransform = calcZoomTransform(chartD);
     const requiredTransition = { duration: ZOOM_AND_ARRANGE_TRANSITION_DURATION };
     applyZoom(requiredTransform, requiredTransition, callback)
-  },[contentsWidth, contentsHeight, margin, chartWidth, chartHeight, _chartX, _chartY, containerRef]);
+  },[applyZoom, containerRef, contentsWidth, contentsHeight, margin, chartWidth, chartHeight, _chartX, _chartY]);
 
   useEffect(() => {
     if(!chartWidth || !chartHeight){ return;}
@@ -101,7 +101,7 @@ export const useZoom = (containerRef, viewGRef, contentsWidth, contentsHeight, m
       applyZoom(requiredTransform, requiredTransition, callback);
       setExternallyRequiredZoomTransformObject(null);
     }
-  }, [externallyRequiredZoomTransformObject])
+  }, [externallyRequiredZoomTransformObject, setExternallyRequiredZoomTransformObject, chartWidth, chartHeight, applyZoom])
 
   return { zoomTransformState, zoomingInProgress, applyZoom, zoomTo, resetZoom, isChartOnScreenChecker };
 

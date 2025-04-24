@@ -30,12 +30,12 @@ const FormControlLabelStyle = {
  * @param {string} name .....
  * @returns {ReactNode} A React element that renders....
  */
-const SettingsCtrls = ({ settings=DEFAULT_DISPLAY_SETTINGS, setSettings, setTooltipsData }) => {
+const SettingsCtrls = ({ settings=DEFAULT_DISPLAY_SETTINGS, setSettings, setHeaderTooltipsData }) => {
   const mouseOverRef = useRef("");
   const handleSettingsChange = (checkboxKey, checkboxValue) => {
     //remove tooltip as it has been clicked
     mouseOverRef.current = "";
-    setTooltipsData([]);
+    setHeaderTooltipsData([]);
     //helper
     setSettings(prevState => {
       const { x, y, colour } = prevState.arrangeBy;
@@ -60,7 +60,7 @@ const SettingsCtrls = ({ settings=DEFAULT_DISPLAY_SETTINGS, setSettings, setTool
       //note - tooltip key is same for all 3 so it doesnt disappear when going from one to the other
       const option = SETTINGS_OPTIONS.arrangeBy.find(opt => opt.key === optKey);
       const newTooltipDatum = { key:"setting", area:"header", title:option.label, paragraphs:option.desc };
-      setTooltipsData(prevState => {
+      setHeaderTooltipsData(prevState => {
         const currentSettingsTooltip = prevState.find(d => d.key === "setting");
         if(currentSettingsTooltip){
           return prevState.map(d => d.key !== "setting" ? d : newTooltipDatum)
@@ -75,7 +75,7 @@ const SettingsCtrls = ({ settings=DEFAULT_DISPLAY_SETTINGS, setSettings, setTool
     mouseOverRef.current = "";
     setTimeout(() => {
       if(mouseOverRef.current) { return; }
-      setTooltipsData(prevState => prevState.filter(d => d.key !== "setting"))
+      setHeaderTooltipsData(prevState => prevState.filter(d => d.key !== "setting"))
     }, 500)
   }
 

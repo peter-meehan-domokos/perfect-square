@@ -1,23 +1,18 @@
 /* eslint react-hooks/exhaustive-deps: 0 */
-//@todo - remove the 2 or 3 places where this disbalong is needed. They are due to the need to prevent
-//duplicate re-renders to the _svgComponents, but can be refactored to remove the need
-//to pass in some settings within the useEffects that we dont want to be triggered
-
 'use client'
-import React, { useState, useEffect, useRef, useMemo, useCallback, useContext } from 'react'
+import React, { useEffect, useRef, useMemo, useCallback, useContext } from 'react'
 import * as d3 from 'd3';
 import { AppContext } from "@/app/context";
 import { VisualContext } from "../visual/context";
+import { TooltipsContext } from '../visual/SVGVisual/hooks_and_modules/tooltips/context';
 import { SVGContainerContext } from '../visual/SVGVisual/container';
 import { ZoomContext } from '../visual/SVGVisual/hooks_and_modules/zoomable-g/page';
 import perfectSquareLayout from './svgComponents/perfectSquare/layout';
 import perfectSquareComponent from "./svgComponents/perfectSquare/component";
 import renderCharts from './hooks_and_modules/renderCharts';
-import { DEFAULT_DISPLAY_SETTINGS, SELECT_MEASURE_TOOLTIP, LOADING_TOOLTIP } from "./constants.js";
+import { SELECT_MEASURE_TOOLTIP, LOADING_TOOLTIP } from "./constants.js";
 import { ZOOM_AND_ARRANGE_TRANSITION_DURATION, CHART_IN_TRANSITION, CHART_OUT_TRANSITION } from '@/app/constants';
 import { useSimulation } from '../visual/SVGVisual/hooks_and_modules/simulation/simulation';
-import { useDataChangeManagement } from '../utility/dataChangeManagement';
-
 
 /**
  * @description  Receives the data, passes it through various hooks and handles the 
@@ -43,6 +38,10 @@ const PerfectSquare = () => {
   } = useContext(VisualContext);
 
   const { 
+    setLoadingTooltipsData, setChartsViewboxTooltipsData
+  } = useContext(TooltipsContext);
+
+  const { 
       container: { contentsWidth, contentsHeight }, 
       grid,
       chart,
@@ -58,6 +57,11 @@ const PerfectSquare = () => {
 
   //dom refs
   const contentsGRef = useRef(null);
+
+  //loading tooltip
+  useEffect(() => { 
+    setLoadingTooltipsData(loading ? [LOADING_TOOLTIP] : []); 
+},[loading, setLoadingTooltipsData])
 
   //DATA PROCESSING
   //data - control the way that a complete change of data is handled
@@ -141,8 +145,6 @@ const PerfectSquare = () => {
     renderCharts.call(contentsGRef.current, perfectSquareData.datapoints, perfectSquare, simulationIsOn, {
       transitions:{ enter: CHART_IN_TRANSITION, exit:CHART_OUT_TRANSITION }
     });
-  //@todo - find a better way to handle simulationIsOn...we dont want it to trigger this useEffect because
-  //the next one handles changes to simultionIsOn, but atm we still want to pass it to renderCharts
   }, [contentsWidth, contentsHeight, perfectSquare, perfectSquareData]);
 
   //update due to arrangeBy changing
@@ -160,7 +162,6 @@ const PerfectSquare = () => {
       });
     }
     simulationHasBeenToggledRef.current = true;
-    //prevSimulationStateRef.current = simulationIsOn ? "on" : "off";
 
   }, [perfectSquare, simulationIsOn]);
 
@@ -189,6 +190,18 @@ const PerfectSquare = () => {
     d3.select(contentsGRef.current).selectAll(".chart").call(perfectSquare)
   }, [perfectSquare, selectedChartKey, selectedQuadrantIndex, selectedMeasureKey]);
 
+  //Selected measure change
+  useEffect(() => {
+    if(selectedMeasureKey){
+      setChartsViewboxTooltipsData([SELECT_MEASURE_TOOLTIP])
+      //remove after 3 secs
+      setTimeout(() => { 
+        setChartsViewboxTooltipsData([]); 
+        setSelectedMeasureKey("");
+      }, 3000)
+    }
+  }, [selectedMeasureKey])
+
 
   useEffect(() => {
     //reset flags
@@ -196,7 +209,9 @@ const PerfectSquare = () => {
   }, [simulationIsOn]);
   
   return (
-    <g className="perfect-square-contents" ref={contentsGRef}></g>
+    <>
+      <g className="perfect-square-contents" ref={contentsGRef}></g>
+    </>
   )
 }
 

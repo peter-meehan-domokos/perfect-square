@@ -5,6 +5,7 @@ import { AppContext } from "@/app/context";
 import { VisualContext } from "../context";
 import SVGContainer from './container';
 import ZoomableG from './hooks_and_modules/zoomable-g/page';
+import Tooltips from './hooks_and_modules/tooltips/page';
 
 /**
  * @description Fetches the data for the selected example, stores it, and renders the specific visual (PerfectSquareVisual)
@@ -25,15 +26,9 @@ const SVGVisual = ({ render }) => {
       >
         {render()}
       </ZoomableG>
+      <Tooltips />
     </SVGContainer>
   )
 }
   
 export default SVGVisual;
-
-/*
-<ZoomableG>
-    <Tooltips tooltipsData={tooltipsData} />
-    {withDataChangeManagement(render)}
-</ZoomableG>
-*/
