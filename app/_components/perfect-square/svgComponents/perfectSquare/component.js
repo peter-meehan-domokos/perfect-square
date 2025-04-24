@@ -283,8 +283,7 @@ export default function perfectSquare() {
 
                 //bg
                 container.append("rect").attr("class", "component-bg")
-                    .attr("fill", "transparent")
-                    .attr("stroke", "red");
+                    .attr("fill", "transparent");
 
                 const contentsG = container.append("g").attr("class", "component-contents");
                 contentsG.append("rect").attr("class", "component-contents-bg")
