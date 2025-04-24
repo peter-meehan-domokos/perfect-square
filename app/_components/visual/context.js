@@ -1,5 +1,5 @@
 'use client';
-import { createContext, useState } from "react";
+import { ReactNode, createContext, useState } from "react";
 import * as d3 from 'd3';
 import { DEFAULT_DISPLAY_SETTINGS } from "../perfect-square/constants";
 
@@ -26,14 +26,10 @@ const initVisualState = {
 export const VisualContext = createContext(initVisualState);
 
 /**
- * @description Renders either the Intro, or the Header and Visual, depending on the introIsDisplayed flag state
+ * @description stores state related to the visual
  *
- * @returns {HTMLElement} A div containing either the Intro component, or the Header and Visual Components
+ * @returns {ReactNode} the context provider
  */
-
-//next - create the AppCobtextprovider component too, 
-//then continue to process stuff inside Visual
-
 export const VisualContextProvider = ({ children }) => {
     const [headerExtended, setHeaderExtended] = useState(false);
     const [selectedChartKey, setSelectedChartKey] = useState("");

@@ -13,6 +13,12 @@ const initAppState = {
 }
 export const AppContext = createContext(initAppState);
 
+/**
+ * @description stores state related to the app, which includes the data that is provided to the visual.
+ * Manages updates to the visual data, too allow a smooth cleanup and transition, for example removing any zoomstate
+ *
+ * @returns {ReactNode} the context provider
+ */
 export default function AppContextProvider({ children }) {
   const [introIsDisplayed, setIntroIsDisplayed] = useState(true);
   const [device, setDevice] = useState("");

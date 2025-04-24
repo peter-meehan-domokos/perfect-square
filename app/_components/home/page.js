@@ -1,5 +1,5 @@
 'use client';
-import { useContext } from "react";
+import { ReactNode, useContext } from "react";
 import { AppContext } from "@/app/context";
 import DataLoader from "../utility/data-loader/page";
 import { VisualContextProvider } from "../visual/context";
@@ -16,9 +16,10 @@ const GET_EXAMPLE_DATA = exampleKey => `
 `
 
 /**
- * @description Renders either the Intro, or the Header and Visual, depending on the introIsDisplayed flag state
+ * @description the main app component, which renders the Visual component
  *
- * @returns {HTMLElement} A div containing either the Intro component, or the Header and Visual Components
+ * @returns {ReactNode} A Visual component, wrapped in a layout, some context profvidrrs and a dat loader which 
+ * fetches the required data for the visual.
  */
 const Home = () => {
   const { selectedExampleKey, updateVisualData } = useContext(AppContext);

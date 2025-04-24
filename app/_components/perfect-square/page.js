@@ -15,20 +15,12 @@ import { ZOOM_AND_ARRANGE_TRANSITION_DURATION, CHART_IN_TRANSITION, CHART_OUT_TR
 import { useSimulation } from '../visual/SVGVisual/hooks_and_modules/simulation/simulation';
 
 /**
- * @description  Receives the data, passes it through various hooks and handles the 
- * the rendering and updating of the perfectSquare component via useEffects. Also maintains the state of the visual
- * based on callbacks from the component after user interactions.
- *
- * @param {object} data contains the datapoints which will become charts, the measures to be displayed, and some metadata
- * @param {object} initSelections contains three strings that represent any selections that should be applied to the initial render
- * @param {object} initSimulationSettings contains any initial settings that determine what simulation, if any, is on
- * @param {boolean} loading a flag to show if data is still loading
+ * @description  Receives the data and other state, passes it through functions to prepare teh data, 
+ * and calls useEffects which pass in settings to the svg component (non-react), and renders/updates it.
  * 
- * @returns {HTMLElement} A div that wraps VisualHeader component and an svg. The svg contains a g for the zoom 
- * that is applied in a useEffect, and a g which contains the charts whcih are rendered in a useEffect.
+ * @returns {HTMLElement}  A g which will contain the charts which are rendered in a useEffect.
  */
 
-//@todo - change to width and height because this fits the design pattern: each compponent is doesnt care about higher up the chain
 const PerfectSquare = () => {
   const { visualData:{ data, loading, error }={} } = useContext(AppContext);
   const { 
@@ -103,7 +95,6 @@ const PerfectSquare = () => {
   //apply dimensions
   useEffect(() => {
     if(dataIsNull || !chart){ return; }
-    //console.log("uE 1")
     perfectSquare
       .width(chart.width)
       .height(chart.height)
@@ -114,7 +105,6 @@ const PerfectSquare = () => {
   //apply settings
   useEffect(() => {
     if(dataIsNull){ return; }
-    //console.log("uE 2")
     perfectSquare
       .metaData({ data: { info:perfectSquareData?.info } })
       .selectedChartKey(selectedChartKey)
@@ -127,7 +117,6 @@ const PerfectSquare = () => {
 
   //apply handlers
   useEffect(() => {
-    //console.log("uE 3")
     perfectSquare
         .setSelectedChartKey(chartD => {
           zoomTo(chartD, 
@@ -140,7 +129,6 @@ const PerfectSquare = () => {
   //main render/update visual
   useEffect(() => {
     if (!perfectSquareData || !perfectSquareData.datapoints) { return; }
-    console.log("uE 4")
     //call charts
     renderCharts.call(contentsGRef.current, perfectSquareData.datapoints, perfectSquare, simulationIsOn, {
       transitions:{ enter: CHART_IN_TRANSITION, exit:CHART_OUT_TRANSITION }
@@ -152,7 +140,6 @@ const PerfectSquare = () => {
   const simulationHasBeenToggledRef = useRef(false);
   useEffect(() => {
     if (!perfectSquareData || !perfectSquareData.datapoints) { return; }
-    console.log("uE 5", simulationIsOn)
     if(simulationIsOn){
       d3.select(contentsGRef.current).selectAll(".chart").call(perfectSquare)
     }else{
@@ -167,18 +154,13 @@ const PerfectSquare = () => {
 
   //zooming in progress flag - note that dom will update due to zoom state changes
   useEffect(() => {
-    //console.log("uE 6")
     perfectSquare.zoomingInProgress(zoomingInProgress);
   }, [perfectSquare, zoomingInProgress]);
 
   //update due to zoom
   useEffect(() => {
     if (!perfectSquareData || !perfectSquareData.datapoints) { return; }
-    console.log("uE 7")
-    if(simulationHasBeenToggledRef.current){
-      console.log("ignoring zoom useEff as it is due to sim toggle")
-      return;
-    }
+    if(simulationHasBeenToggledRef.current){ return; }
     const datapointsOnScreen = perfectSquareData.datapoints.filter(d => isChartOnScreenChecker(d))
     //call charts, with no transitions
     renderCharts.call(contentsGRef.current, datapointsOnScreen, perfectSquare, simulationIsOn);
@@ -186,7 +168,6 @@ const PerfectSquare = () => {
 
   //light update for settings changes (the changes are added in an earlier useEffect)
   useEffect(() => {
-    //console.log("uE 8")
     d3.select(contentsGRef.current).selectAll(".chart").call(perfectSquare)
   }, [perfectSquare, selectedChartKey, selectedQuadrantIndex, selectedMeasureKey]);
 

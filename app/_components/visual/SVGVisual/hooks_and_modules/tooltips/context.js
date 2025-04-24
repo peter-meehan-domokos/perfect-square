@@ -4,6 +4,11 @@ import React, { useState, createContext } from "react";
 const initTooltipsState = [];
 export const TooltipsContext = createContext(initTooltipsState);
 
+/**
+ * @description stores state related to tooltips that a child component wil render over the visual
+ *
+ * @returns {ReactNode} the context provider
+ */
 export default function TooltipsContextProvider({ children }) {
     const [headerTooltipsData, setHeaderTooltipsData] = useState([]);
     const [chartsViewboxTooltipsData, setChartsViewboxTooltipsData] = useState([]);

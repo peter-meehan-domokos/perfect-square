@@ -10,6 +10,11 @@ import SettingsCtrls from './SettingsCtrls';
 import quadrantCtrlsComponent from "./quadrantCtrlsComponent";
 import { RESET_ZOOM_DURATION } from "@/app/constants";
 
+/**
+ * @description 
+ *
+ * @returns {HTMLElement} 
+ */
 const VisualHeader = () => { 
   const { 
     visualData:{ data }={} 

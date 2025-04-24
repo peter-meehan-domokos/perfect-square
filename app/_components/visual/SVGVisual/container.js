@@ -37,10 +37,16 @@ const defaultSVGContainerContext = {
 export const SVGContainerContext = createContext(defaultSVGContainerContext);
 
 /**
- * @description Fetches the data for the selected example, stores it, and renders the specific visual (PerfectSquareVisual)
+ * @description a component that renders an svg that takes up all available space, 
+ * and also calculates its dimensions. Optionally provides other layout-related dimensional info (see params)
  *
- * @param {string} exampleKey the selected example, which is passed to the server to retrieve the correct data
- * @returns {import('react').ReactNode} the PerfectSquareVisual component
+ * @param {boolean} withGridDimensions if true, the context will also store the information required for any consumer to 
+ * render a grid of the datapoints, with the number of rows and columns that make maximum use of the space.
+ * 
+ * @param {boolean} withSimulationDimensions if true, the context will also contain nodeWidth and nodeHeight values 
+ * for a simulation if the datapoints, with values such that all datapoints will fit on screen
+ * 
+ * @returns {ReactNode} the context, and the svg element inside it
  */
 
 //@todo - remove the div and just use the svg

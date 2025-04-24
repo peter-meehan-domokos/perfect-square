@@ -11,7 +11,6 @@ import { remove, fadeIn } from '../../../_helpers/domHelpers';
  * 
  */
 function renderCharts(datapoints=[], perfectSquare, simulationIsOn, options={}){
-    console.log("render", datapoints.length)
     const { transitions={} } = options;
     const chartG = d3.select(this).selectAll("g.chart").data(datapoints, d => d.key);
         chartG.enter()

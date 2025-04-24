@@ -1,21 +1,15 @@
 'use client'
-import { useContext } from 'react';
-import { AppContext } from "@/app/context";
-import { VisualContext } from "../visual/context";
+import { ReactNode } from 'react';
 import PerfectSquare from '../perfect-square/page';
 import SVGVisual from './SVGVisual/page';
-import { NoDataFallback } from '../utility/fallbacks/page';
 
 /**
- * @description Fetches the data for the selected example, stores it, and renders the specific visual (PerfectSquareVisual)
- *
- * @param {string} exampleKey the selected example, which is passed to the server to retrieve the correct data
- * @returns {import('react').ReactNode} the PerfectSquareVisual component
+ * @description renders an SVGVisual Component, which follows a renderProps pattern, receiving as props the specific visual.
+ * This component is therefore seam where the specific compoennt is injected into the application.
+ * 
+ * @returns {ReactNode} the SVGVisual component
  */
-const Visual = ({  }) => {
-  const { visualData:{ data, loading, error } = {}} = useContext(AppContext);
-  const { } = useContext(VisualContext);
-
+const Visual = () => {
     return (
       <SVGVisual 
         render={(contentsWidth, contentsHeight, grid) =>
@@ -30,26 +24,3 @@ const Visual = ({  }) => {
 }
   
 export default Visual;
-
-/*
-<LoadingFallback>
-  <ErrorBoundary>
-  </ErrorBoundary>
-</LoadingFallback>
-
-or
-
-<NoDataFallback
-  data={data}
-  loading={loading} 
-  error={error}
-  fallback = {(loading, error) => <h3>No Data</h3>}
->
-  <PerfectSquare 
-    contentsWidth={contentsWidth}
-    contentsHeight={contentsHeight}
-    grid={grid}
-  />
-</NoDataFallback> 
-
-*/

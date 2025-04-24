@@ -15,10 +15,14 @@ const initZoomState = {
 export const ZoomContext = createContext(initZoomState);
 
 /**
- * @description Fetches the data for the selected example, stores it, and renders the specific visual (PerfectSquareVisual)
+ * @description A component that implements full zoom functionality on a g, and provides a context that
+ * contains the state aswell as some utility methods.
  *
- * @param {string} exampleKey the selected example, which is passed to the server to retrieve the correct data
- * @returns {ReactNode} the PerfectSquareVisual component
+ * @param {function} onZoomStart
+ * @param {function} onZoom
+ * @param {ReactNode} children 
+ * @returns {ReactNode} the context provider, wrapping that zoom g that stores the d3 zoom behaviour,
+ * which wraps a view g, on which the zooming transforms are applied (see d3.zoom docs)
  */
 const ZoomableG = ({ onZoomStart, onZoom, children }) => {
     const { 

@@ -1,13 +1,20 @@
 /* eslint react-hooks/exhaustive-deps: 0 */
 'use client'
-import { useEffect, useContext } from "react";
+import react, { useEffect } from "react";
 import { useFetch } from '@/app/_api-requests/fetch-hooks';
 
 /**
- * @description Fetches the data for the selected example, stores it, and renders the specific visual (PerfectSquareVisual)
+ * @description A wrapper that fetches data using a given query, renders a loading fallback if supplied, and saves the data
  *
- * @param {string} exampleKey the selected example, which is passed to the server to retrieve the correct data
- * @returns {import('react').ReactNode} the PerfectSquareVisual component
+ * @param {string} query 
+ * @param {function} save 
+ * @param {function} extractData 
+ * @param {function} successCallback 
+ * @param {function} fallback 
+ * @param {ReactNode} children
+ * 
+ * @returns {ReactNode} 
+ * 
  */
 const DataLoader = ({ 
   query, 

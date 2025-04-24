@@ -265,7 +265,6 @@ export default function perfectSquare() {
         nrCharts = selection.nodes().length;
         if(nrCharts === 0){ return; }
         updateDimnsAndColourAccessors(selection);
-        //console.log("chart")
 
         selection
             .call(init)
