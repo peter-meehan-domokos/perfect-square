@@ -265,7 +265,7 @@ export default function perfectSquare() {
         nrCharts = selection.nodes().length;
         if(nrCharts === 0){ return; }
         updateDimnsAndColourAccessors(selection);
-        //console.log("chart", selection.data().length)
+        //console.log("chart")
 
         selection
             .call(init)
@@ -283,7 +283,8 @@ export default function perfectSquare() {
 
                 //bg
                 container.append("rect").attr("class", "component-bg")
-                    .attr("fill", "transparent");
+                    .attr("fill", "transparent")
+                    .attr("stroke", "red");
 
                 const contentsG = container.append("g").attr("class", "component-contents");
                 contentsG.append("rect").attr("class", "component-contents-bg")

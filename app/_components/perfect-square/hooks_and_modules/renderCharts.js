@@ -6,11 +6,12 @@ import { remove, fadeIn } from '../../../_helpers/domHelpers';
  *
  * @param {Array} datapoints the datapoints that require to be displayed with a chart
  * @param {function} perfectSquare the main component that will render a chart in each container g it receives
- * @param {boolean} dataIsArranged a flag to show whether or not the force is applied, in which case the transform 
+ * @param {boolean} simulationIsOn a flag to show whether or not the force is applied, in which case the transform 
  * to position each chart is applied by the force rather than here 
  * 
  */
-function renderCharts(datapoints=[], perfectSquare, dataIsArranged, options={}){
+function renderCharts(datapoints=[], perfectSquare, simulationIsOn, options={}){
+    console.log("render", simulationIsOn)
     const { transitions={} } = options;
     const chartG = d3.select(this).selectAll("g.chart").data(datapoints, d => d.key);
         chartG.enter()
@@ -19,7 +20,7 @@ function renderCharts(datapoints=[], perfectSquare, dataIsArranged, options={}){
             .attr("id", d => `chart-${d.key}`)
             .call(fadeIn, { transition:transitions.enter || null })
             .attr("transform", function(d,i){
-                return dataIsArranged ? d3.select(this).attr("transform") : `translate(${d.cellX},${d.cellY})`
+                return simulationIsOn ? d3.select(this).attr("transform") : `translate(${d.cellX},${d.cellY})`
             })
             .merge(chartG)
             .each(function(d,i){
@@ -28,9 +29,9 @@ function renderCharts(datapoints=[], perfectSquare, dataIsArranged, options={}){
                         .transition()
                         .delay(transitions.update.delay || 0)
                         .duration(transitions.update.duration || 0)
-                            .attr("transform", (d,i) => dataIsArranged ? d3.select(this).attr("transform") : `translate(${d.cellX},${d.cellY})`);
+                            .attr("transform", (d,i) => simulationIsOn ? d3.select(this).attr("transform") : `translate(${d.cellX},${d.cellY})`);
                 }else{
-                    d3.select(this).attr("transform", (d,i) => dataIsArranged ? d3.select(this).attr("transform") : `translate(${d.cellX},${d.cellY})`);
+                    d3.select(this).attr("transform", (d,i) => simulationIsOn ? d3.select(this).attr("transform") : `translate(${d.cellX},${d.cellY})`);
                 }
             })
             .call(perfectSquare, { transitions });

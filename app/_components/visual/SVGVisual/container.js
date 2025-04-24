@@ -1,5 +1,5 @@
 'use client'
-import { useContext, useRef, useMemo, useEffect, createContext } from 'react';
+import { useContext, useRef, useMemo, useEffect, createContext, useCallback } from 'react';
 import * as d3 from 'd3';
 import { AppContext } from '@/app/context';
 import { VisualContext } from "../context";
@@ -64,8 +64,8 @@ const SVGContainer = ({ withDimensions=true, withGridDimensions=false, withSimul
     const simulation = useMemo(() => withSimulationDimensions && grid?.cellWidth ? calcSimulationNodeDimensions(grid.cellWidth, grid.cellHeight, nrDatapoints, arrangeBy) : null, 
         [withSimulationDimensions, grid?.cellWidth, grid?.cellHeight, nrDatapoints, arrangeBy]);
 
-    const calcChartDimns = () => {
-        const simulationIsOn = _simulationIsOn(arrangeBy) && simulation;
+    const calcChartDimns = useCallback(() => {
+        const simulationIsOn = _simulationIsOn(arrangeBy) && simulation ? true : false;
         //chart dimns and position accessors - use node sizes if simulation is on (ie arrangeBy has been set)
         const width = simulationIsOn && simulation?.nodeWidth ? simulation.nodeWidth : grid.cellWidth;
         const height = simulationIsOn && simulation?.nodeHeight ? simulation.nodeHeight : grid.cellHeight;
@@ -73,7 +73,8 @@ const SVGContainer = ({ withDimensions=true, withGridDimensions=false, withSimul
         const _x = simulationIsOn ? d => d.x : d => d.cellX;
         const _y = simulationIsOn ? d => d.y : d => d.cellY;
         return { width, height, margin, _x, _y }
-    }
+    },[arrangeBy, simulation, grid])
+
     const chart = grid ? calcChartDimns() : null;
     
     const context = {
@@ -83,15 +84,13 @@ const SVGContainer = ({ withDimensions=true, withGridDimensions=false, withSimul
         chart
     } 
 
-    useEffect(() => {
-        d3.select(containerDivRef.current).select("svg")
-            .attr("transform", `translate(${margin.left}, ${margin.top})`);
-    }, [margin])
-
     return (
         <SVGContainerContext.Provider value={context} >
             <div className="vis-layout" ref={containerDivRef}>
-                <svg className="vis" width="100%" height="100%" >
+                <svg className="vis" 
+                    transform={`translate(${margin.left}, ${margin.top})`}
+                    width={`${contentsWidth}px`} 
+                    height={`${contentsHeight}px`}  >
                     {children}
                 </svg>
             </div>

@@ -60,8 +60,8 @@ export const getDisabledLevelsForZoom = (initLevel, targLevel) =>
  * 
  * @returns {boolean} true iff this chart is currently positioned within the viewbox of the container, given the current zoom state.
  */
-  export const isChartOnScreenCheckerFunc = (contentsWidth, contentsHeight, chartWidth, chartHeight, _chartX = d=>d.x, _chartY = d=>d.y) => (chartD, zoomTransform) => {
-    const { x, y, k } = zoomTransform;
+  export const isChartOnScreenCheckerFunc = (contentsWidth, contentsHeight, chartWidth, chartHeight, _chartX = d=>d.x, _chartY = d=>d.y, zoomTransformState) => (chartD) => {
+    const { x, y, k } = zoomTransformState;
     const chartX1 = _chartX(chartD);
     const chartY1 = _chartY(chartD);
     const chartX2 = chartX1 + chartWidth;
@@ -102,20 +102,16 @@ export const getDisabledLevelsForZoom = (initLevel, targLevel) =>
  */
   export const calcZoomTransformFunc = (contentsWidth, contentsHeight, margin, chartWidth, chartHeight, _chartX=d=>d.x, _chartY=d=>d.y) => chartD => {
     const k = d3.min([contentsWidth/chartWidth, contentsHeight/chartHeight]);
-    //Remove impact of zoom on margin to keep it constant
-    const marginLeftAdjustment = margin.left - k * margin.left;
-    const marginTopAdjustment = margin.top - k * margin.top
-
-    //chartx is wrong when we click 2nd d of 500ds first
     const chartX = _chartX(chartD);
     const chartY = _chartY(chartD);
     
     //zoom into selected chart
-    const translateX = -(chartX * k) + (contentsWidth - (k * chartWidth))/2 + marginLeftAdjustment;
-    const translateY = -(chartY * k) + (contentsHeight - (k * chartHeight))/2 + marginTopAdjustment;
+    const translateX = -(chartX * k) + (contentsWidth - (k * chartWidth))/2;
+    const translateY = -(chartY * k) + (contentsHeight - (k * chartHeight))/2;
 
     return d3.zoomIdentity.translate(translateX, translateY).scale(k);
 
   }
+
 
   

@@ -82,6 +82,7 @@ export const useSimulation = (containerRef, data) => {
     if(!simulationIsOn){
       simRef.current?.stop();
       simIsStartedRef.current = false;
+    }else{
       simRef.current?.restart();
       simIsStartedRef.current = true;
     }

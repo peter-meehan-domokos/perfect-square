@@ -28,11 +28,11 @@ export const useZoom = (containerRef, viewGRef, contentsWidth, contentsHeight, m
   const zoomRef = useRef(null);
 
 
-  const isChartOnScreenChecker = useCallback((chartD, zoomTransformState) => {
+  const isChartOnScreenChecker = useCallback((chartD) => {
     if(!chartWidth || !chartHeight){ return;}
-    const checker = isChartOnScreenCheckerFunc(contentsWidth, contentsHeight, chartWidth, chartHeight, _chartX, _chartY);
-    return checker(chartD, zoomTransformState);
-  },[contentsWidth, contentsHeight, chartWidth, chartHeight, _chartX, _chartY])
+    const checker = isChartOnScreenCheckerFunc(contentsWidth, contentsHeight, chartWidth, chartHeight, _chartX, _chartY, zoomTransformState);
+    return checker(chartD);
+  },[contentsWidth, contentsHeight, chartWidth, chartHeight, _chartX, _chartY, zoomTransformState])
 
   const applyZoom = useCallback((requiredTransform, requiredTransition, callback = () => {}) => { 
     if(!containerRef || !containerRef.current){ return; }

@@ -87,8 +87,8 @@ const PerfectSquare = () => {
   const simulationData = { nodesData:perfectSquareData?.datapoints || [], info:perfectSquareData?.info || {} }
   const { 
     simulationIsOn, 
-    //simulationHasBeenTurnedOnOrOff 
-  } = useSimulation(contentsGRef, simulationData)
+    simulationHasBeenTurnedOnOrOff 
+  } = useSimulation(contentsGRef, simulationData);
 
   //CHART
   //initialise the main vis component
@@ -119,7 +119,7 @@ const PerfectSquare = () => {
       .zoomK(zoomTransformState.k)
       .arrangeBy(arrangeBy);
 
-  }, [dataIsNull, perfectSquare, perfectSquareData?.info, selectedChartKey, selectedQuadrantIndex, selectedMeasureKey, zoomTransformState?.k/*, arrangeBy*/])
+  }, [dataIsNull, perfectSquare, perfectSquareData?.info, selectedChartKey, selectedQuadrantIndex, selectedMeasureKey, zoomTransformState?.k, arrangeBy])
 
   //apply handlers
   useEffect(() => {
@@ -136,7 +136,7 @@ const PerfectSquare = () => {
   //main render/update visual
   useEffect(() => {
     if (!perfectSquareData || !perfectSquareData.datapoints) { return; }
-    //console.log("uE 4")
+    console.log("uE 4")
     //call charts
     renderCharts.call(contentsGRef.current, perfectSquareData.datapoints, perfectSquare, simulationIsOn, {
       transitions:{ enter: CHART_IN_TRANSITION, exit:CHART_OUT_TRANSITION }
@@ -146,11 +146,11 @@ const PerfectSquare = () => {
   }, [contentsWidth, contentsHeight, perfectSquare, perfectSquareData]);
 
   //update due to arrangeBy changing
+  //flag to prevent the zoom useEffect running when sim changes the zoom functions eg isChartOnScreenChecker
+  const simulationHasBeenToggledRef = useRef(false);
   useEffect(() => {
-    //console.log("uE 5")
-    if (!perfectSquareData || !perfectSquareData.datapoints) { 
-      return; 
-    }
+    if (!perfectSquareData || !perfectSquareData.datapoints) { return; }
+    console.log("uE 5", simulationIsOn)
     if(simulationIsOn){
       d3.select(contentsGRef.current).selectAll(".chart").call(perfectSquare)
     }else{
@@ -159,7 +159,9 @@ const PerfectSquare = () => {
         transitions:{ update: { duration:ZOOM_AND_ARRANGE_TRANSITION_DURATION }}
       });
     }
-    //call charts, smoothly transitioning the chart positions
+    simulationHasBeenToggledRef.current = true;
+    //prevSimulationStateRef.current = simulationIsOn ? "on" : "off";
+
   }, [perfectSquare, simulationIsOn]);
 
   //zooming in progress flag - note that dom will update due to zoom state changes
@@ -170,18 +172,28 @@ const PerfectSquare = () => {
 
   //update due to zoom
   useEffect(() => {
-    //console.log("uE 7")
     if (!perfectSquareData || !perfectSquareData.datapoints) { return; }
-    const datapointsOnScreen = perfectSquareData.datapoints.filter(d => isChartOnScreenChecker(d, zoomTransformState))
+    console.log("uE 7")
+    if(simulationHasBeenToggledRef.current){
+      console.log("ignoring zoom useEff as it is due to sim toggle")
+      return;
+    }
+    const datapointsOnScreen = perfectSquareData.datapoints.filter(d => isChartOnScreenChecker(d))
     //call charts, with no transitions
     renderCharts.call(contentsGRef.current, datapointsOnScreen, perfectSquare, simulationIsOn);
-  }, [perfectSquare, zoomTransformState, isChartOnScreenChecker]);
+  }, [perfectSquare, isChartOnScreenChecker]);
 
   //light update for settings changes (the changes are added in an earlier useEffect)
   useEffect(() => {
     //console.log("uE 8")
     d3.select(contentsGRef.current).selectAll(".chart").call(perfectSquare)
   }, [perfectSquare, selectedChartKey, selectedQuadrantIndex, selectedMeasureKey]);
+
+
+  useEffect(() => {
+    //reset flags
+    simulationHasBeenToggledRef.current = false;
+  }, [simulationIsOn]);
   
   return (
     <g className="perfect-square-contents" ref={contentsGRef}></g>
