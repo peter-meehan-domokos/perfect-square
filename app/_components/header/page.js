@@ -14,7 +14,7 @@ import { robotoFont, robotoBoldFont } from '@/app/assets/fonts';
  * @returns {HTMLElement} A header element containing a title, a link button to the intro, and a menu list
  */
 const Header = () => {
-    const { examples, selectedExample, setSelectedExample, setIntroIsDisplayed } = useContext(AppContext);
+    const { examples, selectedExampleKey, updateSelectedExample, setIntroIsDisplayed } = useContext(AppContext);
     return (
       <header className="header">
           <button className="intro-link" onClick={setIntroIsDisplayed} >
@@ -27,8 +27,8 @@ const Header = () => {
               {examples?.data?.map(item => 
                   <li
                       key={`item-${item.key}`} 
-                      className={`item ${selectedExample === item.key ? "selected" : ""} ${robotoFont.className}`}
-                      onClick = {() => setSelectedExample(item.key)}
+                      className={`item ${selectedExampleKey === item.key ? "selected" : ""} ${robotoFont.className}`}
+                      onClick = {() => updateSelectedExample(item.key)}
                   >
                       {item.name}
                   </li>

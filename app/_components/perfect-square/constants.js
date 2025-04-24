@@ -61,7 +61,7 @@ export const LOADING_TOOLTIP = {
     }
 }
 
-export const DEFAULT_SIMULATION_SETTINGS = { 
+export const DEFAULT_DISPLAY_SETTINGS = { 
     arrangeBy:{ x: "", y:"", colour:"" }
 }
 

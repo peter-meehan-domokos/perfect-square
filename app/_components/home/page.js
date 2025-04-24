@@ -14,17 +14,25 @@ const GET_EXAMPLE_DATA = exampleKey => `
   }
 `
 
+//helper
+/*const _cleanupNeeded = (prevVisualData, newVisualData) => {
+  console.log("cleanupneeded function++++++++")
+  console.log("prev", prevVisualData)
+  console.log("new", newVisualData)
+
+  return prevVisualData.data && prevVisualData.data?.key !== newVisualData.data?.key ? true : false;
+}*/
 /**
  * @description Renders either the Intro, or the Header and Visual, depending on the introIsDisplayed flag state
  *
  * @returns {HTMLElement} A div containing either the Intro component, or the Header and Visual Components
  */
 const Home = () => {
-  const { selectedExample, setVisualData } = useContext(AppContext);
+  const { selectedExampleKey, updateVisualData, visualData } = useContext(AppContext);
     return (
       <DataLoader
-        query={GET_EXAMPLE_DATA(selectedExample)}
-        save={setVisualData}
+        query={GET_EXAMPLE_DATA(selectedExampleKey)}
+        save={newVisualData => updateVisualData(newVisualData)}
         extractData={data => data.exampleData?.data ? JSON.parse(data.exampleData.data) : null}
       >
         <VisualContextProvider>

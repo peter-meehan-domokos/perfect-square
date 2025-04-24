@@ -8,14 +8,15 @@ import React, { useState, useEffect, useRef, useMemo, useCallback, useContext } 
 import * as d3 from 'd3';
 import { AppContext } from "@/app/context";
 import { VisualContext } from "../visual/context";
+import { SVGContainerContext } from '../visual/SVGVisual/container';
 import { ZoomContext } from '../visual/SVGVisual/hooks_and_modules/zoomable-g/page';
 import perfectSquareLayout from './svgComponents/perfectSquare/layout';
 import perfectSquareComponent from "./svgComponents/perfectSquare/component";
 import renderCharts from './hooks_and_modules/renderCharts';
-import { DEFAULT_SIMULATION_SETTINGS, SELECT_MEASURE_TOOLTIP, LOADING_TOOLTIP } from "./constants.js";
+import { DEFAULT_DISPLAY_SETTINGS, SELECT_MEASURE_TOOLTIP, LOADING_TOOLTIP } from "./constants.js";
 import { ZOOM_AND_ARRANGE_TRANSITION_DURATION, CHART_IN_TRANSITION, CHART_OUT_TRANSITION } from '@/app/constants';
-import { useSimulation } from './hooks_and_modules/simulation';
-import { useDataChangeManagement } from './hooks_and_modules/dataChangeManagement';
+import { useSimulation } from '../visual/SVGVisual/hooks_and_modules/simulation/simulation';
+import { useDataChangeManagement } from '../utility/dataChangeManagement';
 
 
 /**
@@ -33,30 +34,33 @@ import { useDataChangeManagement } from './hooks_and_modules/dataChangeManagemen
  */
 
 //@todo - change to width and height because this fits the design pattern: each compponent is doesnt care about higher up the chain
-const PerfectSquare = ({ contentsWidth, contentsHeight, grid }) => {
-  //@todo - remove the ={} once we have a loadingFallback
-  const { visualData:{ data }={} } = useContext(AppContext);
-  console.log("PS", data)
+const PerfectSquare = () => {
+  const { visualData:{ data, loading, error }={} } = useContext(AppContext);
   const { 
     selectedChartKey, selectedQuadrantIndex, selectedMeasureKey,
     setSelectedChartKey, setSelectedQuadrantIndex, setSelectedMeasureKey,
+    displaySettings: { arrangeBy }
   } = useContext(VisualContext);
 
   const { 
+      container: { contentsWidth, contentsHeight }, 
+      grid,
+      chart,
+  } = useContext(SVGContainerContext);
+
+  const { 
     zoomTransformState, 
-    //zoomingInProgress, 
+    zoomingInProgress, 
     zoomTo, 
     resetZoom, 
-    //isChartOnScreenChecker 
+    isChartOnScreenChecker 
    } = useContext(ZoomContext);
-
-  const { cellWidth, cellHeight, cellMargin } = grid || {};
 
   //dom refs
   const contentsGRef = useRef(null);
 
   //DATA PROCESSING
-  //managedData - control the way that a complete change of data is handled
+  //data - control the way that a complete change of data is handled
   const cleanup = useCallback(() => {
     setSelectedChartKey("");
     setSelectedQuadrantIndex(null);
@@ -64,55 +68,62 @@ const PerfectSquare = ({ contentsWidth, contentsHeight, grid }) => {
     resetZoom(false);
   }, [setSelectedChartKey, setSelectedQuadrantIndex, setSelectedMeasureKey, resetZoom]);
 
-  const managedData = useDataChangeManagement(contentsGRef, data, cleanup);
-  console.log("managed", managedData)
-  
-  //layout function - puts data into format expected by perfectSquare component
-  const perfectSquareData = useMemo(() => perfectSquareLayout(managedData, { grid }), 
-    [managedData, JSON.stringify(grid)]);
+  const prevDataKeyRef = useRef("")
+  useEffect(() => {
+    if(prevDataKeyRef.current && prevDataKeyRef.current !== data?.key){
+      setTimeout(() => {
+        //reset settings
+        cleanup();
+      }, CHART_OUT_TRANSITION.duration)
+    }
+    prevDataKeyRef.current = data?.key;
+  }, [data?.key])
+
+  //issue is layout isnt always applied
+  const perfectSquareData = useMemo(() => perfectSquareLayout(data, { grid }), 
+    [data, JSON.stringify(grid)]);
 
   //simulation - turns on when user selects an 'arrangeBy' setting
-  /*const simulationData = { nodesData:perfectSquareData?.datapoints || [], info:perfectSquareData?.info || {} }
-  const { simulationSettings, setSimulationSettings, nodeWidth, nodeHeight, simulationIsOn, simulationHasBeenTurnedOnOrOff } = useSimulation(contentsGRef, simulationData, contentsWidth, contentsHeight, cellWidth, cellHeight, initSimulationSettings)
-  const { arrangeBy } = simulationSettings;*/
-  const simulationIsOn = false;
-
-  //chart dimns and position accessors - use node sizes if simulation is on (ie arrangeBy has been set)
-  const chartWidth = simulationIsOn ? nodeWidth : cellWidth;
-  const chartHeight = simulationIsOn ? nodeHeight : cellHeight;
-  const chartMargin = cellMargin;
-  const _chartX = simulationIsOn ? d => d?.x : d => d?.cellX;
-  const _chartY = simulationIsOn ? d => d.y : d => d.cellY;
+  const simulationData = { nodesData:perfectSquareData?.datapoints || [], info:perfectSquareData?.info || {} }
+  const { 
+    simulationIsOn, 
+    //simulationHasBeenTurnedOnOrOff 
+  } = useSimulation(contentsGRef, simulationData)
 
   //CHART
   //initialise the main vis component
   const perfectSquare = useMemo(() => perfectSquareComponent(), []);
 
   //CHARTS RELATED USE-EFFECTS
-  //@todo - consider putting all of these into a useCharts useEffect
+  const dataIsNull = data === null;
   //apply dimensions
   useEffect(() => {
+    if(dataIsNull || !chart){ return; }
+    //console.log("uE 1")
     perfectSquare
-      .width(chartWidth)
-      .height(chartHeight)
-      .margin(chartMargin);
+      .width(chart.width)
+      .height(chart.height)
+      .margin(chart.margin);
 
-  }, [chartWidth, chartHeight, chartMargin])
+  }, [dataIsNull, chart?.width, chart?.height, chart?.margin])
   
   //apply settings
   useEffect(() => {
+    if(dataIsNull){ return; }
+    //console.log("uE 2")
     perfectSquare
       .metaData({ data: { info:perfectSquareData?.info } })
       .selectedChartKey(selectedChartKey)
       .selectedQuadrantIndex(selectedQuadrantIndex)
       .selectedMeasureKey(selectedMeasureKey)
       .zoomK(zoomTransformState.k)
-      //.arrangeBy(arrangeBy);
+      .arrangeBy(arrangeBy);
 
-  }, [perfectSquare, perfectSquareData?.info, selectedChartKey, selectedQuadrantIndex, selectedMeasureKey, zoomTransformState?.k/*, arrangeBy*/])
+  }, [dataIsNull, perfectSquare, perfectSquareData?.info, selectedChartKey, selectedQuadrantIndex, selectedMeasureKey, zoomTransformState?.k/*, arrangeBy*/])
 
   //apply handlers
   useEffect(() => {
+    //console.log("uE 3")
     perfectSquare
         .setSelectedChartKey(chartD => {
           zoomTo(chartD, 
@@ -125,18 +136,52 @@ const PerfectSquare = ({ contentsWidth, contentsHeight, grid }) => {
   //main render/update visual
   useEffect(() => {
     if (!perfectSquareData || !perfectSquareData.datapoints) { return; }
+    //console.log("uE 4")
     //call charts
     renderCharts.call(contentsGRef.current, perfectSquareData.datapoints, perfectSquare, simulationIsOn, {
       transitions:{ enter: CHART_IN_TRANSITION, exit:CHART_OUT_TRANSITION }
     });
   //@todo - find a better way to handle simulationIsOn...we dont want it to trigger this useEffect because
-  //the next one handles changes ot simultionIsOn, but atm we still want to pass it to renderCharts
+  //the next one handles changes to simultionIsOn, but atm we still want to pass it to renderCharts
   }, [contentsWidth, contentsHeight, perfectSquare, perfectSquareData]);
+
+  //update due to arrangeBy changing
+  useEffect(() => {
+    //console.log("uE 5")
+    if (!perfectSquareData || !perfectSquareData.datapoints) { 
+      return; 
+    }
+    if(simulationIsOn){
+      d3.select(contentsGRef.current).selectAll(".chart").call(perfectSquare)
+    }else{
+      //@todo - add transition to size of charts
+      renderCharts.call(contentsGRef.current, perfectSquareData.datapoints, perfectSquare, simulationIsOn, {
+        transitions:{ update: { duration:ZOOM_AND_ARRANGE_TRANSITION_DURATION }}
+      });
+    }
+    //call charts, smoothly transitioning the chart positions
+  }, [perfectSquare, simulationIsOn]);
+
+  //zooming in progress flag - note that dom will update due to zoom state changes
+  useEffect(() => {
+    //console.log("uE 6")
+    perfectSquare.zoomingInProgress(zoomingInProgress);
+  }, [perfectSquare, zoomingInProgress]);
+
+  //update due to zoom
+  useEffect(() => {
+    //console.log("uE 7")
+    if (!perfectSquareData || !perfectSquareData.datapoints) { return; }
+    const datapointsOnScreen = perfectSquareData.datapoints.filter(d => isChartOnScreenChecker(d, zoomTransformState))
+    //call charts, with no transitions
+    renderCharts.call(contentsGRef.current, datapointsOnScreen, perfectSquare, simulationIsOn);
+  }, [perfectSquare, zoomTransformState, isChartOnScreenChecker]);
 
   //light update for settings changes (the changes are added in an earlier useEffect)
   useEffect(() => {
+    //console.log("uE 8")
     d3.select(contentsGRef.current).selectAll(".chart").call(perfectSquare)
-  }, [perfectSquare, selectedChartKey, selectedQuadrantIndex, selectedMeasureKey])
+  }, [perfectSquare, selectedChartKey, selectedQuadrantIndex, selectedMeasureKey]);
   
   return (
     <g className="perfect-square-contents" ref={contentsGRef}></g>

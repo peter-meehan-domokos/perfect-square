@@ -39,13 +39,13 @@ export default function MainRouter() {
  * @returns {ReactNode} 
  */
 const HomePage = () => {
-  const { setIntroIsDisplayed, setSelectedExample, setExamples } = useContext(AppContext);
+  const { setIntroIsDisplayed, updateSelectedExample, setExamples } = useContext(AppContext);
   return (
     <DataLoader 
       query={GET_EXAMPLES} 
       save={setExamples}
       extractData={data => data.examples}
-      successCallback={extractedData => setSelectedExample(extractedData[0]?.key)}
+      successCallback={extractedData => updateSelectedExample(extractedData[0]?.key)}
     >
         <HomeLayout
             openIntro={() => setIntroIsDisplayed(true)}

@@ -10,13 +10,13 @@ import PerfectSquareHeader from '../visual/header/page';
 import perfectSquareLayout from './svgComponents/perfectSquare/layout';
 import perfectSquareComponent from "./svgComponents/perfectSquare/component";
 import renderCharts from './hooks_and_modules/renderCharts';
-import { DEFAULT_SIMULATION_SETTINGS, SELECT_MEASURE_TOOLTIP, LOADING_TOOLTIP } from "./constants.js";
+import { DEFAULT_DISPLAY_SETTINGS, SELECT_MEASURE_TOOLTIP, LOADING_TOOLTIP } from "./constants.js";
 import { ZOOM_AND_ARRANGE_TRANSITION_DURATION, CHART_IN_TRANSITION, CHART_OUT_TRANSITION } from '@/app/constants';
 import { useZoom } from '../visual/SVGVisual/hooks_and_modules/zoomable-g/zoom';
-import { useContainerDimensions } from '../visual/SVGVisual/hooks_and_modules/containerDimensions';
+import { useSVGContainerContext } from '../visual/SVGVisual/hooks_and_modules/containerDimensions';
 import calcGrid from '../visual/SVGVisual/hooks_and_modules/grid'
 import { useTooltips } from './hooks_and_modules/tooltips';
-import { useSimulation } from './hooks_and_modules/simulation';
+import { useSimulation } from '../visual/SVGVisual/hooks_and_modules/simulation/simulation';
 import { useDataChangeManagement } from './hooks_and_modules/dataChangeManagement';
 
 /**
@@ -32,7 +32,7 @@ import { useDataChangeManagement } from './hooks_and_modules/dataChangeManagemen
  * @returns {HTMLElement} A div that wraps VisualHeader component and an svg. The svg contains a g for the zoom 
  * that is applied in a useEffect, and a g which contains the charts whcih are rendered in a useEffect.
  */
-const PerfectSquare = ({ data={ datapoints:[], info:{ } }, initSelections={}, initSimulationSettings=DEFAULT_SIMULATION_SETTINGS, loading=true }) => {
+const PerfectSquare = ({ data={ datapoints:[], info:{ } }, initSelections={}, initSimulationSettings=DEFAULT_DISPLAY_SETTINGS, loading=true }) => {
   const { initSelectedChartKey="", initSelectedMeasureKey="", initSelectedQuadrantIndex=null } = initSelections;
   //selection state
   const [selectedChartKey, setSelectedChartKey] = useState(initSelectedChartKey);
@@ -57,7 +57,7 @@ const PerfectSquare = ({ data={ datapoints:[], info:{ } }, initSelections={}, in
   const { key, title, desc, info, categories, datapoints } = managedData;
 
   //container dimensions
-  const containerDimns = useContainerDimensions(containerDivRef);
+  const containerDimns = useSVGContainerContext(containerDivRef);
   const { width, height, margin, contentsWidth, contentsHeight } = containerDimns;
 
   //grid
@@ -71,8 +71,8 @@ const PerfectSquare = ({ data={ datapoints:[], info:{ } }, initSelections={}, in
 
   //simulation - turns on when user selects an 'arrangeBy' setting
   const simulationData = { nodesData:perfectSquareData?.datapoints || [], info:perfectSquareData?.info || {} }
-  const { simulationSettings, setSimulationSettings, nodeWidth, nodeHeight, simulationIsOn, simulationHasBeenTurnedOnOrOff } = useSimulation(containerDivRef, simulationData, contentsWidth, contentsHeight, cellWidth, cellHeight, initSimulationSettings)
-  const { arrangeBy } = simulationSettings;
+  const { displaySettings, setDisplaySettings, nodeWidth, nodeHeight, simulationIsOn, simulationHasBeenTurnedOnOrOff } = useSimulation(containerDivRef, simulationData, contentsWidth, contentsHeight, cellWidth, cellHeight, initSimulationSettings)
+  const { arrangeBy } = displaySettings;
 
   //chart dimns and position accessors - use node sizes if simulation is on (ie arrangeBy has been set)
   const chartWidth = simulationIsOn ? nodeWidth : cellWidth;

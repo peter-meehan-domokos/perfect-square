@@ -10,7 +10,7 @@ import { getElementDimns } from '@/app/_helpers/domHelpers';
  * 
  * @return {object} the dimensions - width, height, margin, contentsWidth, contentsHeight
  */
-export const useContainerDimensions = (containerRef, margin) => {
+export const useSVGContainerContext = (containerRef, margin) => {
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(0);
 

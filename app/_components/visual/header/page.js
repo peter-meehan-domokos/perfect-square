@@ -15,7 +15,8 @@ const VisualHeader = () => {
   
   const { 
     headerExtended, setHeaderExtended, 
-    selectedQuadrantIndex, setSelectedQuadrantIndex 
+    selectedQuadrantIndex, setSelectedQuadrantIndex,
+    displaySettings, setDisplaySettings
   } = useContext(VisualContext);
 
   const quadrantCtrls = useMemo(() => quadrantCtrlsComponent(), []);
@@ -57,7 +58,10 @@ const VisualHeader = () => {
             </div>
             <ZoomCtrls zoomTransformState={zoomTransformState} resetZoom={handleExternalResetZoom} />
           </div>
-          {/**<SettingsCtrls settings={settings} setSettings={setSettings} setTooltipsData={setTooltipsData} />*/}
+          <SettingsCtrls 
+            settings={displaySettings} 
+            setSettings={setDisplaySettings} 
+            setTooltipsData={()=>{}/*setTooltipsData*/} />
         </div>
       </div>
   )

@@ -3,8 +3,7 @@ import { useContext, useRef, useMemo, useEffect } from 'react';
 import * as d3 from 'd3';
 import { AppContext } from "@/app/context";
 import { VisualContext } from "../context";
-import { useContainerDimensions } from './hooks_and_modules/containerDimensions';
-import calcGrid from './hooks_and_modules/grid';
+import SVGContainer from './container';
 import ZoomableG from './hooks_and_modules/zoomable-g/page';
 
 /**
@@ -13,45 +12,20 @@ import ZoomableG from './hooks_and_modules/zoomable-g/page';
  * @param {string} exampleKey the selected example, which is passed to the server to retrieve the correct data
  * @returns {import('react').ReactNode} the PerfectSquareVisual component
  */
-const SVGVisual = ({ render, withGrid=true }) => {
+const SVGVisual = ({ render }) => {
   const { visualData:{ data }={} } = useContext(AppContext);
   const { setSelectedChartKey, setZoomTransformState, requiredZoomTransform } = useContext(VisualContext);
 
-  const containerDivRef = useRef(null);
-
-  //container dimensions
-  const { contentsWidth, contentsHeight, margin } = useContainerDimensions(containerDivRef);
-
-  //grid
-  const grid = useMemo(() => withGrid ? calcGrid(contentsWidth, contentsHeight, data?.datapoints?.length) : undefined, 
-      [withGrid, contentsWidth, contentsHeight, data?.datapoints?.length]);
-
-  //@todo - consider adding cellX and cellY to datapoints in here rather than in perfectSquareLayout..this seems ot be the logical
-  //location for it
-
-  //position the contentsG
-  useEffect(() => {
-      d3.select(containerDivRef.current).select("svg")
-        .attr("transform", `translate(${margin.left}, ${margin.top})`);
-  }, [margin])
-
-
+  //dimnsprov may not even need to store cell and node dimns, maybe just chartdimns, although that may trigger sim hook too often
   return (
-    <div className="vis-layout" ref={containerDivRef}>
-      <svg className="vis" width="100%" height="100%" >
-        <ZoomableG 
-          contentsWidth={contentsWidth} 
-          contentsHeight={contentsHeight} 
-          margin={margin} 
-          cellWidth={grid.cellWidth}
-          cellHeight={grid.cellHeight}
-          onZoomStart={() => { setSelectedChartKey(""); }}
-          onZoom={setZoomTransformState}
-        >
-          {render(contentsWidth, contentsHeight, grid)}
-        </ZoomableG>
-      </svg>
-    </div>
+    <SVGContainer withDimensions={true} withGridDimensions={true} withSimulationDimensions={true} >
+      <ZoomableG 
+        onZoomStart={() => { setSelectedChartKey(""); }}
+        onZoom={setZoomTransformState}
+      >
+        {render()}
+      </ZoomableG>
+    </SVGContainer>
   )
 }
   

@@ -117,3 +117,5 @@ export const getDisabledLevelsForZoom = (initLevel, targLevel) =>
     return d3.zoomIdentity.translate(translateX, translateY).scale(k);
 
   }
+
+  

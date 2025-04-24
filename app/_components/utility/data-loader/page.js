@@ -13,6 +13,7 @@ const DataLoader = ({
   save,
   extractData = data => data, 
   successCallback= () => {}, 
+  fallback,
   children 
 }) => {
     const { data, error, loading } = useFetch(query);
@@ -26,7 +27,13 @@ const DataLoader = ({
   }, [data, error, loading])
 
     return (
-        <>{children}</>
+      <>
+        {fallback && loading ? 
+          fallback()
+            :
+          children
+        }
+      </>
     )
 }
   

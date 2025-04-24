@@ -1,5 +1,8 @@
-import react, { useEffect, useRef, useState, useMemo } from "react";
+import react, { useEffect, useRef, useState, useMemo, useContext } from "react";
 import * as d3 from 'd3';
+import { VisualContext } from "../../../context";
+import { SVGContainerContext } from "../../container";
+import { _simulationIsOn } from "../../../helpers";
 
 //constants
 const COLLISION_FORCE_RADIUS_FACTOR = 1.15;
@@ -7,29 +10,8 @@ const EXTRA_HORIZ_MARGIN_FACTOR_FOR_FORCE = 0.15;
 const EXTRA_TOP_MARGIN_FACTOR_FOR_FORCE = 0.25
 const EXTRA_BOTTOM_MARGIN_FACTOR_FOR_FORCE = 0.25
 const CENTRE_FORCE_STRENGTH = 1.8;
-const REDUCTION_FACTOR_FROM_CELL_SIZE = 0.6;
 
 //helpers
-const _simulationIsOn = arrangeBy => arrangeBy?.x || arrangeBy?.y || arrangeBy?.colour ? true : false;
-
-const calcSizeReductionFactor = (nrNodes, arrangeBy) => {
-  //@todo - apply a log scale instead so continually increases but never reaches limit
-  const extraReductionForNodes = d3.min([0.1, 0.002 * nrNodes]);
-  const nrNodesFactor = 1 - extraReductionForNodes;
-
-  //if data is arranged but with no x an dy, it will form a group around centre, so need more space
-  const extraReductionIfCentred = arrangeBy.colour && !arrangeBy.x && !arrangeBy.y ? 0.15 : 0;
-  const centredFactor = 1 - extraReductionIfCentred;
-  return nrNodesFactor * centredFactor * REDUCTION_FACTOR_FROM_CELL_SIZE;
-}
-
-const calcNodeDimensions = (cellWidth, cellHeight, nrNodes, arrangeBy) => {
-  const factor = calcSizeReductionFactor(nrNodes, arrangeBy);
-  return {
-    nodeWidth:cellWidth * factor,
-    nodeHeight:cellHeight * factor
-  }
-}
 
 /**
  * @description A hook that sets up a d3.force simulation to act on data, making use of a helper function to apply the required forces
@@ -43,14 +25,26 @@ const calcNodeDimensions = (cellWidth, cellHeight, nrNodes, arrangeBy) => {
  * 
  * @return {object} an object containing getter and setter for the settings, the node dimensions, and a simulationIsOn flag
  */
-export const useSimulation = (containerRef, data, contentsWidth, contentsHeight, cellWidth, cellHeight, initSettings) => {
-  const [settings, setSettings] = useState(initSettings || DEFAULT_SIMULATION_SETTINGS)
+export const useSimulation = (containerRef, data) => {
+  const { 
+    displaySettings: { arrangeBy }
+  } = useContext(VisualContext);
+
+  const { 
+    container: { contentsWidth, contentsHeight }, 
+    simulation
+  } = useContext(SVGContainerContext);
+
+  const nodeWidth = simulation?.nodeWidth || 0;
+  const nodeHeight = simulation?.nodeHeight || 0;
+
+
+  
   const prevArrangeByRef = useRef(null);
   const simRef = useRef(null);
   const simIsStartedRef = useRef(false);
   const simTicksInProcessRef = useRef(false);
 
-  const { arrangeBy } = settings;
   const simulationIsOn = _simulationIsOn(arrangeBy);
   const simulationWasAlreadyOn = _simulationIsOn(prevArrangeByRef.current);
   const simulationHasBeenTurnedOnOrOff = simulationIsOn !== simulationWasAlreadyOn;
@@ -66,9 +60,6 @@ export const useSimulation = (containerRef, data, contentsWidth, contentsHeight,
     })
   }
 
-  const { nodeWidth, nodeHeight } = useMemo(() => calcNodeDimensions(cellWidth, cellHeight, nodesData.length, arrangeBy), 
-    [cellWidth, cellHeight, nodesData.length, arrangeBy]);
-
   //simulation
   useEffect(() => {
     if(!simulationIsOn){ return; }
@@ -79,7 +70,7 @@ export const useSimulation = (containerRef, data, contentsWidth, contentsHeight,
       .on("tick", () => {
         if(!simTicksInProcessRef.current){ simTicksInProcessRef.current = true; }
         if(!simIsStartedRef.current){ return; }
-        d3.select(containerRef.current).select("g.perfect-square-contents").selectAll("g.chart")
+        d3.select(containerRef.current).selectAll("g.chart")
           .attr("transform", d => `translate(${d.x}, ${d.y})`)
       })
       .on("end", () => { simTicksInProcessRef.current = false; })
@@ -91,15 +82,12 @@ export const useSimulation = (containerRef, data, contentsWidth, contentsHeight,
     if(!simulationIsOn){
       simRef.current?.stop();
       simIsStartedRef.current = false;
-    }else{
       simRef.current?.restart();
       simIsStartedRef.current = true;
     }
   },[simulationIsOn])
   
   return { 
-    simulationSettings:settings, 
-    setSimulationSettings:setSettings,
     nodeWidth,
     nodeHeight,
     simulationIsOn,

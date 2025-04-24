@@ -10,9 +10,7 @@ import { remove, fadeIn } from '../../../_helpers/domHelpers';
  * to position each chart is applied by the force rather than here 
  * 
  */
-function renderCharts(datapoints, perfectSquare, dataIsArranged, options={}){
-    if(!Array.isArray(datapoints)){ return; }
- 
+function renderCharts(datapoints=[], perfectSquare, dataIsArranged, options={}){
     const { transitions={} } = options;
     const chartG = d3.select(this).selectAll("g.chart").data(datapoints, d => d.key);
         chartG.enter()
@@ -24,7 +22,7 @@ function renderCharts(datapoints, perfectSquare, dataIsArranged, options={}){
                 return dataIsArranged ? d3.select(this).attr("transform") : `translate(${d.cellX},${d.cellY})`
             })
             .merge(chartG)
-            .each(function(d){
+            .each(function(d,i){
                 if(transitions.update){
                     d3.select(this)
                         .transition()
@@ -37,6 +35,8 @@ function renderCharts(datapoints, perfectSquare, dataIsArranged, options={}){
             })
             .call(perfectSquare, { transitions });
 
+    //maybe inc duration here as a mutliple of exit().nodes().length up to a maximum of 1000
+    //if it isnt working, but seems to be working
     chartG.exit().call(remove, { transition:transitions.exit || null })
 }
 
