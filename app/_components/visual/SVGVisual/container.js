@@ -44,7 +44,7 @@ export const SVGContainerContext = createContext(defaultSVGContainerContext);
  */
 
 //@todo - remove the div and just use the svg
-const SVGContainer = ({ withDimensions=true, withGridDimensions=false, withSimulationDimensions=true, children }) => {
+const SVGContainer = ({ withGridDimensions=false, withSimulationDimensions=true, children }) => {
     const { visualData:{ data } } = useContext(AppContext);
     const { displaySettings: { arrangeBy } = {} } = useContext(VisualContext);
 
@@ -53,7 +53,7 @@ const SVGContainer = ({ withDimensions=true, withGridDimensions=false, withSimul
     const nrDatapoints = data?.datapoints.length || (dataExists ? 1 : 0)
 
     const containerDivRef = useRef(null);
-    const container = withDimensions ? useSVGContainerContext(containerDivRef) : {};
+    const container = useSVGContainerContext(containerDivRef);
     const { contentsWidth, contentsHeight, margin } = container;
 
     //if consumer just needs a simulation, then grid is still needed to calculate the simulation dimensions

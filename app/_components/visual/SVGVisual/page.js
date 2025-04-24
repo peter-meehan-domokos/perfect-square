@@ -18,7 +18,7 @@ const SVGVisual = ({ render }) => {
 
   //dimnsprov may not even need to store cell and node dimns, maybe just chartdimns, although that may trigger sim hook too often
   return (
-    <SVGContainer withDimensions={true} withGridDimensions={true} withSimulationDimensions={true} >
+    <SVGContainer withGridDimensions={true} withSimulationDimensions={true} >
       <ZoomableG 
         onZoomStart={() => { setSelectedChartKey(""); }}
         onZoom={setZoomTransformState}
