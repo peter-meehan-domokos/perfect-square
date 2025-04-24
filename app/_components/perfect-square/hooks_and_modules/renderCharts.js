@@ -36,8 +36,6 @@ function renderCharts(datapoints=[], perfectSquare, simulationIsOn, options={}){
             })
             .call(perfectSquare, { transitions });
 
-    //maybe inc duration here as a mutliple of exit().nodes().length up to a maximum of 1000
-    //if it isnt working, but seems to be working
     chartG.exit().call(remove, { transition:transitions.exit || null })
 }
 

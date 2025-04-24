@@ -5,7 +5,7 @@ import { CHART_OUT_TRANSITION, DELAY_FOR_DOM_CLEAN_UP } from '@/app/constants';
 
 const nullVisualData = { data: null, loading: false, error: null };
 const initAppState = {
-  introIsDisplayed:false,
+  introIsDisplayed:true,
   device:null,
   examples:[],
   selectedExampleKey:"",
@@ -14,7 +14,7 @@ const initAppState = {
 export const AppContext = createContext(initAppState);
 
 export default function AppContextProvider({ children }) {
-  const [introIsDisplayed, setIntroIsDisplayed] = useState(false);
+  const [introIsDisplayed, setIntroIsDisplayed] = useState(true);
   const [device, setDevice] = useState("");
   const [examples, setExamples] = useState("");
   const [selectedExampleKey, setSelectedExampleKey] = useState("");

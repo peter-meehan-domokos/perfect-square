@@ -1,5 +1,5 @@
 'use client'
-import react, { useState, useEffect, useRef, useCallback, useContext } from "react";
+import { useState, useEffect, useRef, useCallback, useContext } from "react";
 import * as d3 from 'd3';
 import { VisualContext } from "../../../context";
 import { isChartOnScreenCheckerFunc, calcZoomTransformFunc } from "../../../../perfect-square/helpers";

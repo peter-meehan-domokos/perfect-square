@@ -1,6 +1,5 @@
 'use client'
-import { useContext, useRef, useMemo, useEffect } from 'react';
-import * as d3 from 'd3';
+import { useContext } from 'react';
 import { AppContext } from "@/app/context";
 import { VisualContext } from "../context";
 import SVGContainer from './container';

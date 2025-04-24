@@ -5,7 +5,7 @@ import { COLOURS } from "../../../constants";
 import { CHART_IN_TRANSITION } from '../../../constants';
 import { resetIcon } from "../../../assets/svgIcons";
 
-const { BLUE, LIGHT_BLUE, GREY, SMOKE_WHITE } = COLOURS;
+const { BLUE, GREY, SMOKE_WHITE } = COLOURS;
 
 export default function quadrantCtrls() {
     // settings that apply to all quadrantsBartCharts, in case there is more than 1 eg a row of players

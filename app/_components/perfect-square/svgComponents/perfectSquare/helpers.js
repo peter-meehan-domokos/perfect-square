@@ -1,5 +1,4 @@
 
-import * as d3 from 'd3';
 import { isNumber } from '../../../../_helpers/dataHelpers';
 import { immutableReverse } from '@/app/_helpers/arrayHelpers';
 

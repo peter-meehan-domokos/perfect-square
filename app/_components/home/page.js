@@ -15,14 +15,6 @@ const GET_EXAMPLE_DATA = exampleKey => `
   }
 `
 
-//helper
-/*const _cleanupNeeded = (prevVisualData, newVisualData) => {
-  console.log("cleanupneeded function++++++++")
-  console.log("prev", prevVisualData)
-  console.log("new", newVisualData)
-
-  return prevVisualData.data && prevVisualData.data?.key !== newVisualData.data?.key ? true : false;
-}*/
 /**
  * @description Renders either the Intro, or the Header and Visual, depending on the introIsDisplayed flag state
  *

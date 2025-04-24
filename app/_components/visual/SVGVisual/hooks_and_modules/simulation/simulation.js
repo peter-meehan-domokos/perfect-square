@@ -1,4 +1,4 @@
-import react, { useEffect, useRef, useState, useMemo, useContext } from "react";
+import { useEffect, useRef, useContext } from "react";
 import * as d3 from 'd3';
 import { VisualContext } from "../../../context";
 import { SVGContainerContext } from "../../container";
@@ -10,8 +10,6 @@ const EXTRA_HORIZ_MARGIN_FACTOR_FOR_FORCE = 0.15;
 const EXTRA_TOP_MARGIN_FACTOR_FOR_FORCE = 0.25
 const EXTRA_BOTTOM_MARGIN_FACTOR_FOR_FORCE = 0.25
 const CENTRE_FORCE_STRENGTH = 1.8;
-
-//helpers
 
 /**
  * @description A hook that sets up a d3.force simulation to act on data, making use of a helper function to apply the required forces

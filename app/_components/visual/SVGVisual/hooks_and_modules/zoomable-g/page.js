@@ -2,7 +2,6 @@
 import ReactNode, { useRef, createContext, useContext, useMemo } from 'react';
 import { useZoom } from '@/app/_components/visual/SVGVisual/hooks_and_modules/zoomable-g/zoom';
 import * as d3 from 'd3';
-import { VisualContext } from '../../../context';
 import { SVGContainerContext } from '../../container';
 
 const initZoomState = {

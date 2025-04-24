@@ -1,5 +1,5 @@
 'use client'
-import { useContext, useRef, useMemo, useEffect, createContext, useCallback } from 'react';
+import { useContext, useRef, useMemo, createContext, useCallback } from 'react';
 import * as d3 from 'd3';
 import { AppContext } from '@/app/context';
 import { VisualContext } from "../context";
