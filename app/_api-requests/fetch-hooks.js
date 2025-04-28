@@ -39,5 +39,5 @@ export const useFetch = (query) => {
     fetchData();
   }, [stringifiedQuery, data]);
 
-  return { data:data[stringifiedQuery], loading, error };
+  return { data:data[stringifiedQuery] || null, loading, error };
 };
