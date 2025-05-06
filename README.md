@@ -60,22 +60,19 @@ User can click a particular bar (which represents a measure or a dimension) to h
 
 ### Development Stack and set-up
 
-This is a client app built with Next.js, React and D3. (It currently uses javascript but typesceipt release is imminent, along with full testing and productionised codebase.)
+This is a client app built with Next.js, React and D3. (Currently Javascript but typescript migration release is imminent).
 
 It uses GraphQL to communicate with a server to retrieve data. GraphQL is a good choice as it provides a clean way to avoid over-fetching of data, which will be an issue when a larger number of datapoints are involved.
 
-The server (written in node, and utilising python child processes) is deployed to heroku.
+The server (written in node, and utilising python child processes for analytics of large datasets) is deployed to heroku, and provides data to a vaeiety of viualisation apps.
 
-It was developed on a chrome browser, and is responsive to all display sizes and devices, including touch. However, it hasn't been tested on other browsers or on mobile devices, so may be unstable if not using chrome on a laptop or PC.
-
-In general, the application is still in development, has some minor bugs, has not been through testing, and some functions are not yet documented.
-These are all being worked on for release very soon.
+PerfectSquare was developed on a chrome browser, and is responsive to all display sizes and devices, including touch. However, it hasn't been tested on other browsers or on mobile devices, so may be unstable if not using chrome on a laptop or PC. Minor bugs exist.
 
 ### Some conventions
 
 #### Margin Convention
 
-WARNING TO NON-D3 DEVELOPERS - margin in SVG/D3 world acts as padding in HTML/CSS world, so we get, for example, contentsWidth = width - margin.left - margin.right.
+NOTE TO NON-D3/SVG DEVELOPERS - margin in SVG/D3 world acts as padding in HTML/CSS world, so we get, for example, contentsWidth = width - margin.left - margin.right.
 This margin convention is applied throughout the svg code. Every rendering component is ignorant of it's container. It receives it's own dimensions either as settings (if its a full-on 'component') or as an argument (if its just a smaller rendering helper function). If it has a margin, this is applied to derive the contentsWidth and contentsHeight.
 
 #### Naming conventions
@@ -88,10 +85,10 @@ Naming Conventions
 | 	e	| 		| 	A dom event - either a source event or a D3 pseudo event that may or may not contain a source event |
 | 	d, myComponentD	| chartD, tooltipD | Represents a datum, which is a datapoint that has been through a layout function and been binded to a dom element	| 	
 | 	x , y	| 	Horizontal and vertical dimensions	| 
-| _ underscore | _width | Used for simple functions, esp to distinguish between variables of the same name. |
-| 	Dom Elements	| 	chartG, contentsG	| 	Names that refer to dom elements should always add the name of the element on the end |
-| componentLayout (D3 not React) | perfectSquareLayout | Reserved for functions that take data and prepare it for the component of the same name |
-| component (D3 not React) | perfectSquareComponent | Reserved for functions that take a selection and render an svg component, and often have a settings api |
+| _variableName | _width | Used for simple functions that return a variable value on a per datapoint basis, esp to distinguish between constant values of the same name. |
+| 	variableNameDomElementName	| 	chartG, contentsG	| 	Names that refer to dom elements should always add the name of the element on the end |
+| componentLayout (D3 non-React) | perfectSquareLayout | Reserved for functions that take data and prepare it for the component of the same name |
+| component (D3 non-React) | perfectSquareComponent | Reserved for functions that take a selection and render an svg component, and often have a settings api |
 
 #### Use of 'this'
 
@@ -101,27 +98,27 @@ The D3 convention is followed that for any function that acts on an element, the
 
 Functions that act on elements, will generally be passed a d3 selection, rather than the raw element(s). This allows components to be used for multiple elements at once. Then, selection.each is used to iterate and extract each element (as 'this') and its datum.
 
-### Architecture of the Visual
+### Architecture of the Main SVG Visual
 
 #### Overview
 
 Each datapoint becomes an instance of a chart inside the overall visual. It is rendered as follows. (React components start with capitals, d3-oriented functions and react hooks in camelCase.)
 
-1. [Visual](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/_visual/page.js) gets the data via a [useFetch](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_api-requests/fetch-hooks.js) hook, and calls the PerfectSquareVisual.
-2. [PerfectSquareVisual](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/_perfect-square-visual/page.js) sets up the space, the [zooming](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/_perfect-square-visual/_hooks_and_modules/zoom.js), and the [simulation](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/_perfect-square-visual/_hooks_and_modules/simulation.js), and then applies the [perfectSquareLayout](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/_perfect-square-visual/_svgComponents/_perfectSquare/layout.js) to the data to prepare it for the perfectSquareComponent, and calls renderCharts.
-3. [renderCharts](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/_perfect-square-visual/_hooks_and_modules/renderCharts.js) renders one g element per datapoint, inside the container, then calls perfectSquareComponent on this selection of gs.
-4. [perfectSquareComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/_perfect-square-visual/_svgComponents/_perfectSquare/component.js) receives a selection of gs, and renders/updates each one by calling various subComponents.
-5. [subcomponents](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/_perfect-square-visual/_svgComponents/_perfectSquare/subcomponents.js) render/update a part of each chart, returning the selection to allow chaining.
+1. [AppContext](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/context.js) and [VisualContext](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/visual/context.js) provide settings and data to the visual.
 
-#### The main React component - [PerfectSquareVisual](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/_perfect-square-visual/page.js) 
 
-It runs the data through a [perfectSquareLayout](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/_perfect-square-visual/_svgComponents/_perfectSquare/layout.js) to prepare it for the perfectSquareComponent, utilising the D3 layout design pattern.
+[SVGVisual](https://github.com/peter-meehan-domokos/perfect-square/tree/main/app/_components/visual/SVGVisual) receives the particular component - perfectSquareComponent - via the renderProps pattern, and renders it as a child inside an [SVGContainer](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/visual/SVGVisual/container.js) component and a [ZoomableG](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/visual/SVGVisual/hooks_and_modules/zoomable-g/page.js) wrapper which adds zooming.
 
-It calls renderCharts inside a useEffect, which uses the D3 enter-update-exit pattern to call the [perfectSquareComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/_perfect-square-visual/_svgComponents/_perfectSquare/component.js), passing it the selection of all charts.
+2. [SVGContainer](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/visual/SVGVisual/container.js) calculates dimensional information for the visual, including the container itself, but also the information for a [grid](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/visual/SVGVisual/hooks_and_modules/grid.js) layout of all the datapoints (ie charts), and for a simulation of the datapoints (which requires smaller charts). These are provided in an SVGContainerContext.
 
-It handles callbacks such as for event handling, by updating its state, which then triggers the necessary dom updates via specific useEffects or via its own returned JSX. For example, the user selects a chart at the d3/dom level, this is passed to the React component which sets this in state, and this in turn triggers a useEffect which updates the dom via the d3 component, and also makes any other required updates, such as to the controls.
+3. [ZoomableG](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/visual/SVGVisual/hooks_and_modules/zoomable-g/page.js) sets up zooming, with the help of a [useZoom](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/visual/SVGVisual/hooks_and_modules/zoomable-g/zoom.js) hook, and provides state and utility functions via a ZoomContext. Some of these are also accessible higher up the chain so that zoom can be externally controlled too.
 
-#### The main D3 component - [perfectSquareComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/_perfect-square-visual/_svgComponents/_perfectSquare/component.js)
+4.[PerfectSquare](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/perfect-square/page.js) is the React component of the SVG Vis. It passes the data through a layout function, [perfectSquareLayout](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/perfect-square/svgComponents/perfectSquare/layout.js), which prepares the data for the D3 [perfectSquareComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/perfect-square/svgComponents/perfectSquare/component.js), as per the D3 layout-component design pattern. A [simulation hook](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/visual/SVGVisual/hooks_and_modules/simulation/simulation.js) is also called which handles changes that need to be made if the simulation is updated or turned on/off. Finally, various useEffects render/update the charts based on state changes, using the D3 enter-update-exit pattern in [renderCharts]().
+
+5. [perfectSquareComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/perfect-square/svgComponents/perfectSquare/component.js) calls various [subcomponents](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/perfect-square/svgComponents/perfectSquare/subcomponents.js) to render/update a part of each chart, returning the selection to allow chaining.
+
+
+#### The main D3 component pattern - [perfectSquareComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/perfect-square/svgComponents/perfectSquare/component.js)
 
 The perfectSquareComponent utilises the D3 component design pattern - it returns an inner function which can then be used to render and update each chart it receives as part of a selection of charts. It uses this inner function approach rather than classes, because this is more consistent with the implementation of D3 itself, allowing for seamless integration of these functions within standard D3 chaining.
 
@@ -142,7 +139,7 @@ The description in the VisualHeader is hidden in smaller container sizes, with a
    
 #### 1. Virtualised Rendering
 
-Only the datapoints on screen are rendered and this is updated on every zoom event. Checking is provided by the zoom hook utility function [isChartOnScreenCheckerFunc](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/_perfect-square-visual/_hooks_and_modules/zoom.js).
+Only the datapoints on screen are rendered and this is updated on every zoom event. Checking is provided by the general utility higher-order function [isChartOnScreenCheckerFunc](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/perfect-square/helpers.js) which the zoom hook makes use of.
 
 #### 2. Semantic Zoom
 
