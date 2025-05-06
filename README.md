@@ -2,7 +2,9 @@
 
 [Live demo here](https://peter-meehan-domokos.github.io/perfect-square/) 
 
-Note: still under development. Some minor issues exist, especially around manual zooming when simulation is on.
+Typescript migration under way. See [this branch](https://github.com/peter-meehan-domokos/perfect-square/tree/typescript).
+
+Note: still under development. 
 
 ## Overview
 
