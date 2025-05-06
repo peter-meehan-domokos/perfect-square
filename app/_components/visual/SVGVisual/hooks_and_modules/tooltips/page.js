@@ -1,14 +1,14 @@
 'use client'
 import React, { useEffect, useRef, useMemo, useContext } from 'react'
 import { TooltipsContext } from './context';
-import { SVGContainerContext } from '../../container';
+import { SVGDimensionsContext } from '../../container';
 import tooltipComponent from "./component";
 import renderTooltips from "./renderTooltips";
 
 /**
  * @description  
  * 
- * @returns {HTMLElement} 
+ * @returns {ReactElement} 
  */
 
 const Tooltips = () => {
@@ -18,7 +18,7 @@ const Tooltips = () => {
 
     const { 
         container: { contentsWidth, contentsHeight }, 
-    } = useContext(SVGContainerContext);
+    } = useContext(SVGDimensionsContext);
 
     //dom refs
     const containerRef = useRef(null);

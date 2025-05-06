@@ -15,6 +15,7 @@ export const useFetch = (query) => {
   useEffect(() => {
     //check if fetched previously
     if(data[stringifiedQuery]) { return; }
+    if(loading){ return; }
 
     const fetchData = async () => {
       setLoading(true);

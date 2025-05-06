@@ -4,7 +4,7 @@ import react, { useEffect, useContext } from "react";
 /**
  * @description 
  * @param {string} 
- * @returns {ReactNode}
+ * @returns {ReactElement}
  */
 export const NoDataFallback = ({ data, loading, error, fallback = () => null, children }) => {
     return (

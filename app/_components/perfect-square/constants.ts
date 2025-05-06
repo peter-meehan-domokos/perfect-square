@@ -1,6 +1,11 @@
-export const DEFAULT_CONTAINER_MARGIN = { left:10, right:10, top:10, bottom:10 };
-export const DEFAULT_CHART_MARGIN = { left:0, right:0, top:0, bottom:0 };
-export const CALC_CELL_MARGIN = (width, height) => ({ left:width * 0.1, right:width * 0.1, top:height * 0.1, bottom:height * 0.1 });
+import { Margin, Tooltip } from "@/app/common-types/data-types";
+import { DisplaySettings } from "../visual/context";
+
+export const DEFAULT_CONTAINER_MARGIN : Margin = { left:10, right:10, top:10, bottom:10 };
+export const DEFAULT_CHART_MARGIN : Margin = { left:0, right:0, top:0, bottom:0 };
+export function CALC_CELL_MARGIN(width : number, height : number): Margin { 
+    return { left:width * 0.1, right:width * 0.1, top:height * 0.1, bottom:height * 0.1 };
+}
 
 export const LEVELS_OF_DETAIL = [1,2,3];
 //these values base_sizes (derived from the chart width and height essentially)
@@ -17,7 +22,6 @@ export const SETTINGS_OPTIONS = {
         },
         { 
             key:"deviation", label:"Deviation", 
-            desc:"",
             desc:[
                 { text:"Each chart is a datapoint (vector) made up of multiple bars (measures or dimensions)." },
                 { text:"The datapoint's standard deviation is the standard deviation of all it bar values." }
@@ -34,34 +38,34 @@ export const SETTINGS_OPTIONS = {
     ]
 }
 
-export const SELECT_MEASURE_TOOLTIP = {
-    area:"charts-viewbox",
-    position:"top",
-    paragraphs:[
-        { text: "Clicking a measure isn't available yet." }
+export const SELECT_MEASURE_TOOLTIP : Tooltip = {
+    type : "select-measure",
+    position : "top",
+    paragraphs : [
+        { text : "Clicking a measure isn't available yet." }
     ]
 }
 
-export const LOADING_TOOLTIP = {
-    area:"charts-viewbox",
-    position:"bottom",
-    paragraphs:[
-        { text: "The data is loading..." }
+export const LOADING_TOOLTIP : Tooltip = {
+    type : "loading",
+    position : "bottom",
+    paragraphs : [
+        { text : "The data is loading..." }
     ],
-    styles:{
-        bg:{
-            fill:"none"
+    styles : {
+        bg : {
+            fill : "none"
         },
-        textLine:{
-            fontSize:14,
-            fontMin:10,
-            fontMax:16
+        textLine : {
+            fontSize : 14,
+            fontMin : 10,
+            fontMax : 16
         }
 
     }
 }
 
-export const DEFAULT_DISPLAY_SETTINGS = { 
+export const DEFAULT_DISPLAY_SETTINGS : DisplaySettings = { 
     arrangeBy:{ x: "", y:"", colour:"" }
 }
 

@@ -7,7 +7,7 @@ import { robotoMonoFont } from '@/app/assets/fonts';
  * @param {object} image an object that includes a src string for fethcing the image
  *  @param {Array} items the text items for the footer, to be rendered alongside the image
  * 
- * @returns {HTMLElement} A div containing the content
+ * @returns {ReactElement} A div containing the content
  */
  const Footer = ({ image, items=[] }) => {
     return (

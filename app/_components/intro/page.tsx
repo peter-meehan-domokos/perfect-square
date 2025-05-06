@@ -1,5 +1,6 @@
 'use client'
-import { useRef } from 'react';
+import { ReactElement, useRef, useContext, useCallback } from 'react';
+import { AppContext } from '@/app/context';
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -19,10 +20,11 @@ const playButtonStyle = {
  * 
  * @param {function} closeIntro a handler that sets the state in the parent to close the intro and render the visual
  * 
- * @returns {HTMLElement} A div containing a React-Slick Slider component
+ * @returns {ReactElement} A div containing a React-Slick Slider component
  */
-const Intro = ({ closeIntro }) => {
-    const sliderRef = useRef(null);
+const Intro : React.FC = () => {
+    const { setIntroIsDisplayed } = useContext(AppContext);
+    const sliderRef = useRef<HTMLElement | null> (null);
     const settings = {
         dots: true,
         infinite: true,
@@ -31,11 +33,13 @@ const Intro = ({ closeIntro }) => {
         slidesToScroll: 1,
       };
 
-    const goToNextSlide = () => {  sliderRef.current.slickNext(); }
+    const closeIntro = useCallback(() => setIntroIsDisplayed(false), [setIntroIsDisplayed])
 
-    const _isLastSlide = i => i === INTRO_SLIDES.length - 1;
+    const goToNextSlide = () => {  sliderRef.current?.slickNext(); }
 
-    const _controlButtons = isLastSlide => [{
+    const _isLastSlide = (i : number) => i === INTRO_SLIDES.length - 1;
+
+    const _controlButtons = (isLastSlide: boolean) => [{
         label:isLastSlide ? "Play" : "Next",
         onClick:isLastSlide ? closeIntro : goToNextSlide,
         className:`${isLastSlide ? "last-slide-controls" : "slide-controls"}`,

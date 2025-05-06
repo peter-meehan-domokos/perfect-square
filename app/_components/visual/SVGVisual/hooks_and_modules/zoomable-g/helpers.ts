@@ -1,40 +1,6 @@
+import { Container, ContainerWithDatapointPositioning, Margin, PositionedDatapoint } from '@/app/common-types/data-types';
+import { ZoomTransform } from "d3-zoom";
 import * as d3 from 'd3';
-import { LEVELS_OF_DETAIL, LEVELS_OF_DETAIL_THRESHOLDS, CHART_SIZE_REDUCTION_FACTOR_FOR_SIM, DEFAULT_CHART_MARGIN } from "./constants";
-
-export const calcLevelOfDetailFromBase = baseSize => (k, disabledLevels=[]) => {
-    const enabledLevels = LEVELS_OF_DETAIL.filter(l => !disabledLevels.includes(l));
-    const nrLevels = enabledLevels.length;
-    //@todo - add a level 4 threshold and shift them all up 1, with level 1 just a rect inside a rect
-    if(baseSize * k > LEVELS_OF_DETAIL_THRESHOLDS[1]){ return enabledLevels[enabledLevels.length - 1]; }
-    if(baseSize * k > LEVELS_OF_DETAIL_THRESHOLDS[0] && nrLevels > 1){ return enabledLevels[enabledLevels.length - 2];}
-    return enabledLevels[0];
-};
-
-//returns levels that are inbetween both (note levels start at 1, not 0)
-export const getDisabledLevelsForZoom = (initLevel, targLevel) =>
-    initLevel && targLevel ? LEVELS_OF_DETAIL.slice(initLevel - 1, targLevel) : [];
-
-  export const calcChartSizesAndGridLayout = (contentsWidth, contentsHeight, nrCols, nrRows, nrDatapoints, arrangeBy, _chartMargin={}) => {
-    const reductionFactor = calcReductionFactor(nrDatapoints, arrangeBy);
-    const chartWidth = reductionFactor * contentsWidth / nrCols;
-    const chartHeight = reductionFactor * contentsHeight / nrRows;
-    const chartMarginValues = typeof _chartMargin === "function" ? _chartMargin(chartWidth, chartHeight) : _chartMargin;
-    const chartMargin = { ...DEFAULT_CHART_MARGIN, ...chartMarginValues }
-    return { 
-      chartWidth, chartHeight, chartMargin, 
-      nrRows, nrCols
-    }
-  }
-
-  export const applyMargin = (width, height, margin) => {
-      return {
-        width,
-        height,
-          contentsWidth : d3.max([width - margin.left - margin.right, 0]),
-          contentsHeight : d3.max([height - margin.top - margin.bottom, 0]),
-          margin
-      }
-  }
 
   /**
  * @description A higher-order function that returns a function that determines whether or not the chart of a particular
@@ -60,14 +26,20 @@ export const getDisabledLevelsForZoom = (initLevel, targLevel) =>
  * 
  * @returns {boolean} true iff this chart is currently positioned within the viewbox of the container, given the current zoom state.
  */
-  export const isChartOnScreenCheckerFunc = (contentsWidth, contentsHeight, chartWidth, chartHeight, _chartX = d=>d.x, _chartY = d=>d.y, zoomTransformState) => (chartD) => {
-    const { x, y, k } = zoomTransformState;
-    const chartX1 = _chartX(chartD);
-    const chartY1 = _chartY(chartD);
-    const chartX2 = chartX1 + chartWidth;
-    const chartY2 = chartY1 + chartHeight;
+   export const isChartOnScreenCheckerFunc = (
+    container : Container, 
+    chart : ContainerWithDatapointPositioning, 
+    zoomTransform : ZoomTransform
+  ) => (chartD : PositionedDatapoint) => {
+    const { contentsWidth, contentsHeight } = container;
+    
+    const { x, y, k } = zoomTransform;
+    const chartX1 = chart._x(chartD);
+    const chartY1 = chart._y(chartD);
+    const chartX2 = chartX1 + chart.width;
+    const chartY2 = chartY1 + chart.height;
 
-    const BUFFER = 200;
+    const BUFFER = 200; 
 
     const isOnScreenHorizontally = chartX2 * k + x >= 0 - BUFFER && chartX1 * k + x <= contentsWidth + BUFFER;
     const isOnScreenVertically = chartY2 * k + y >= 0 - BUFFER && chartY1 * k + y <= contentsHeight + BUFFER; 
@@ -100,18 +72,54 @@ export const getDisabledLevelsForZoom = (initLevel, targLevel) =>
  * @returns {D3ZoomTransformObject} The D3 Transform that is ready to be applied to the zoom g in the dom.
  * It contains the required x, y and k(scale) values to zoom into the selected chart
  */
-  export const calcZoomTransformFunc = (contentsWidth, contentsHeight, margin, chartWidth, chartHeight, _chartX=d=>d.x, _chartY=d=>d.y) => chartD => {
-    const k = d3.min([contentsWidth/chartWidth, contentsHeight/chartHeight]);
-    const chartX = _chartX(chartD);
-    const chartY = _chartY(chartD);
-    
-    //zoom into selected chart
-    const translateX = -(chartX * k) + (contentsWidth - (k * chartWidth))/2;
-    const translateY = -(chartY * k) + (contentsHeight - (k * chartHeight))/2;
+  export const calcZoomTransformFunc = (
+    container : Container, 
+    chart : ContainerWithDatapointPositioning
+    ) => (
+      chartD : PositionedDatapoint
+      ) => {
+        //@todo  - change type of chart.width and height to nonzero numbers
+        if(chart.width === 0 || chart.height === 0){ return undefined; }
+        const { contentsWidth, contentsHeight } = container;
+        //can safely assert k is not undefined, because all 4 numbers involved are defined, and the denominators non-zero
+        const k = d3.min([contentsWidth/chart.width, contentsHeight/chart.height])!;
+        const chartX = chart._x(chartD);
+        const chartY = chart._y(chartD);
+        
+        //zoom into selected chart
+        const translateX = -(chartX * k) + (contentsWidth - (k * chart.width))/2;
+        const translateY = -(chartY * k) + (contentsHeight - (k * chart.height))/2;
 
-    return d3.zoomIdentity.translate(translateX, translateY).scale(k);
+        return d3.zoomIdentity.translate(translateX, translateY).scale(k);
 
   }
+
+  /**
+ * @description Calculates and applies basic settings to the zoom, and attaches event handlers 
+ *
+ * @param {D3ZoomBehaviourObject} zoom the d3 zoom behaviour object, initialised by d3.zoom()
+ * @param {Number} contentsWidth the width of the zoom space
+ * @param {Number} contentsHeight the height of zoom space
+ * @param {Number} chartWidth the width of each individual chart
+ * @param {Number} chartHeight the height of each individual chart
+ * @param {object} options the optional event handlers to be attached
+ * 
+ */
+export function setupZoom(zoom, container, chart, options={}){
+  const { onStart=()=>{}, onZoom=()=>{}, onEnd=()=>{} } = options;
+  if(chart.width === 0 || chart.height === 0){ return; }
+  const { contentsWidth, contentsHeight } = container;
+
+  //we allow user to zoom into margin, as more immersive (ie no artifical boundary)
+  const kMax = d3.max([contentsWidth/chart.width, contentsHeight/chart.height]);
+  zoom
+    .scaleExtent([1, kMax])
+    //@todo - make this contentsWidth and height, and shoft zoomG too by the margin
+    .translateExtent([[0, 0], [contentsWidth, contentsHeight]])
+    .on("start", onStart)
+    .on("zoom", onZoom)
+    .on("end", onEnd);
+}
 
 
   

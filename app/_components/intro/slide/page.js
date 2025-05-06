@@ -18,7 +18,7 @@ const paragraphStyle = {
  * @param {Array} paragraphs an array of paragraphs of text to be renderd in p elements
  * @param {object} visual an optional object that can contain an image with a src url, and/or an array of text
  * 
- * @returns {HTMLElement} A div containing the content that has been passed in
+ * @returns {ReactElement} A div containing the content that has been passed in
  */
 
 //@todo - move static content to proper place in a text file

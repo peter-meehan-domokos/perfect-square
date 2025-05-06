@@ -1,7 +1,7 @@
 import { useEffect, useRef, useContext } from "react";
 import * as d3 from 'd3';
 import { VisualContext } from "../../../context";
-import { SVGContainerContext } from "../../container";
+import { SVGDimensionsContext } from "../../container";
 import { _simulationIsOn } from "../../../helpers";
 
 //constants
@@ -28,16 +28,8 @@ export const useSimulation = (containerRef, data) => {
     displaySettings: { arrangeBy }
   } = useContext(VisualContext);
 
-  const { 
-    container: { contentsWidth, contentsHeight }, 
-    simulation
-  } = useContext(SVGContainerContext);
+  const dimensions = useContext(SVGDimensionsContext);
 
-  const nodeWidth = simulation?.nodeWidth || 0;
-  const nodeHeight = simulation?.nodeHeight || 0;
-
-
-  
   const prevArrangeByRef = useRef(null);
   const simRef = useRef(null);
   const simIsStartedRef = useRef(false);
@@ -60,9 +52,9 @@ export const useSimulation = (containerRef, data) => {
 
   //simulation
   useEffect(() => {
-    if(!simulationIsOn){ return; }
+    if(!simulationIsOn | !dimensions.container | !dimensions.simulation){ return; }
     simRef.current = d3.forceSimulation(nodesData);
-    applyForces(simRef.current, contentsWidth, contentsHeight, nodeWidth, nodeHeight, arrangeBy, nodesData.length, info);
+    applyForces(simRef.current, dimensions.container, dimensions.simulation, arrangeBy, info);
 
     simRef.current
       .on("tick", () => {
@@ -73,7 +65,7 @@ export const useSimulation = (containerRef, data) => {
       })
       .on("end", () => { simTicksInProcessRef.current = false; })
 
-  }, [contentsWidth, contentsHeight, nodesData.length, arrangeBy, containerRef, info, nodeWidth, nodeHeight, nodesData, simulationIsOn])
+  }, [dimensions.container, dimensions.simulation, arrangeBy, info, nodesData, simulationIsOn])
 
   //start/stop sim
   useEffect(() => {
@@ -87,8 +79,6 @@ export const useSimulation = (containerRef, data) => {
   },[simulationIsOn])
   
   return { 
-    nodeWidth,
-    nodeHeight,
     simulationIsOn,
     simulationHasBeenTurnedOnOrOff
   }
@@ -109,7 +99,9 @@ export const useSimulation = (containerRef, data) => {
  * @param {object} dataInfo meta information about all the nodesData eg mean, deviation
  * 
  */
-function applyForces(sim, contentsWidth, contentsHeight, nodeWidth, nodeHeight, arrangeBy, nrNodes, dataInfo){
+function applyForces(sim, containerDimensions, simulationDimensions, arrangeBy, dataInfo){
+    const { contentsWidth, contentsHeight } = containerDimensions;
+    const { nodeWidth, nodeHeight, nrNodes } = simulationDimensions;
     const { mean, deviation } = dataInfo;
     const extraHorizMarginForForce = contentsWidth * EXTRA_HORIZ_MARGIN_FACTOR_FOR_FORCE;
     const extraTopMarginForForce = contentsHeight * EXTRA_TOP_MARGIN_FACTOR_FOR_FORCE;

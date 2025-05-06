@@ -8,9 +8,9 @@ import Footer from './footer/page';
  * @param {string} containerClassNames enables to parent component to place addiotnal classnames on the container
  * @param {string} controlButtons the buttons that should be displayed for this particular slide eg Next Slide
  * @param {string} footer the content for a footer if required for the slide, expects either an image, text or both
- * @param {ReactNode} children the slide that this wrapper wraps
+ * @param {ReactElement} children the slide that this wrapper wraps
  * 
- * @returns {HTMLElement} A div containing the wrapper content and any children
+ * @returns {ReactElement} A div containing the wrapper content and any children
  */
 export default function SlideLayout({ containerClassNames="", controlButtons, footer, children }) {
 

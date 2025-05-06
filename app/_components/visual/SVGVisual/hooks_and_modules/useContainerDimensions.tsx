@@ -1,22 +1,26 @@
 'use client'
 import { useState, useEffect } from "react";
-import { DEFAULT_CONTAINER_MARGIN } from "../../../perfect-square/constants.js";
+import { DEFAULT_CONTAINER_MARGIN } from "../../../perfect-square/constants";
 import { applyMargin } from '../../../perfect-square/helpers';
 import { getElementDimns } from '@/app/_helpers/domHelpers';
+import { Container } from "@/app/common-types/data-types";
 
 /**
  * @description A hook that calculates the dimensions of the given element and sets up a listener for any changes to it 
- * @param {Ref} containerRef a ref to the element
+ * @param {Ref} container the element
  * 
  * @return {object} the dimensions - width, height, margin, contentsWidth, contentsHeight
  */
-export const useSVGContainerContext = (containerRef, margin) => {
+
+const useContainerDimensions = (container : HTMLElement | null, margin = DEFAULT_CONTAINER_MARGIN):Container | null => {
   const [width, setWidth] = useState(0);
   const [height, setHeight] = useState(0);
 
   useEffect(() => { 
+    if(!container){ return; }
+
     const updateDimensions = () => {
-        const { width, height } = getElementDimns.call(containerRef.current);
+        const { width, height } = getElementDimns.call(container);
         setWidth(width);
         setHeight(height);
     };
@@ -25,12 +29,14 @@ export const useSVGContainerContext = (containerRef, margin) => {
 
     //resize listener
     let resizeObserver = new ResizeObserver(() => { updateDimensions(); }); 
-    resizeObserver.observe(containerRef.current);
+    resizeObserver.observe(container);
 
     //cleanup
     return () => { resizeObserver.disconnect(); };
-  },[containerRef])
+  },[container])
   
-  return applyMargin(width, height, margin || DEFAULT_CONTAINER_MARGIN)
+  return container ? applyMargin(width, height, margin) : null
 
 };
+
+export default useContainerDimensions;

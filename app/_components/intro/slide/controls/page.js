@@ -4,7 +4,7 @@
  * 
  * @param {function} closeIntro a handler that sets the state in the parent to close the intro and render the visual
  * 
- * @returns {HTMLElement} A div containing a React-Slick Slider component
+ * @returns {ReactElement} A div containing a React-Slick Slider component
  */
 
 //@todo - add container div for controls

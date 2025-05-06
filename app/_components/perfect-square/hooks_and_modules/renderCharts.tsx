@@ -5,12 +5,12 @@ import { remove, fadeIn } from '../../../_helpers/domHelpers';
  * @description Runs the datapoints through a D3 enter-update-exit pattern to render the charts, and filters out those not on screen
  *
  * @param {Array} datapoints the datapoints that require to be displayed with a chart
- * @param {function} perfectSquare the main component that will render a chart in each container g it receives
+ * @param {function} componentToRender the main component that will render a chart in each container g it receives
  * @param {boolean} simulationIsOn a flag to show whether or not the force is applied, in which case the transform 
  * to position each chart is applied by the force rather than here 
  * 
  */
-function renderCharts(datapoints=[], perfectSquare, simulationIsOn, options={}){
+function renderCharts(datapoints=[], componentToRender, simulationIsOn, options={}){
     const { transitions={} } = options;
     const chartG = d3.select(this).selectAll("g.chart").data(datapoints, d => d.key);
         chartG.enter()
@@ -33,7 +33,7 @@ function renderCharts(datapoints=[], perfectSquare, simulationIsOn, options={}){
                     d3.select(this).attr("transform", (d,i) => simulationIsOn ? d3.select(this).attr("transform") : `translate(${d.cellX},${d.cellY})`);
                 }
             })
-            .call(perfectSquare, { transitions });
+            .call(componentToRender, { transitions });
 
     chartG.exit().call(remove, { transition:transitions.exit || null })
 }
