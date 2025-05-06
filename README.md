@@ -117,7 +117,7 @@ Each datapoint becomes an instance of a chart inside the overall visual. It is r
 6. [perfectSquareComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/perfect-square/svgComponents/perfectSquare/component.js) calls various [subcomponents](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/perfect-square/svgComponents/perfectSquare/subcomponents.js) to render/update a part of each chart, returning the selection to allow chaining.
 
 
-#### The main D3 component pattern: [perfectSquareComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/perfect-square/svgComponents/perfectSquare/component.js)
+#### The main D3 component inner-function pattern: [perfectSquareComponent](https://github.com/peter-meehan-domokos/perfect-square/blob/main/app/_components/perfect-square/svgComponents/perfectSquare/component.js)
 
 The perfectSquareComponent utilises the D3 component design pattern - it uses currying to return an inner function which can then be used to render and update each chart it receives as part of a selection of charts. It uses this inner function approach rather than classes, because this is more consistent with the implementation of D3 itself, allowing for seamless integration of these functions within standard D3 chaining.
 
