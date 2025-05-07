@@ -46,21 +46,25 @@ export interface SecondOrderTransformFn<T> {
     (t : T):TransformFn<T>;
 }
 
-export interface AccessorFn<T , Value> {
-    (t : T):Value
+export interface AccessorFn<T , R> {
+    (t : T):R
 }
 
 export interface TransformWithAccessorFn<T, Value> {
     (t : T, accessor : AccessorFn<T, Value>):T;
 }
-  
+
+/*
 export interface ArrayManipulatorFn<T> {
 (arr: T[]):T[]
 }
+*/
 
+/*
 export interface ArrayManipulatorWithAccessorFn<T, Value> {
     (arr: T[], accessor : AccessorFn<T, Value>):T[]
-    }
+}
+*/
 
 export interface ZoomCallbacks {
     onZoomStart? : HandlerFn<D3ZoomEvent<SVGElement, PositionedDatapoint>> | undefined,
