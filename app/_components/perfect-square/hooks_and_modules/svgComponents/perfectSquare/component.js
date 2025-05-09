@@ -193,9 +193,9 @@ export default function perfectSquare() {
     function updateColourAccessors(){
         _chartColourWhenNotGreyedOut = d => {
             const summaryMeasureKey = arrangeBy.colour; //value, deviation or position
-            if(!summaryMeasureKey || !metaData.data) { return BLUE; }
-            const { min, max, range } = metaData.data.info[summaryMeasureKey] 
-            const value = d.info[summaryMeasureKey];
+            if(!summaryMeasureKey || !metadata.data) { return BLUE; }
+            const { min, max, range } = metadata[summaryMeasureKey] 
+            const value = d.metadata[summaryMeasureKey];
             const valueAsProportion = (value - min)/range;
             return colourScale(scaleStartPoint + valueAsProportion * (scaleEndPoint - scaleStartPoint))
         }
@@ -227,7 +227,7 @@ export default function perfectSquare() {
             const anotherQuadrantIsSelected = isNumber(selectedQuadrantIndex) && selectedQuadrantIndex !== summaryD.i;
             if(anotherChartIsSelected || anotherQuadrantIsSelected){ return GREY; }
             //Case 2. highlighhted in red
-            if(summaryD.info.mean < 50){ return "red";}
+            if(summaryD.metadata.mean < 50){ return "red";}
             //Case 3. return a standard easy to read blue
             return BLUE;
         }
@@ -235,7 +235,7 @@ export default function perfectSquare() {
     }
 
     //state
-    let metaData = {};
+    let metadata = {};
     let selectedQuadrantIndex = null;
     let selectedChartKey = "";
     let selectedMeasureKey = "";
@@ -416,9 +416,9 @@ export default function perfectSquare() {
         margin = { ...margin, ...value };
         return chart;
     };
-    chart.metaData = function (value) {
-        if (!arguments.length) { return metaData; }
-        metaData = value;
+    chart.metadata = function (value) {
+        if (!arguments.length) { return metadata; }
+        metadata = value;
         return chart;
     };
     chart.selectedQuadrantIndex = function (value) {

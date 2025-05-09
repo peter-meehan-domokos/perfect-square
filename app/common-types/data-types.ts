@@ -204,6 +204,11 @@ export interface SimulationDimensions {
     nrNodes : number
 }
 
+export interface SimulationData {
+    nodesData : PerfectSquareDatapoint[],
+    metadata : DatasetMetadata<MeasureDataSummaryItem>
+}
+
 export interface Tooltip {
     //tagged union
     type: "header" | "loading" | "select-measure",

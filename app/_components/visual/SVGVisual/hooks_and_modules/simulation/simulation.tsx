@@ -1,8 +1,9 @@
-import { useEffect, useRef, useContext } from "react";
+import { RefObject, useEffect, useRef, useContext } from "react";
 import * as d3 from 'd3';
 import { VisualContext } from "../../../context";
 import { SVGDimensionsContext } from "../../container";
 import { _simulationIsOn } from "../../../helpers";
+import { SimulationData } from "@/app/common-types/data-types";
 
 //constants
 const COLLISION_FORCE_RADIUS_FACTOR = 1.15;
@@ -11,19 +12,21 @@ const EXTRA_TOP_MARGIN_FACTOR_FOR_FORCE = 0.25
 const EXTRA_BOTTOM_MARGIN_FACTOR_FOR_FORCE = 0.25
 const CENTRE_FORCE_STRENGTH = 1.8;
 
+interface UseSimulationFn {
+  (
+    containerRef : RefObject<SVGElement | SVGGElement | HTMLDivElement | null>,
+    data : SimulationData | null
+  ) : any
+}
+
 /**
  * @description A hook that sets up a d3.force simulation to act on data, making use of a helper function to apply the required forces
  * @param {Ref} containerRef a ref to the dom node on which to run the simulation
  * @param {object} data the data for the simulation, including a nodesData array
- * @param {} contentsWidth the width of the space that the simulation must fit into
- * @param {} contentsHeight the height of the space that the simulation must fit into
- * @param {} cellWidth the width of the node if it is in a normal grid display - which is the basis for the node width
- * @param {} cellHeight the height of the node if it is in a normal grid display - which is the basis for the node height
- * @param {} initSettings the initial settings (x,y,colour), which determine which simulation, if any, is on
  * 
  * @return {object} an object containing getter and setter for the settings, the node dimensions, and a simulationIsOn flag
  */
-export const useSimulation = (containerRef, data) => {
+export const useSimulation : UseSimulationFn = (containerRef, data) => {
   const { 
     displaySettings: { arrangeBy }
   } = useContext(VisualContext);
@@ -41,10 +44,9 @@ export const useSimulation = (containerRef, data) => {
   //update flag for next time
   prevArrangeByRef.current = arrangeBy;
 
-  const { nodesData, info } = data;
   //if moving from a grid (ie non-arranged), we set d.x and d.y properties so transitions starts from current position
-  if(simulationIsOn && !simulationWasAlreadyOn){
-    nodesData.forEach(d => {
+  if(data && simulationIsOn && !simulationWasAlreadyOn){
+    data.nodesData.forEach(d => {
       d.x = d.cellX;
       d.y = d.cellY;
     })
@@ -52,9 +54,11 @@ export const useSimulation = (containerRef, data) => {
 
   //simulation
   useEffect(() => {
+    if(!data){ return; }
     if(!simulationIsOn | !dimensions.container | !dimensions.simulation){ return; }
+    const { nodesData, metadata } = data;
     simRef.current = d3.forceSimulation(nodesData);
-    applyForces(simRef.current, dimensions.container, dimensions.simulation, arrangeBy, info);
+    applyForces(simRef.current, dimensions.container, dimensions.simulation, arrangeBy, metadata);
 
     simRef.current
       .on("tick", () => {
@@ -65,10 +69,11 @@ export const useSimulation = (containerRef, data) => {
       })
       .on("end", () => { simTicksInProcessRef.current = false; })
 
-  }, [dimensions.container, dimensions.simulation, arrangeBy, info, nodesData, simulationIsOn])
+  }, [dimensions.container, dimensions.simulation, arrangeBy, data, simulationIsOn])
 
   //start/stop sim
   useEffect(() => {
+    if(!data){ return; }
     if(!simulationIsOn){
       simRef.current?.stop();
       simIsStartedRef.current = false;
@@ -80,7 +85,7 @@ export const useSimulation = (containerRef, data) => {
   
   return { 
     simulationIsOn,
-    simulationHasBeenTurnedOnOrOff
+    //simulationHasBeenTurnedOnOrOff
   }
 
 };
@@ -96,13 +101,14 @@ export const useSimulation = (containerRef, data) => {
  * @param {Number} cellHeight the height of each individual chart
  * @param {object} arrangeBy contains the arrangement settings, with x, y and colour values potentially
  * @param {Number} nrNodes the number of nodesData/charts to display
- * @param {object} dataInfo meta information about all the nodesData eg mean, deviation
+ * @param {object} dataInfo metadata about all the nodesData eg mean, deviation
  * 
  */
-function applyForces(sim, containerDimensions, simulationDimensions, arrangeBy, dataInfo){
+function applyForces(sim, containerDimensions, simulationDimensions, arrangeBy, metadata){
     const { contentsWidth, contentsHeight } = containerDimensions;
     const { nodeWidth, nodeHeight, nrNodes } = simulationDimensions;
-    const { mean, deviation } = dataInfo;
+    //@todo - handle mean or deviation undefined
+    const { mean, deviation } = metadata;
     const extraHorizMarginForForce = contentsWidth * EXTRA_HORIZ_MARGIN_FACTOR_FOR_FORCE;
     const extraTopMarginForForce = contentsHeight * EXTRA_TOP_MARGIN_FACTOR_FOR_FORCE;
     const extraBottomMarginForForce = contentsHeight * EXTRA_BOTTOM_MARGIN_FACTOR_FOR_FORCE;
@@ -125,13 +131,13 @@ function applyForces(sim, containerDimensions, simulationDimensions, arrangeBy, 
           return horizSpacePerChart * d.i + adjuster;
         }
         if(arrangeBy.x === "mean"){
-          const proportion = mean.range === 0 ? 0.5 : (d.info.mean - mean.min)/mean.range;
+          const proportion = mean.range === 0 ? 0.5 : (d.metadata.mean - mean.min)/mean.range;
           //when prop = 1 ie max chart, its off the screen, so need to adjust it back. This way, if prop=0, it will still be at the start of space
           return (horizSpace - horizSpacePerChart) * proportion + adjuster;
         }
         if(arrangeBy.x === "deviation"){
           //invert it by subtracting the proportion from 1 to get prop value
-          const proportion = deviation.range === 0 ? 0.5 : 1 - (d.info.deviation - deviation.min)/deviation.range
+          const proportion = deviation.range === 0 ? 0.5 : 1 - (d.metadata.deviation - deviation.min)/deviation.range
           return (horizSpace - horizSpacePerChart) * proportion + adjuster;
         }
         //default to centre of screen
@@ -146,11 +152,11 @@ function applyForces(sim, containerDimensions, simulationDimensions, arrangeBy, 
           return contentsHeight - (d.i + 1) * vertSpacePerChart + adjuster;
         }
         if(arrangeBy.y === "mean" && mean.range !== 0){
-          const proportion = (d.info.mean - mean.min)/mean.range;
+          const proportion = (d.metadata.mean - mean.min)/mean.range;
           return contentsHeight - vertSpacePerChart - ((vertSpace - vertSpacePerChart) * proportion) + adjuster;
         }
         if(arrangeBy.y === "deviation" && deviation.range !== 0){
-          const proportion = 1 - (d.info.deviation - deviation.min)/deviation.range;
+          const proportion = 1 - (d.metadata.deviation - deviation.min)/deviation.range;
           return contentsHeight - vertSpacePerChart - ((vertSpace - vertSpacePerChart) * proportion) + adjuster;
         }
 

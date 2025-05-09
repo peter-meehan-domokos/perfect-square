@@ -2,7 +2,7 @@
 'use client'
 import React, { useEffect, useRef, useMemo, useCallback, useContext } from 'react'
 import * as d3 from 'd3';
-import { PositionedDatapoint, PerfectSquareData } from '@/app/common-types/data-types';
+import { PositionedDatapoint, PerfectSquareData, SimulationData } from '@/app/common-types/data-types';
 import {  } from '@/app/common-types/function-types';
 import { AppContext } from "@/app/context";
 import { VisualContext } from "../visual/context";
@@ -77,21 +77,21 @@ const PerfectSquare : React.FC = () => {
     prevDataKeyRef.current = data?.key || "";
   }, [data?.key])
 
-  //issue is layout isnt always applied
-
-  //@todo - handle null data before here, 
-  //also handle datapoints undefined - this just shouldnt be allowed, any exampledata must have datapoints defined
-  //changed layout so it returns null at first, and also may return data with no datapoints defined eg datapoints = undefined
   const perfectSquareData : PerfectSquareData | null = useMemo(() => {
     if(!data || !grid) { return null; }
     return perfectSquareLayout(data, grid)
   }, [data, grid]);
 
-  //simulation - turns on when user selects an 'arrangeBy' setting
-  const simulationData = { nodesData:perfectSquareData?.datapoints || [], info:perfectSquareData?.info || {} }
+  const simulationData : SimulationData  | null = useMemo(() => {
+    if(!perfectSquareData) { return null }
+    return {
+      nodesData : perfectSquareData.datapoints, 
+      metadata : perfectSquareData.metadata
+    } 
+  },[perfectSquareData]);
+
   const { 
     simulationIsOn, 
-    //simulationHasBeenTurnedOnOrOff 
   } = useSimulation(contentsGRef, simulationData);
 
   //CHART
@@ -113,7 +113,7 @@ const PerfectSquare : React.FC = () => {
   useEffect(() => {
     if(!perfectSquareData){ return; }
     perfectSquare
-      .metaData({ data: { info:perfectSquareData.info } })
+      .metadata(perfectSquareData.metadata)
       .selectedChartKey(selectedChartKey)
       .selectedQuadrantIndex(selectedQuadrantIndex)
       .selectedMeasureKey(selectedMeasureKey)
