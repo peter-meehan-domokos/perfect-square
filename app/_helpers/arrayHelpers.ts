@@ -5,18 +5,20 @@ import * as d3 from 'd3';
 //@todo - add a type that extends Sortable or whatever the type, so accessor can return other sortable types eg dates
 export function sortAscending<T>(
   arr : T[], 
-  accessor : AccessorFn<T, number>
+  accessor : AccessorFn<T, number | null | undefined>
   ):T[] {
   const dataCopy = arr.map(d => d);
-  return dataCopy.sort((a, b) => d3.ascending(accessor(a), accessor(b)))
+  //d3.ascending cannot handle null values so convert any nulls to undefined
+  return dataCopy.sort((a, b) => d3.ascending(accessor(a) || undefined, accessor(b) || undefined))
 };
 
 export function sortDescending<T>(
   arr : T[], 
-  accessor : AccessorFn<T, number>
+  accessor : AccessorFn<T, number | null | undefined>
   ):T[] {
   const dataCopy = arr.map(d => d);
-  return dataCopy.sort((a, b) => d3.descending(accessor(a), accessor(b)))
+  //d3.descending cannot handle null values so convert any nulls to undefined
+  return dataCopy.sort((a, b) => d3.descending(accessor(a) || undefined, accessor(b) || undefined))
 };
 
 export function immutableReverse<T>(arr : T[]): T[] {

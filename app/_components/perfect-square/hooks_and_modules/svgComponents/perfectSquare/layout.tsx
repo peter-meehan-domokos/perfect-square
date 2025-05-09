@@ -1,8 +1,11 @@
-import { ExampleData, PerfectSquareData, Grid, DatapointQuadrantValue, PerfectSquareDatapoint, DatapointQuadrantData, GridUtilityFunctions } from '@/app/common-types/data-types';
+import { ExampleData, PerfectSquareData, Grid, DatapointQuadrantValue, 
+    PerfectSquareDatapoint, DatapointQuadrantData, 
+    DatasetMetadata, MeasureDataSummaryItem
+} from '@/app/common-types/data-types';
 import { TransformFn, SecondOrderTransformFn } from '@/app/common-types/function-types';
 import * as d3 from 'd3';
 import { sortAscending, sortDescending } from '../../../../../_helpers/arrayHelpers';
-import { percentageScoreConverter } from '../../../../../_helpers/dataHelpers';
+import { percentageScoreConverter, isNumber } from '../../../../../_helpers/dataHelpers';
 
 /**
  * @description converts the data it receives into the format expected by the perfectSquareComponent (d3 layout pattern),
@@ -62,6 +65,12 @@ import { percentageScoreConverter } from '../../../../../_helpers/dataHelpers';
         const cellX = _cellX(_colNr(i));
         const cellY = _cellY(_rowNr(i));
 
+        const metadata : DatasetMetadata<number> = {
+            mean : undefined,
+            deviation : undefined,
+            position : undefined
+        }
+
         return {
             //DatapointInfo type
             key:datapoint.key,
@@ -72,71 +81,92 @@ import { percentageScoreConverter } from '../../../../../_helpers/dataHelpers';
             cellX,
             cellY,
             //other properties of the PerfectSquareDatapoint type
-            i
+            i,
+            metadata
         }
     })
 
-    //@todo - must handle undefined cases, as no values are guaranteed to be non-null, so mean etc could return undefined
-    //note that the consumer has control over whether or not to pass null values to the perfectSquare component or not
+    //note - no values are guaranteed to be non-null, so mean etc could return undefined.
+    //The consumer has control over whether or not to pass null values to the perfectSquare component or not
     //which will depend on the use case - do we want null values reported in the vis somehow, or not
-    const datapointsWithSummaryInfo = datapointsWithOrderedMeasures.map(datapoint => {
+    const datapointsWithMetadata : PerfectSquareDatapoint[] = datapointsWithOrderedMeasures.map(datapoint => {
         //@todo - user rollup
-        const quadrantsWithSummaryInfo = datapoint.quadrantsData.map(q => ({
-            ...q,
-            info: { mean:Math.round(d3.mean(q.values.map(v => v.value))) }
-        }))
-        const datapointMean = d3.mean(quadrantsWithSummaryInfo.map(q => q.info.mean));
+        const quadrantsWithMetadata = datapoint.quadrantsData.map(q => {
+            const meanValue = d3.mean(q.values.map(v => v.value));
+            return {
+                ...q,
+                metadata: { 
+                    mean: isNumber(meanValue) ? Math.round(meanValue!) : undefined
+                }
+            }
+        })
+        const datapointMeanValue = d3.mean(quadrantsWithMetadata.map(q => q.metadata.mean));
         const allValues = datapoint.quadrantsData
             .map(q => q.values)
             .reduce((arr1, arr2) => ([...arr1, ...arr2]))
             .map(v => v.value);
 
-        const datapointDeviation = d3.deviation(allValues)
+        const datapointDeviationValue = d3.deviation(allValues)
         return {
             ...datapoint,
-            quadrantsData:quadrantsWithSummaryInfo,
-            info:{
-                mean:Math.round(datapointMean),
-                deviation:Number(datapointDeviation.toFixed(1))
+            quadrantsData : quadrantsWithMetadata,
+            metadata : {
+                ...datapoint.metadata,
+                mean : isNumber(datapointMeanValue) ? Math.round(datapointMeanValue!) : undefined,
+                deviation : isNumber(datapointDeviationValue) ? Number(datapointDeviationValue!.toFixed(1)) : undefined,
             }
         }
     });
 
-    const minMean = d3.min(datapointsWithSummaryInfo.map(d => d.info.mean));
-    const maxMean = d3.max(datapointsWithSummaryInfo.map(d => d.info.mean));
-    const meanRange = maxMean - minMean;
-
-
-    const minDeviation = d3.min(datapointsWithSummaryInfo.map(d => d.info.deviation));
-    const maxDeviation = d3.max(datapointsWithSummaryInfo.map(d => d.info.deviation));
-    const deviationRange = maxDeviation - minDeviation;
-
-    //add position to info
-    const datapointsOrderedBySummaryMean = sortAscending(datapointsWithSummaryInfo, v => v.info.mean)
-        .map((d,i) => ({ ...d, info:{ ...d.info, position:i + 1 } }));
+    //add position to info for each datapoint
+    const datapointsPositionedBySummaryMean = sortAscending(datapointsWithMetadata, d => d.metadata.mean)
+        .map((d,i) => ({ 
+            ...d, 
+            metadata:{ 
+                ...d.metadata, 
+                position:i + 1 
+            } 
+        }));
     
-    //update the info object in the ordered datapoints that we will actaully return
-    const datapointsWithSummaryInfoAndPosition = datapointsWithSummaryInfo
+    //update the info object in the ordered datapoints that we will actually return
+    const datapointsWithMetadataAndPosition : PerfectSquareDatapoint[] = datapointsWithMetadata
         .map(d => ({ 
             ...d, 
-            info:datapointsOrderedBySummaryMean.find(datapoint => datapoint.key === d.key).info
+            //can assert existence as both arrays are base off the same array, with no filtering of datapoints
+            metadata:datapointsPositionedBySummaryMean.find(datapoint => datapoint.key === d.key)!.metadata
         }))
         .map(d => ({ 
             ...d, 
-            subtitle: `Mean ${d.info.mean} / Deviation ${d.info.deviation}`
+            subtitle: `Mean ${d.metadata.mean || "N/A"} / Deviation ${d.metadata.deviation || "N/A"}`
         }))
 
+    //calc summary values of the entire set of datapoints    
+    const minMean = d3.min(datapointsWithMetadata, d => d.metadata.mean);
+    const maxMean = d3.max(datapointsWithMetadata, d => d.metadata.mean);
+    const meanRange = minMean && maxMean ? maxMean - minMean : undefined;
+
+    const minDeviation = d3.min(datapointsWithMetadata, d => d.metadata.deviation);
+    const maxDeviation = d3.max(datapointsWithMetadata, d => d.metadata.deviation);
+    const deviationRange = minDeviation && maxDeviation ? maxDeviation - minDeviation : undefined;
+
+    const dataMetadata : DatasetMetadata<MeasureDataSummaryItem> = {
+        mean:{ 
+            min:minMean, max:maxMean, range:meanRange, order:"low-to-high" 
+        },
+        deviation:{ 
+            min:minDeviation, max: maxDeviation, range:deviationRange, order:"high-to-low" 
+        },
+        //position will be used as a default date arrangement if there are dates
+        position:{ 
+            min: 0, max: datapoints.length, range:datapoints.length, order:"low-to-high" 
+        },
+    }
+    
     return {
         ...data,
         measures, 
-        datapoints: datapointsWithSummaryInfoAndPosition,
-        info:{
-            ...data.info,
-            mean:{ min:minMean, max:maxMean, range:meanRange, order:"low-to-high" },
-            deviation:{ min:minDeviation, max: maxDeviation, range:deviationRange, order:"high-to-low" },
-            //position will be used as a default date arrangement if there are dates
-            position:{ min: 0, max: datapoints.length, range:datapoints.length, order:"low-to-high" },
-        }
+        datapoints : datapointsWithMetadataAndPosition,
+        metadata : dataMetadata
     }
 }
 

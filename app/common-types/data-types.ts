@@ -24,7 +24,7 @@ interface ExampleInfo {
 
 //ITEMS FOR DATAPOINTS
 //items for a standard datapoint, that is not formatted for any particular vis
-type optimalValueDescription = "min" | "max";
+type OptimalValue = "min" | "max" | number;
 interface Category {
     key : string,
     title : string,
@@ -48,7 +48,7 @@ interface Measure {
     //as being one of the actual catoegories I htink, then pass in 
     categoryKey : string, // keyof T,
     range : [number, number],
-    optimalValue : optimalValueDescription | number,
+    optimalValue : OptimalValue,
     preInjuryValue : number
 }
 
@@ -66,18 +66,12 @@ interface DatapointCategoryData {
 }
 
 //corresponding items formatted for the perfect square datapoint (eg categories become quadrants)
-type DatasetOrder = ["low-to-high", "high-to-low"];
-interface MeasureDataSummaryItem {
-    min : number,
-    max : number,
-    range : number,
-    order : DatasetOrder
-}
-
-interface PerfectSquareInfo extends ExampleInfo {
-    mean : MeasureDataSummaryItem,
-    deviation : MeasureDataSummaryItem,
-    position : MeasureDataSummaryItem
+type DatasetOrder = "low-to-high" | "high-to-low";
+export interface MeasureDataSummaryItem {
+    min : number | undefined,
+    max : number | undefined,
+    range : number | undefined,
+    order? : DatasetOrder
 }
 
 export interface DatapointQuadrantValue extends DatapointCategoryValue {
@@ -89,6 +83,12 @@ export interface DatapointQuadrantValue extends DatapointCategoryValue {
 
 export interface DatapointQuadrantData extends Category {
     values : DatapointQuadrantValue[]
+}
+
+export interface DatasetMetadata<T> {
+    mean : T | undefined,
+    deviation : T | undefined,
+    position : T | undefined,
 }
 
 //DATAPOINT SUPERCLASSES
@@ -129,25 +129,27 @@ export interface PositionedDatapoint extends Datapoint, DatapointPosition {}
 //(not a subclass of Datapoint as it is a reformatting rather than an extension eg categories become quadrants)
 export interface PerfectSquareDatapoint extends DatapointInfo, DatapointQuadrantsData, DatapointPosition {
     i : number,
+    metadata : DatasetMetadata<number>
 }
 
 //DATA (including all datapoints)
 //standard data, before it has been formatted for any particular vis
-export interface ExampleData {
+interface DataSupportingProperties {
     key : string,
     title : string[],
     desc? : string[],
     info : ExampleInfo,
     measures : Measure[],
     categories : Category[],
-    datapoints : Datapoint[]
 }
 
-//standard data in the format that the perfect square expects
-export interface PerfectSquareData extends ExampleData {
-    measures : Measure[], 
-    datapoints: PositionedDatapoint[],
-    info : PerfectSquareInfo
+export interface ExampleData extends DataSupportingProperties {
+    datapoints : Datapoint[]
+}
+//datapoints in the format that the perfect square expects, along with summary metadata
+export interface PerfectSquareData extends DataSupportingProperties {
+    datapoints: PerfectSquareDatapoint[],
+    metadata : DatasetMetadata<MeasureDataSummaryItem>
 } 
 
 export interface Margin {
