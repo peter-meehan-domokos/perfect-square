@@ -4,14 +4,13 @@ import React, { useEffect, useRef, useMemo, useCallback, useContext } from 'reac
 import * as d3 from 'd3';
 import { PerfectSquareData } from '@/app/common-types/data-types';
 import {  } from '@/app/common-types/function-types';
-import { AppContext } from "@/app/context";
-import { VisualContext } from "../visual/context";
-import { TooltipsContext } from '../visual/SVGVisual/hooks_and_modules/tooltips/context';
-import { SVGDimensionsContext } from '../visual/SVGVisual/container';
-import { ZoomContext } from '../visual/SVGVisual/hooks_and_modules/zoomable-g/page';
+import { VisualContext } from "../../visual/context";
+import { TooltipsContext } from '../../visual/SVGVisual/hooks_and_modules/tooltips/context';
+import { SVGDimensionsContext } from '../../visual/SVGVisual/container';
+import { ZoomContext } from '../../visual/SVGVisual/hooks_and_modules/zoomable-g/page';
 
 import renderCharts from './renderCharts';
-import { SELECT_MEASURE_TOOLTIP, LOADING_TOOLTIP } from "./constants";
+import { SELECT_MEASURE_TOOLTIP, LOADING_TOOLTIP } from "../constants";
 import { ZOOM_AND_ARRANGE_TRANSITION_DURATION, CHART_IN_TRANSITION, CHART_OUT_TRANSITION } from '@/app/constants';
 
 /**
@@ -21,8 +20,7 @@ import { ZOOM_AND_ARRANGE_TRANSITION_DURATION, CHART_IN_TRANSITION, CHART_OUT_TR
  * @returns {ReactElement}  A g which will contain the charts which are rendered in a useEffect.
  */
 
-const usePerfectSquareCharts = ({ containerElement, data, perfectSquare, simulationIsOn }) => {
-  const { visualDataResult:{ data, loading, error } } = useContext(AppContext);
+const usePerfectSquareCharts = (containerElement, data, perfectSquare, simulationIsOn) => {
   const { 
     selectedChartKey, selectedQuadrantIndex, selectedMeasureKey,
     setSelectedChartKey, setSelectedQuadrantIndex, setSelectedMeasureKey,
@@ -94,6 +92,7 @@ const usePerfectSquareCharts = ({ containerElement, data, perfectSquare, simulat
   //update due to arrangeBy changing
   //flag to prevent the zoom useEffect running when sim changes the zoom functions eg isChartOnScreenChecker
   const simulationHasBeenToggledRef = useRef(false);
+  
   useEffect(() => {
     if (!data || !containerElement) { return; }
     if(simulationIsOn){
@@ -139,7 +138,6 @@ const usePerfectSquareCharts = ({ containerElement, data, perfectSquare, simulat
       }, 3000)
     }
   }, [selectedMeasureKey])
-
 
   useEffect(() => {
     //reset flags

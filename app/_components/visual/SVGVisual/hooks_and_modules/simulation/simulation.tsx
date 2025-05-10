@@ -1,9 +1,11 @@
-import { RefObject, useEffect, useRef, useContext } from "react";
+import { RefObject, useEffect, useRef, useContext, useMemo } from "react";
 import * as d3 from 'd3';
+import { PerfectSquareSimulationNodeDatum, PerfectSquareForceSimulation, SimulationData, 
+  ArrangeBy, PerfectSquareDatapoint, DatasetMetadata, MeasureDataSummaryItem,
+Container, SimulationDimensions } from "@/app/common-types/data-types";
 import { VisualContext } from "../../../context";
 import { SVGDimensionsContext } from "../../container";
 import { _simulationIsOn } from "../../../helpers";
-import { SimulationData } from "@/app/common-types/data-types";
 
 //constants
 const COLLISION_FORCE_RADIUS_FACTOR = 1.15;
@@ -33,14 +35,12 @@ export const useSimulation : UseSimulationFn = (containerRef, data) => {
 
   const dimensions = useContext(SVGDimensionsContext);
 
-  const prevArrangeByRef = useRef(null);
-  const simRef = useRef(null);
+  const prevArrangeByRef = useRef<ArrangeBy | null>(null);
   const simIsStartedRef = useRef(false);
   const simTicksInProcessRef = useRef(false);
 
   const simulationIsOn = _simulationIsOn(arrangeBy);
   const simulationWasAlreadyOn = _simulationIsOn(prevArrangeByRef.current);
-  const simulationHasBeenTurnedOnOrOff = simulationIsOn !== simulationWasAlreadyOn;
   //update flag for next time
   prevArrangeByRef.current = arrangeBy;
 
@@ -52,36 +52,43 @@ export const useSimulation : UseSimulationFn = (containerRef, data) => {
     })
   }
 
+  const simRef = useRef<PerfectSquareForceSimulation | null>(null)
+
   //simulation
   useEffect(() => {
     if(!data){ return; }
-    if(!simulationIsOn | !dimensions.container | !dimensions.simulation){ return; }
+    if(!simulationIsOn || !dimensions.container || !dimensions.simulation){ return; }
     const { nodesData, metadata } = data;
+
+    //create the sim with the right forces
     simRef.current = d3.forceSimulation(nodesData);
     applyForces(simRef.current, dimensions.container, dimensions.simulation, arrangeBy, metadata);
 
+    //handle tick events
     simRef.current
       .on("tick", () => {
+        //return;
         if(!simTicksInProcessRef.current){ simTicksInProcessRef.current = true; }
         if(!simIsStartedRef.current){ return; }
+        //@todo - set the anonymous function as ValueFn of the correct type
         d3.select(containerRef.current).selectAll("g.chart")
-          .attr("transform", d => `translate(${d.x}, ${d.y})`)
+        // @ts-ignore
+          .attr("transform", (d : PerfectSquareDatapoint) => `translate(${d.x}, ${d.y})`)
       })
       .on("end", () => { simTicksInProcessRef.current = false; })
+  }, [dimensions.container, dimensions.simulation, arrangeBy, data, simulationIsOn]);
 
-  }, [dimensions.container, dimensions.simulation, arrangeBy, data, simulationIsOn])
-
-  //start/stop sim
   useEffect(() => {
-    if(!data){ return; }
+    if(!simRef.current){ return; }
+    //turn it on or off
     if(!simulationIsOn){
-      simRef.current?.stop();
+      simRef.current.stop();
       simIsStartedRef.current = false;
     }else{
-      simRef.current?.restart();
+      simRef.current.restart();
       simIsStartedRef.current = true;
     }
-  },[simulationIsOn])
+  }, [simulationIsOn])
   
   return { 
     simulationIsOn,
@@ -90,25 +97,32 @@ export const useSimulation : UseSimulationFn = (containerRef, data) => {
 
 };
 
-
 /**
  * @description Calculates and applies forces to the simulation for the required arrangeBy settings 
  *
- * @param {D3ForceSimulation} sim the d3 force simulation object
- * @param {Number} contentsWidth the width of the container, minus the margins (d3 margin convention)
- * @param {Number} contentsHeight the height of the container, minus the margins (d3 margin convention)
- * @param {Number} cellWidth the width of each individual chart
- * @param {Number} cellHeight the height of each individual chart
- * @param {object} arrangeBy contains the arrangement settings, with x, y and colour values potentially
+ * @param {PerfectSquareForceSimulation} sim the d3 force simulation object
+ * @param {Container} containerDimensions the width of the container, minus the margins (d3 margin convention)
+ * @param {SimulationDimensions} simulationDimensions the height of the container, minus the margins (d3 margin convention)
+ * @param {ArrangeBy} arrangeBy contains the arrangement settings, with x, y and colour values potentially
  * @param {Number} nrNodes the number of nodesData/charts to display
- * @param {object} dataInfo metadata about all the nodesData eg mean, deviation
+ * @param {object} dataMetadata metadata about all the nodesData eg mean, deviation
  * 
  */
-function applyForces(sim, containerDimensions, simulationDimensions, arrangeBy, metadata){
+
+function applyForces(
+  //find the type of forcesimulation
+  sim : PerfectSquareForceSimulation,
+  containerDimensions : Container, 
+  simulationDimensions : SimulationDimensions, 
+  arrangeBy : ArrangeBy, 
+  dataMetadata : DatasetMetadata<MeasureDataSummaryItem>
+  ): void {
     const { contentsWidth, contentsHeight } = containerDimensions;
     const { nodeWidth, nodeHeight, nrNodes } = simulationDimensions;
-    //@todo - handle mean or deviation undefined
-    const { mean, deviation } = metadata;
+
+    const { mean, deviation } = dataMetadata;
+    if(!mean || !deviation) { return; }
+    //2nd time called, range of deviation is undefined
     const extraHorizMarginForForce = contentsWidth * EXTRA_HORIZ_MARGIN_FACTOR_FOR_FORCE;
     const extraTopMarginForForce = contentsHeight * EXTRA_TOP_MARGIN_FACTOR_FOR_FORCE;
     const extraBottomMarginForForce = contentsHeight * EXTRA_BOTTOM_MARGIN_FACTOR_FOR_FORCE;
@@ -120,7 +134,7 @@ function applyForces(sim, containerDimensions, simulationDimensions, arrangeBy, 
     sim
       .force("center", d3.forceCenter(contentsWidth / 2, contentsHeight/2).strength(CENTRE_FORCE_STRENGTH))
       .force("collide", d3.forceCollide().radius((nodeWidth/2) * COLLISION_FORCE_RADIUS_FACTOR))
-      .force("x", d3.forceX(d => {
+      .force("x", d3.forceX((d) => {
         //need to centre each chart in its horizspaceperchart ie +(hozspacePerChart - nodeWidth)/2
         const adjuster = extraHorizMarginForForce + (horizSpacePerChart - nodeWidth)/2;
         if(arrangeBy.x === "position" && d.date){
@@ -131,14 +145,16 @@ function applyForces(sim, containerDimensions, simulationDimensions, arrangeBy, 
           return horizSpacePerChart * d.i + adjuster;
         }
         if(arrangeBy.x === "mean"){
-          const proportion = mean.range === 0 ? 0.5 : (d.metadata.mean - mean.min)/mean.range;
+          if(!d.metadata.mean || !mean.min || !mean.range){ return 0; }
+          const proportionOfScreenLength = mean.range === 0 ? 0.5 : (d.metadata.mean - mean.min)/mean.range!;
           //when prop = 1 ie max chart, its off the screen, so need to adjust it back. This way, if prop=0, it will still be at the start of space
-          return (horizSpace - horizSpacePerChart) * proportion + adjuster;
+          return (horizSpace - horizSpacePerChart) * proportionOfScreenLength + adjuster;
         }
         if(arrangeBy.x === "deviation"){
+          if(!d.metadata.deviation || !deviation.min || !deviation.range){ return 0; }
           //invert it by subtracting the proportion from 1 to get prop value
-          const proportion = deviation.range === 0 ? 0.5 : 1 - (d.metadata.deviation - deviation.min)/deviation.range
-          return (horizSpace - horizSpacePerChart) * proportion + adjuster;
+          const proportionOfScreenLength = deviation.range === 0 ? 0.5 : 1 - (d.metadata.deviation - deviation.min)/deviation.range
+          return (horizSpace - horizSpacePerChart) * proportionOfScreenLength + adjuster;
         }
         //default to centre of screen
         return (contentsWidth - nodeWidth)/2;
@@ -151,13 +167,15 @@ function applyForces(sim, containerDimensions, simulationDimensions, arrangeBy, 
         if(arrangeBy.y === "position"){
           return contentsHeight - (d.i + 1) * vertSpacePerChart + adjuster;
         }
-        if(arrangeBy.y === "mean" && mean.range !== 0){
-          const proportion = (d.metadata.mean - mean.min)/mean.range;
-          return contentsHeight - vertSpacePerChart - ((vertSpace - vertSpacePerChart) * proportion) + adjuster;
+        if(arrangeBy.y === "mean"){
+          if(!d.metadata.mean || !mean.min || !mean.range){ return 0; }
+          const proportionOfScreenHeight = (d.metadata.mean - mean.min)/mean.range;
+          return contentsHeight - vertSpacePerChart - ((vertSpace - vertSpacePerChart) * proportionOfScreenHeight) + adjuster;
         }
-        if(arrangeBy.y === "deviation" && deviation.range !== 0){
-          const proportion = 1 - (d.metadata.deviation - deviation.min)/deviation.range;
-          return contentsHeight - vertSpacePerChart - ((vertSpace - vertSpacePerChart) * proportion) + adjuster;
+        if(arrangeBy.y === "deviation"){
+          if(!d.metadata.deviation || !deviation.min || !deviation.range){ return 0; }
+          const proportionOfScreenHeight = 1 - (d.metadata.deviation - deviation.min)/deviation.range;
+          return contentsHeight - vertSpacePerChart - ((vertSpace - vertSpacePerChart) * proportionOfScreenHeight) + adjuster;
         }
 
         //default to centre of screen

@@ -1,8 +1,7 @@
 /* eslint react-hooks/exhaustive-deps: 0 */
 'use client'
 import React, { useEffect, useRef, useMemo, useCallback, useContext } from 'react'
-import * as d3 from 'd3';
-import { PositionedDatapoint, PerfectSquareData, SimulationData } from '@/app/common-types/data-types';
+import { PerfectSquareData, SimulationData } from '@/app/common-types/data-types';
 import {  } from '@/app/common-types/function-types';
 import { AppContext } from "@/app/context";
 import { VisualContext } from "../visual/context";
@@ -11,11 +10,10 @@ import { SVGDimensionsContext } from '../visual/SVGVisual/container';
 import { ZoomContext } from '../visual/SVGVisual/hooks_and_modules/zoomable-g/page';
 import perfectSquareLayout from './hooks_and_modules/svgComponents/perfectSquare/layout';
 import perfectSquareComponent from "./hooks_and_modules/svgComponents/perfectSquare/component";
-import renderCharts from './hooks_and_modules/renderCharts';
-import { SELECT_MEASURE_TOOLTIP, LOADING_TOOLTIP } from "./constants";
-import { ZOOM_AND_ARRANGE_TRANSITION_DURATION, CHART_IN_TRANSITION, CHART_OUT_TRANSITION } from '@/app/constants';
+import { LOADING_TOOLTIP } from "./constants";
+import { CHART_OUT_TRANSITION } from '@/app/constants';
 import { useSimulation } from '../visual/SVGVisual/hooks_and_modules/simulation/simulation';
-import { usePerfectSquareCharts } from "./hooks_and_modules/usePerfectSquareCharts";
+import usePerfectSquareCharts from "./hooks_and_modules/usePerfectSquareCharts";
 
 /**
  * @description  Receives the data and other state, passes it through functions to prepare teh data, 

@@ -4,7 +4,7 @@ import * as d3 from 'd3';
 import { ZoomTransform } from "d3-zoom";
 import { DEFAULT_DISPLAY_SETTINGS } from "../perfect-square/constants";
 import { HandlerFnWithNoArgs } from "@/app/common-types/function-types";
-import { ArrangeBy, Transition } from "@/app/common-types/data-types";
+import { DisplaySettings, ArrangeBy, Transition } from "@/app/common-types/data-types";
 
 type ExternallyRequiredZoomTransformObject = {
     requiredTransform: ZoomTransform,
@@ -31,10 +31,6 @@ type ExternalZoomContext = {
 type HeaderContext = {
     headerExtended:boolean,
     setHeaderExtended:Dispatch<SetStateAction<boolean>>
-}
-
-export type DisplaySettings = {
-    arrangeBy: ArrangeBy
 }
 
 type DisplayContext = {

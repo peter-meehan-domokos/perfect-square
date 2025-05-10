@@ -1,5 +1,5 @@
 
-import { isNumber } from '../../../../_helpers/dataHelpers';
+import { isNumber } from '@/app/_helpers/dataHelpers';
 import { immutableReverse } from '@/app/_helpers/arrayHelpers';
 
 export function quadrantsContainerTransform(selection, width, height, selectedQuadrantIndex){

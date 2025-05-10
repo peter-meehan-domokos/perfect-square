@@ -143,11 +143,11 @@ import { percentageScoreConverter, isNumber } from '../../../../../_helpers/data
     //calc summary values of the entire set of datapoints    
     const minMean = d3.min(datapointsWithMetadata, d => d.metadata.mean);
     const maxMean = d3.max(datapointsWithMetadata, d => d.metadata.mean);
-    const meanRange = minMean && maxMean ? maxMean - minMean : undefined;
+    const meanRange = isNumber(minMean) && isNumber(maxMean) ? maxMean! - minMean! : undefined;
 
     const minDeviation = d3.min(datapointsWithMetadata, d => d.metadata.deviation);
     const maxDeviation = d3.max(datapointsWithMetadata, d => d.metadata.deviation);
-    const deviationRange = minDeviation && maxDeviation ? maxDeviation - minDeviation : undefined;
+    const deviationRange = isNumber(minDeviation) && isNumber(maxDeviation) ? maxDeviation! - minDeviation! : undefined;
 
     const dataMetadata : DatasetMetadata<MeasureDataSummaryItem> = {
         mean:{ 

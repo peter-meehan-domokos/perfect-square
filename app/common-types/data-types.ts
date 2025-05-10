@@ -1,5 +1,5 @@
-import { TransformFn, SecondOrderTransformFn } from "./function-types";
-import { D3ZoomEvent, ZoomTransform } from "d3-zoom";
+import { TransformFn } from "./function-types";
+import { Simulation } from "d3-force";
 
 export interface QueryResult <T> {
     data : T | null,
@@ -96,6 +96,7 @@ export interface DatasetMetadata<T> {
 export interface DatapointInfo {
     key : string,
     title : string,
+    date? : Date
 }
 
 //the data for each category for a given datapoint
@@ -204,10 +205,14 @@ export interface SimulationDimensions {
     nrNodes : number
 }
 
+export interface PerfectSquareSimulationNodeDatum extends d3.SimulationNodeDatum, PerfectSquareDatapoint {}
+
 export interface SimulationData {
-    nodesData : PerfectSquareDatapoint[],
+    nodesData : PerfectSquareSimulationNodeDatum[],
     metadata : DatasetMetadata<MeasureDataSummaryItem>
 }
+
+export interface PerfectSquareForceSimulation extends Simulation<PerfectSquareSimulationNodeDatum, undefined>{}
 
 export interface Tooltip {
     //tagged union
@@ -249,4 +254,8 @@ export interface ArrangeBy {
     x: ArrangeByOption,
     y : ArrangeByOption,
     colour : ArrangeByOption
+}
+
+export interface DisplaySettings {
+    arrangeBy: ArrangeBy
 }

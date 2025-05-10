@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { remove, fadeIn } from '../../../../_helpers/domHelpers';
+import { remove, fadeIn } from '@/app/_helpers/domHelpers';
 import { chartPathD, quadrantPathD, quadrantTransform } from './helpers';
 import { FADE_IN_OUT_DURATION } from '@/app/constants';
 
@@ -173,7 +173,7 @@ export function quadrantsSummary(selection, width, height, settings={}){
                         .attr("stroke-width", _scaleValue(0.08))
                         .attr("stroke", _textColour(summaryD, data.key))
                         .attr("fill", _textColour(summaryD, data.key))
-                        .text(`${summaryD.info.mean}%`);
+                        .text(`${summaryD.metadata.mean}%`);
                 })
 
             summaryG.exit().call(remove); 

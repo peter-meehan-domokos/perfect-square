@@ -22,7 +22,7 @@
         "@/*": ["./*"]
       }
     },
-    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/page.ts", "app/_components/main-content/home/page.tsx", "app/_components/visual/SVGVisual/container.js", "app/_components/perfect-square/helpers.ts", "app/_components/perfect-square/hooks_and_modules/svgComponents/perfectSquare/layout.tsx", "app/_helpers/dataHelpers.ts", "app/_components/visual/SVGVisual/hooks_and_modules/simulation/simulation.js"],
+    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/page.ts", "app/_components/main-content/home/page.tsx", "app/_components/visual/SVGVisual/container.js", "app/_components/perfect-square/helpers.ts", "app/_components/perfect-square/hooks_and_modules/svgComponents/perfectSquare/layout.tsx", "app/_helpers/dataHelpers.ts", "app/_components/visual/SVGVisual/hooks_and_modules/simulation/simulation.js", "app/_components/perfect-square/hooks_and_modules/renderCharts.js"],
     "exclude": ["node_modules"]
   }
   
