@@ -1,10 +1,11 @@
+//@ts-nocheck
 'use client'
-import { RefObject, useState, useEffect, useRef, useCallback, useContext, useMemo } from "react";
+import { RefObject, useState, useEffect, useCallback, useContext, useMemo } from "react";
 import * as d3 from 'd3';
 import { ZoomTransform, D3ZoomEvent, ZoomBehavior, ZoomedElementBaseType } from "d3-zoom";
 import { ZoomContext, ZoomingInProgress } from "./page";
 import { ContainerWithDatapointPositioning, PositionedDatapoint, Transition } from '@/app/common-types/data-types';
-import { HandlerFn, HandlerFnWithNoArgs, ZoomCallbacks } from "@/app/common-types/function-types";
+import { HandlerFnWithNoArgs, ZoomCallbacks } from "@/app/common-types/function-types";
 import { VisualContext } from "../../../context";
 import { Container } from '@/app/common-types/data-types';
 import { isChartOnScreenCheckerFunc, calcZoomTransformFunc, setupZoom } from "./helpers";
@@ -57,7 +58,7 @@ export const useZoom : UseZoomFn = (containerRef, viewRef, container, chart, cal
  
     //setupZoom(d3ZoomRef.current, container, chart, {
     setupZoom(zoom, container, chart, {
-      onStart:callbacks.onZoomStart ? callbacks.onZoomStart : () => {},
+      onStart:callbacks.onStart ? callbacks.onStart : () => {},
       onZoom:(e : D3ZoomEvent<SVGElement, PositionedDatapoint>) => {
         //@todo - find out why ZoomTransform obejct is deemed not assignable, when it is
         d3.select(viewRef.current).attr("transform", e.transform);

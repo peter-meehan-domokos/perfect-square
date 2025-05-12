@@ -56,7 +56,7 @@ interface Measure {
 interface DatapointCategoryValue {
     key : string,
     measureKey : string,
-    value : number | null
+    value : number | null //value is raw here, so will only be null if not a number
 }
 
 interface DatapointCategoryData {
@@ -74,8 +74,10 @@ export interface MeasureDataSummaryItem {
     order? : DatasetOrder
 }
 
-export interface DatapointQuadrantValue extends DatapointCategoryValue {
-    rawValue : number | null,
+export interface DatapointQuadrantValue extends Omit<DatapointCategoryValue, "value"> {
+    //at this point, value is calculated not raw ie has been processed and will be a number or undefined
+    value : number | undefined, 
+    rawValue : number | null //raw values are always null if not a number
     name : string, //@todo - why are we changing from title to name, remove this
     label : string,
     calcBarHeight : (maxHeight : number) => number
@@ -185,10 +187,10 @@ export interface CellDimensions {
 }
 
 export interface GridUtilityFunctions {
-    _cellX : TransformFn<number>,
-    _cellY : TransformFn<number>,
-    _rowNr : TransformFn<number>,
-    _colNr : TransformFn<number>
+    _cellX : TransformFn<number, number>,
+    _cellY : TransformFn<number, number>,
+    _rowNr : TransformFn<number, number>,
+    _colNr : TransformFn<number, number>
 }
 
 export interface Grid extends GridStructure, CellDimensions, GridUtilityFunctions { };
@@ -259,3 +261,7 @@ export interface ArrangeBy {
 export interface DisplaySettings {
     arrangeBy: ArrangeBy
 }
+
+export type LevelOfDetail = 1 | 2 | 3;
+
+export type LiberalNumber = number | null | undefined | string;

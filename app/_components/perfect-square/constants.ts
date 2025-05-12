@@ -1,5 +1,4 @@
-import { Margin, Tooltip } from "@/app/common-types/data-types";
-import { DisplaySettings } from "../visual/context";
+import { Margin, Tooltip, DisplaySettings, LevelOfDetail } from "@/app/common-types/data-types";
 
 export const DEFAULT_CONTAINER_MARGIN : Margin = { left:10, right:10, top:10, bottom:10 };
 export const DEFAULT_CHART_MARGIN : Margin = { left:0, right:0, top:0, bottom:0 };
@@ -7,7 +6,7 @@ export function CALC_CELL_MARGIN(width : number, height : number): Margin {
     return { left:width * 0.1, right:width * 0.1, top:height * 0.1, bottom:height * 0.1 };
 }
 
-export const LEVELS_OF_DETAIL = [1,2,3];
+export const LEVELS_OF_DETAIL : LevelOfDetail[] = [1,2,3];
 //these values base_sizes (derived from the chart width and height essentially)
 export const LEVELS_OF_DETAIL_THRESHOLDS = [90, 220]; //note - level 2 below 90 has poor performance as too many charts
 

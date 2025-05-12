@@ -1,3 +1,4 @@
+//@ts-nocheck
 'use client'
 import { ReactElement, useRef, useContext, useCallback } from 'react';
 import { AppContext } from '@/app/context';
@@ -24,7 +25,7 @@ const playButtonStyle = {
  */
 const Intro : React.FC = () => {
     const { setIntroIsDisplayed } = useContext(AppContext);
-    const sliderRef = useRef<HTMLElement | null> (null);
+    const sliderRef = useRef<Slider | null> (null);
     const settings = {
         dots: true,
         infinite: true,

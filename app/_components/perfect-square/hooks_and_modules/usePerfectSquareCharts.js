@@ -2,8 +2,6 @@
 'use client'
 import React, { useEffect, useRef, useMemo, useCallback, useContext } from 'react'
 import * as d3 from 'd3';
-import { PerfectSquareData } from '@/app/common-types/data-types';
-import {  } from '@/app/common-types/function-types';
 import { VisualContext } from "../../visual/context";
 import { TooltipsContext } from '../../visual/SVGVisual/hooks_and_modules/tooltips/context';
 import { SVGDimensionsContext } from '../../visual/SVGVisual/container';

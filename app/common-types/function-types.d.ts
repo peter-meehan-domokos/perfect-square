@@ -38,13 +38,24 @@ export interface FunctionalComponentWithNoProps {
     (): ReactElement;
 }
 
-export interface TransformFn<T> {
-    (args : T):T;
+export interface TransformFn<T, U> {
+    (args : T):U;
 }
 
-export interface SecondOrderTransformFn<T> {
-    (t : T):TransformFn<T>;
+export interface SecondOrderTransformFn<T, U> {
+    (t : T):TransformFn<T, U>;
 }
+
+/*
+export interface TransformFnWithOptions<T,U> {
+    (t : T, u : U): T
+}
+*/
+
+export type TransformerFactory<T, U, Options> = (
+    targetValue : T, 
+    options : Options
+) => TransformFn<T, U>
 
 export interface AccessorFn<T , R> {
     (t : T):R
@@ -54,20 +65,17 @@ export interface TransformWithAccessorFn<T, Value> {
     (t : T, accessor : AccessorFn<T, Value>):T;
 }
 
-/*
-export interface ArrayManipulatorFn<T> {
-(arr: T[]):T[]
+export interface ConvertToPercentageOptions {
+    dps? : number,
+    defaultValue? : number,
+    customRange? : [number, number],
+    allowGreaterThan100? : boolean,
+    allowLessThanZero? : boolean,
+    useRangeAsBound? : boolean
 }
-*/
-
-/*
-export interface ArrayManipulatorWithAccessorFn<T, Value> {
-    (arr: T[], accessor : AccessorFn<T, Value>):T[]
-}
-*/
 
 export interface ZoomCallbacks {
-    onZoomStart? : HandlerFn<D3ZoomEvent<SVGElement, PositionedDatapoint>> | undefined,
+    onStart? : HandlerFn<D3ZoomEvent<SVGElement, PositionedDatapoint>> | undefined,
     onZoom? : HandlerFn<D3ZoomEvent<SVGSVGElement, PositionedDatapoint>> | undefined,
-    onZoomEnd? : HandlerFn<D3ZoomEvent<SVGSVGElement, PositionedDatapoint>> | undefined,
+    onEnd? : HandlerFn<D3ZoomEvent<SVGSVGElement, PositionedDatapoint>> | undefined,
 }

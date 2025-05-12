@@ -1,8 +1,13 @@
-import { Container, Margin } from '@/app/common-types/data-types';
+import { Container, Margin, LevelOfDetail } from '@/app/common-types/data-types';
 import * as d3 from 'd3';
 import { LEVELS_OF_DETAIL, LEVELS_OF_DETAIL_THRESHOLDS, DEFAULT_CHART_MARGIN } from "./constants";
 
-export const calcLevelOfDetailFromBase = (baseSize) => (k, disabledLevels=[]) => {
+export const calcLevelOfDetailFromBase = (
+    baseSize : number
+    ) => (
+        k : number, 
+        disabledLevels : LevelOfDetail[] =[]
+        ):LevelOfDetail => {
     const enabledLevels = LEVELS_OF_DETAIL.filter(l => !disabledLevels.includes(l));
     const nrLevels = enabledLevels.length;
     //@todo - add a level 4 threshold and shift them all up 1, with level 1 just a rect inside a rect
@@ -12,10 +17,17 @@ export const calcLevelOfDetailFromBase = (baseSize) => (k, disabledLevels=[]) =>
 };
 
 //returns levels that are inbetween both (note levels start at 1, not 0)
-export const getDisabledLevelsForZoom = (initLevel, targLevel) =>
+export const getDisabledLevelsForZoom = (
+    initLevel : LevelOfDetail, 
+    targLevel : LevelOfDetail
+    ):LevelOfDetail[] =>
     initLevel && targLevel ? LEVELS_OF_DETAIL.slice(initLevel - 1, targLevel) : [];
 
-export const applyMargin = (width : number, height : number, margin : Margin):Container => {
+export const applyMargin = (
+    width : number, 
+    height : number, 
+    margin : Margin
+    ):Container => {
     return {
       width,
       height,

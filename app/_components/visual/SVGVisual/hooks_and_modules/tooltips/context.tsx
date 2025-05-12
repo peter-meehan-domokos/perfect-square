@@ -1,7 +1,6 @@
 'use client'
 import React, { PropsWithChildren, Dispatch, SetStateAction, useState, createContext } from "react";
 import { Tooltip } from "@/app/common-types/data-types";
-import {  } from "@/app/common-types/function-types";
 
 type Tooltips = Array<Tooltip>;
 type TooltipsContext = {

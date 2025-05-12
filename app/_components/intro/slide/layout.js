@@ -6,7 +6,7 @@ import Footer from './footer/page';
  * @description Renders a wrapper for a slide child, adding controls and a footer (if applicable)
  * 
  * @param {string} containerClassNames enables to parent component to place addiotnal classnames on the container
- * @param {string} controlButtons the buttons that should be displayed for this particular slide eg Next Slide
+ * @param {object} controlButtons the buttons that should be displayed for this particular slide eg Next Slide
  * @param {string} footer the content for a footer if required for the slide, expects either an image, text or both
  * @param {ReactElement} children the slide that this wrapper wraps
  * 

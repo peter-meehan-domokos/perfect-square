@@ -193,7 +193,7 @@ export default function perfectSquare() {
     function updateColourAccessors(){
         _chartColourWhenNotGreyedOut = d => {
             const summaryMeasureKey = arrangeBy.colour; //value, deviation or position
-            if(!summaryMeasureKey || !metadata.data) { return BLUE; }
+            if(!summaryMeasureKey || !metadata[summaryMeasureKey] ) { return BLUE; }
             const { min, max, range } = metadata[summaryMeasureKey] 
             const value = d.metadata[summaryMeasureKey];
             const valueAsProportion = (value - min)/range;
@@ -313,7 +313,7 @@ export default function perfectSquare() {
          * @returns {D3SelectionObject} the same selection is returned, as part of d3s call method, to support chaining
          */
         function update(selection){
-            selection.each(function(chartData){
+            selection.each(function(chartData, i){
                 const container = d3.select(this);
                 //flags & values
                 const anotherChartIsSelected = selectedChartKey && selectedChartKey !== chartData.key ? true : false;

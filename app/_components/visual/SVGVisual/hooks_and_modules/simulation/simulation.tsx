@@ -59,9 +59,10 @@ export const useSimulation : UseSimulationFn = (containerRef, data) => {
     if(!data){ return; }
     if(!simulationIsOn || !dimensions.container || !dimensions.simulation){ return; }
     const { nodesData, metadata } = data;
+    //console.log("simue")
 
     //create the sim with the right forces
-    simRef.current = d3.forceSimulation(nodesData);
+    simRef.current = d3.forceSimulation(nodesData).stop();
     applyForces(simRef.current, dimensions.container, dimensions.simulation, arrangeBy, metadata);
 
     //handle tick events
@@ -76,7 +77,9 @@ export const useSimulation : UseSimulationFn = (containerRef, data) => {
           .attr("transform", (d : PerfectSquareDatapoint) => `translate(${d.x}, ${d.y})`)
       })
       .on("end", () => { simTicksInProcessRef.current = false; })
-  }, [dimensions.container, dimensions.simulation, arrangeBy, data, simulationIsOn]);
+  //@todo - data on causes sim to run again when zoom changes. find a better design.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dimensions.container, dimensions.simulation, arrangeBy, /*data,*/ simulationIsOn]);
 
   useEffect(() => {
     if(!simRef.current){ return; }
@@ -145,21 +148,26 @@ function applyForces(
           return horizSpacePerChart * d.i + adjuster;
         }
         if(arrangeBy.x === "mean"){
-          if(!d.metadata.mean || !mean.min || !mean.range){ return 0; }
+          //@todo - replace guards with call to isNumber and assert types after that
+          if(typeof d.metadata.mean !== "number" || typeof mean.min !== "number" || typeof mean.range !== "number"){ return 0; }
+          if(isNaN(d.metadata.mean) || isNaN(mean.min) || isNaN(mean.range)){ return 0; }
+
           const proportionOfScreenLength = mean.range === 0 ? 0.5 : (d.metadata.mean - mean.min)/mean.range!;
           //when prop = 1 ie max chart, its off the screen, so need to adjust it back. This way, if prop=0, it will still be at the start of space
           return (horizSpace - horizSpacePerChart) * proportionOfScreenLength + adjuster;
         }
         if(arrangeBy.x === "deviation"){
-          if(!d.metadata.deviation || !deviation.min || !deviation.range){ return 0; }
+          //@todo - replace guards with call to isNumber and assert types after that
+          if(typeof d.metadata.deviation !== "number" || typeof deviation.min !== "number" || typeof deviation.range !== "number"){ return 0; }
+          if(isNaN(d.metadata.deviation) || isNaN(deviation.min) || isNaN(deviation.range)){ return 0; }
           //invert it by subtracting the proportion from 1 to get prop value
-          const proportionOfScreenLength = deviation.range === 0 ? 0.5 : 1 - (d.metadata.deviation - deviation.min)/deviation.range
+          const proportionOfScreenLength = deviation.range === 0 ? 0.5 : 1 - (d.metadata.deviation - deviation.min)/deviation.range;
           return (horizSpace - horizSpacePerChart) * proportionOfScreenLength + adjuster;
         }
         //default to centre of screen
         return (contentsWidth - nodeWidth)/2;
       })) 
-      .force("y", d3.forceY(d => {
+      .force("y", d3.forceY((d) => {
         const adjuster = (vertSpacePerChart - nodeHeight)/2 - extraBottomMarginForForce;
         if(arrangeBy.y === "position" && d.date){
           //@todo - implement this similar to mean and deviation (and can just replace all 3 with d3 scales)
@@ -168,12 +176,18 @@ function applyForces(
           return contentsHeight - (d.i + 1) * vertSpacePerChart + adjuster;
         }
         if(arrangeBy.y === "mean"){
-          if(!d.metadata.mean || !mean.min || !mean.range){ return 0; }
+          //@todo - replace guards with call to isNumber and assert types after that
+          if(typeof d.metadata.mean !== "number" || typeof mean.min !== "number" || typeof mean.range !== "number"){ return 0; }
+          if(isNaN(d.metadata.mean) || isNaN(mean.min) || isNaN(mean.range)){ return 0; }
+
           const proportionOfScreenHeight = (d.metadata.mean - mean.min)/mean.range;
           return contentsHeight - vertSpacePerChart - ((vertSpace - vertSpacePerChart) * proportionOfScreenHeight) + adjuster;
         }
         if(arrangeBy.y === "deviation"){
-          if(!d.metadata.deviation || !deviation.min || !deviation.range){ return 0; }
+          //@todo - replace guards with call to isNumber and assert types after that
+          if(typeof d.metadata.deviation !== "number" || typeof deviation.min !== "number" || typeof deviation.range !== "number"){ return 0; }
+          if(isNaN(d.metadata.deviation) || isNaN(deviation.min) || isNaN(deviation.range)){ return 0; }
+
           const proportionOfScreenHeight = 1 - (d.metadata.deviation - deviation.min)/deviation.range;
           return contentsHeight - vertSpacePerChart - ((vertSpace - vertSpacePerChart) * proportionOfScreenHeight) + adjuster;
         }

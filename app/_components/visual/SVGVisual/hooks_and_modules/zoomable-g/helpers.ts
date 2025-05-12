@@ -1,5 +1,6 @@
 import { Container, ContainerWithDatapointPositioning, Margin, PositionedDatapoint } from '@/app/common-types/data-types';
-import { ZoomTransform } from "d3-zoom";
+import { ZoomCallbacks } from '@/app/common-types/function-types';
+import { ZoomTransform, ZoomBehavior, ZoomedElementBaseType } from "d3-zoom";
 import * as d3 from 'd3';
 
   /**
@@ -105,20 +106,28 @@ import * as d3 from 'd3';
  * @param {object} options the optional event handlers to be attached
  * 
  */
-export function setupZoom(zoom, container, chart, options={}){
-  const { onStart=()=>{}, onZoom=()=>{}, onEnd=()=>{} } = options;
-  if(chart.width === 0 || chart.height === 0){ return; }
-  const { contentsWidth, contentsHeight } = container;
+export function setupZoom(
+  zoom : ZoomBehavior<ZoomedElementBaseType, PositionedDatapoint>, 
+  container : Container, 
+  chartContainer : Container, 
+  callbacks :ZoomCallbacks = {}
+  ):void {
+      //check denominator is non-zero
+      if(chartContainer.width === 0 || chartContainer.height === 0){ return; }
 
-  //we allow user to zoom into margin, as more immersive (ie no artifical boundary)
-  const kMax = d3.max([contentsWidth/chart.width, contentsHeight/chart.height]);
-  zoom
-    .scaleExtent([1, kMax])
-    //@todo - make this contentsWidth and height, and shoft zoomG too by the margin
-    .translateExtent([[0, 0], [contentsWidth, contentsHeight]])
-    .on("start", onStart)
-    .on("zoom", onZoom)
-    .on("end", onEnd);
+      const { onStart = () => {}, onZoom = () => {}, onEnd = () => {} } = callbacks;
+      const { contentsWidth, contentsHeight } = container;
+
+      //we allow user to zoom into margin, as more immersive (ie no artifical boundary)
+      //can assert as we have checked non-zero denominators and know we have all 4 numbers
+      const kMax = d3.max([contentsWidth/chartContainer.width, contentsHeight/chartContainer.height])!;
+      zoom
+        .scaleExtent([1, kMax])
+        //@todo - make this contentsWidth and height, and shoft zoomG too by the margin
+        .translateExtent([[0, 0], [contentsWidth, contentsHeight]])
+        .on("start", onStart)
+        .on("zoom", onZoom)
+        .on("end", onEnd);
 }
 
 

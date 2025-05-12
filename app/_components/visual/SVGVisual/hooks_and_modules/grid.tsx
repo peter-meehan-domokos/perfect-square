@@ -3,8 +3,8 @@ import { CALC_CELL_MARGIN } from "../../../perfect-square/constants";
 import { TransformFn, SecondOrderTransformFn } from "@/app/common-types/function-types";
 import { GridStructure, Grid, CellDimensions } from "@/app/common-types/data-types";
 
-const _cellXCalculator : SecondOrderTransformFn<number> = (cellWidth) => (colNr) => colNr * cellWidth;
-const _cellYCalculator : SecondOrderTransformFn<number> = (cellHeight) => (rowNr) => rowNr * cellHeight;
+const _cellXCalculator : SecondOrderTransformFn<number, number> = (cellWidth) => (colNr) => colNr * cellWidth;
+const _cellYCalculator : SecondOrderTransformFn<number, number> = (cellHeight) => (rowNr) => rowNr * cellHeight;
 
 /**
  * @description A function that calculates the dimensions of grid that will havw the optimal aspect-ratio for
@@ -21,8 +21,8 @@ const calcGrid = (width : number, height : number, nrCells = 1): Grid => {
     //utility functions
     const _cellX = _cellXCalculator(cellDimensions.cellWidth);
     const _cellY = _cellYCalculator(cellDimensions.cellHeight);
-    const _rowNr : TransformFn<number> = cellIndex => Math.floor(cellIndex / structure.nrCols);
-    const _colNr : TransformFn<number> = cellIndex => cellIndex % structure.nrCols;
+    const _rowNr : TransformFn<number, number> = cellIndex => Math.floor(cellIndex / structure.nrCols);
+    const _colNr : TransformFn<number, number> = cellIndex => cellIndex % structure.nrCols;
   
   return { 
     //GridStructure type

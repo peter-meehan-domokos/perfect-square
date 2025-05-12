@@ -1,11 +1,11 @@
 import { ExampleData, PerfectSquareData, Grid, DatapointQuadrantValue, 
     PerfectSquareDatapoint, DatapointQuadrantData, 
-    DatasetMetadata, MeasureDataSummaryItem
+    DatasetMetadata, MeasureDataSummaryItem, LiberalNumber
 } from '@/app/common-types/data-types';
-import { TransformFn, SecondOrderTransformFn } from '@/app/common-types/function-types';
+import { TransformFn } from '@/app/common-types/function-types';
 import * as d3 from 'd3';
 import { sortAscending, sortDescending } from '../../../../../_helpers/arrayHelpers';
-import { percentageScoreConverter, isNumber } from '../../../../../_helpers/dataHelpers';
+import { isNumber, percentageScoreConverterFactory } from '../../../../../_helpers/dataHelpers';
 
 /**
  * @description converts the data it receives into the format expected by the perfectSquareComponent (d3 layout pattern),
@@ -36,8 +36,9 @@ import { percentageScoreConverter, isNumber } from '../../../../../_helpers/data
                     const measure = measures.find(m => m.key === v.measureKey)!;
                     const { preInjuryValue, range, name="", label="" } = measure;
                     //can also assert non-null value due to second filter above
-                    const convertToPC : TransformFn<number> = percentageScoreConverter(preInjuryValue, { range, useRangeAsBound:true });
-                    const value = v.value ? convertToPC(v.value) : null;
+                    const convertToPC : TransformFn<LiberalNumber, number | undefined> = 
+                        percentageScoreConverterFactory(preInjuryValue, { customRange:range, useRangeAsBound:true });
+                    const value = convertToPC(v.value);
                     return {
                         ...v,
                         rawValue:v.value,

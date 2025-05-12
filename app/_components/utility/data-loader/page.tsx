@@ -3,15 +3,6 @@
 import react, { ReactNode, useEffect } from "react";
 import { useFetch } from '@/app/_api-requests/fetch-hooks';
 import { FunctionalComponentWithNoProps, HandlerFn, QueryResultHandlerFn, Noop } from "@/app/common-types/function-types";
-import { Examples } from "@/app/common-types/data-types";
-
-/*
-type ExamplesResponseResultWithExtractedData = {
-  data:Examples | null,
-  error: Error | null,
-  loading: boolean | null
-}
-*/
 
 /**
  * @description A wrapper that fetches data using a given query, renders a loading fallback if supplied, and saves the data
@@ -27,11 +18,10 @@ type ExamplesResponseResultWithExtractedData = {
  * 
  */
 
-
 function DataLoader<T> (props: { 
   query : string, 
   save : QueryResultHandlerFn<T>,
-  extractData : (data:any) => T,
+  extractData : (data:any) => T, //@todo - replace any
   successCallback? : HandlerFn<T>,
   loadingFallback? : FunctionalComponentWithNoProps | null,
   children  : ReactNode

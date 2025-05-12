@@ -1,6 +1,5 @@
 'use client'
 import { ReactElement, useContext } from 'react';
-import { Grid } from "@/app/common-types/data-types";
 import { ZoomCallbacks } from "@/app/common-types/function-types";
 import { VisualContext } from "../context";
 import SVGContainer from './container';
@@ -22,7 +21,7 @@ const SVGVisual : React.FC<SVGVisualProps> = ({ render }) => {
   const { setSelectedChartKey, setZoomTransform } = useContext(VisualContext);
   
   const zoomCallbacks : ZoomCallbacks = {
-    onZoomStart : () => { setSelectedChartKey(""); },
+    onStart : () => { setSelectedChartKey(""); },
     onZoom : (e) => setZoomTransform(e.transform)
   }
   return (

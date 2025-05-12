@@ -19,7 +19,6 @@ type ExamplesWrapper = {
   examples:Examples
 }
 
-//<DataLoader<GetExamplesResponseType>
 /**
  * @description Renders Home, wrapped in a DataLoader to get the examples for the menu
  * 
