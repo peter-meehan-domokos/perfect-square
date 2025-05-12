@@ -38,7 +38,7 @@ export const useFetch = (query) => {
       }
     };
     fetchData();
-  }, [stringifiedQuery, data]);
+  }, [stringifiedQuery, data, loading]);
 
   return { data:data[stringifiedQuery] || null, loading, error };
 };
