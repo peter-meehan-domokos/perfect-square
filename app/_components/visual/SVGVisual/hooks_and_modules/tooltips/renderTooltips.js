@@ -25,7 +25,7 @@ export default function renderTooltips(data, tooltip, width, height){
 
     const tooltipsData = data.map(d => ({
         ...d,
-        enterTransitionType:d.area === "header" ? "slideFromTop" : "fadeIn",
+        enterTransitionType:d.type === "header" ? "slideFromTop" : "fadeIn",
         x:d.position === "top-right" ? width - headerTooltipWidth : (width - chartsViewboxTooltipWidth)/2,
         y:d.position === "top-right" ? 0 : (d.position === "top" ? 20 : height - 20 - chartsViewboxTooltipHeight),
         width:d.type === "header" ? headerTooltipWidth : chartsViewboxTooltipWidth,

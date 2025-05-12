@@ -1,6 +1,6 @@
 import * as d3 from 'd3';
-import { remove } from '../../../../../_helpers/domHelpers';
-import textWrapComponent from '../../../../perfect-square/svgComponents/textWrap/component';
+import { remove } from "../../../../../_helpers/domHelpers";
+import textWrapComponent from "@/app/_components/perfect-square/hooks_and_modules/svgComponents/textWrap/component";
 
 const TOOLTIP_OPACITY = 0.85;
 
@@ -82,9 +82,9 @@ export default function tooltip() {
         updateDimns();
 
         selection.each(function (data,i) {
-            const componentEnter = d3.select(this).selectAll("*").empty();
-            if(componentEnter){ init(this); }
-            update(this, data, componentEnter);
+            const componentIsEntering = d3.select(this).selectAll("*").empty();
+            if(componentIsEntering){ init(this); }
+            update(this, data, componentIsEntering);
         })
 
         function init(containerElement){
@@ -123,14 +123,14 @@ export default function tooltip() {
 
         }
 
-        function update(containerElement, data, componentEnter, options={}){
+        function update(containerElement, data, componentIsEntering, options={}){
             const width = _width ? _width(data) : fixedWidth;
             const height = _height ? _height(data) : fixedHeight;
             const contentsWidth = _contentsWidth ? _contentsWidth(data) : fixedContentsWidth;
             const contentsHeight = _contentsHeight ? _contentsHeight(data) : fixedContentsHeight;
             const styles = _styles ? _styles(data) : fixedStyles;
 
-            if(!componentEnter){
+            if(!componentIsEntering){
                 d3.select('clipPath#tooltip-clip').select('rect')
                 .attr('width', width)
                 .attr('height', height)

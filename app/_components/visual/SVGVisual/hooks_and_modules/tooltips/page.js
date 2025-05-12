@@ -17,7 +17,7 @@ const Tooltips = () => {
     } = useContext(TooltipsContext);
 
     const { 
-        container: { contentsWidth, contentsHeight }, 
+        container, 
     } = useContext(SVGDimensionsContext);
 
     //dom refs
@@ -25,8 +25,10 @@ const Tooltips = () => {
     const tooltip = useMemo(() => tooltipComponent(), []);
 
     useEffect(() => {
-        renderTooltips.call(containerRef.current, tooltipsData, tooltip, contentsWidth, contentsHeight);
-    }, [tooltipsData, containerRef, contentsWidth, contentsHeight, tooltip])
+      if(!container){ return; }
+      const { contentsWidth, contentsHeight } = container;
+      renderTooltips.call(containerRef.current, tooltipsData, tooltip, contentsWidth, contentsHeight);
+    }, [container, tooltipsData, containerRef, container?.contentsWidth, container?.contentsHeight, tooltip])
 
   
   return (

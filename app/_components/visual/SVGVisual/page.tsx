@@ -29,7 +29,7 @@ const SVGVisual : React.FC<SVGVisualProps> = ({ render }) => {
       <ZoomableG callbacks={zoomCallbacks}>
         {render()}
       </ZoomableG>
-      {/*<Tooltips />*/}
+      <Tooltips />
     </SVGContainer>
   )
 }

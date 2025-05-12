@@ -68,7 +68,7 @@ const SVGContainer : React.FC<PropsWithChildren<SVGContainerProps>> = ({
         }
         return calcGrid(container.contentsWidth, container.contentsHeight, nrDatapoints)
     }, 
-    [needGrid, container?.contentsWidth, container?.contentsHeight, nrDatapoints, dataExists]);
+    [needGrid, container, nrDatapoints, dataExists]);
 
     //need grid for simulaiotn, because node sizes are based on it
     const simulation = useMemo(() => {
@@ -77,7 +77,7 @@ const SVGContainer : React.FC<PropsWithChildren<SVGContainerProps>> = ({
         }
         return calcSimulationNodeDimensions(grid.cellWidth, grid.cellHeight, grid.nrCells, arrangeBy);
     },
-    [withSimulationDimensions, grid?.cellWidth, grid?.cellHeight, nrDatapoints, arrangeBy]);
+    [withSimulationDimensions, grid, arrangeBy]);
 
     const simulationIsOn = useMemo(() => _simulationIsOn(arrangeBy) && simulation ? true : false, [arrangeBy, simulation]);
     const chartContainer = useMemo(() => {
@@ -86,7 +86,7 @@ const SVGContainer : React.FC<PropsWithChildren<SVGContainerProps>> = ({
         const width = simulationIsOn && simulation?.nodeWidth ? simulation.nodeWidth : grid.cellWidth;
         const height = simulationIsOn && simulation?.nodeHeight ? simulation.nodeHeight : grid.cellHeight;
         return applyMargin(width, height, grid.cellMargin);
-    },[arrangeBy, simulationIsOn, simulation, grid])
+    },[simulationIsOn, simulation, grid])
 
     const chart : ContainerWithDatapointPositioning | null = !chartContainer ? null : {
         ...chartContainer,
