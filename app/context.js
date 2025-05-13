@@ -51,6 +51,7 @@ export default function AppContextProvider({ children }) {
           setVisualData(pendingVisualDataRef.current)
         }
         pendingVisualDataRef.current = null;
+        cleanupInProgresRef.current = false;
       }, CHART_OUT_TRANSITION.duration + DELAY_FOR_DOM_CLEAN_UP)
     }
     
