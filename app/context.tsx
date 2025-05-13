@@ -73,6 +73,7 @@ const AppContextProvider : React.FC<PropsWithChildren> = ({ children }) => {
           setVisualDataResult(pendingVisualDataResultRef.current)
         }
         pendingVisualDataResultRef.current = null;
+        cleanupInProgresRef.current = false;
       }, CHART_OUT_TRANSITION.duration + DELAY_FOR_DOM_CLEAN_UP)
     }
     

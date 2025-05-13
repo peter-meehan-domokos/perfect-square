@@ -13,11 +13,11 @@ import { robotoMonoFont } from '@/app/assets/fonts';
     return (
         <div className="slide-footer-container">
             <div className="slide-footer">
-                {image &&
+                {/**image &&
                     <div className="slide-footer-visual">
                         <Image className="image" src={image.src} alt="profile-photo" width={0} height={0} />
                     </div>
-                }
+                */}
                 <ul className="slide-footer-items-list">
                     {items.map(item => 
                         <li key={item.key}>
