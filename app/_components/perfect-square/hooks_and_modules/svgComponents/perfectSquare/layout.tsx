@@ -36,8 +36,9 @@ import { isNumber, percentageScoreConverterFactory } from '../../../../../_helpe
                     const measure = measures.find(m => m.key === v.measureKey)!;
                     const { preInjuryValue, range, name="", label="" } = measure;
                     //can also assert non-null value due to second filter above
+                    //@todo - put customRange param back once dtaa-server mockData ranges are corrected
                     const convertToPC : TransformFn<LiberalNumber, number | undefined> = 
-                        percentageScoreConverterFactory(preInjuryValue, { customRange:range, useRangeAsBound:true });
+                        percentageScoreConverterFactory(preInjuryValue, { /*customRange:range,*/ useRangeAsBound:true });
                     const value = convertToPC(v.value);
                     return {
                         ...v,
