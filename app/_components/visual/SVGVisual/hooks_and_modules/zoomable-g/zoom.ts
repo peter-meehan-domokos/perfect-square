@@ -42,25 +42,20 @@ export const useZoom : UseZoomFn = (containerRef, viewRef, container, chart, cal
   const [zoomTransform, setZoomTransform] = useState(d3.zoomIdentity);
   const [zoomingInProgress, setZoomingInProgress] = useState<ZoomingInProgress | null>(null);
   //the d3 zoom behaviour
-  //const d3ZoomRef = useRef<ZoomBehavior<ZoomedElementBaseType, PositionedDatapoint> | null>(null);
   const zoom : ZoomBehavior<ZoomedElementBaseType, PositionedDatapoint> = useMemo(() => d3.zoom(), [])
   //@todo - add flags to useEffect dep array if its a good idea, think about linting rules and why they are there
   //this flags add clarity: they wont cause useEffects to trigger, but these will be set to true before
   //container and chart are defined, so we can be sure they will get triggered after these are rendered
-  const domElementsRendered = containerRef && viewRef //&& containerRef.current && viewRef.current;
+  const domElementsRendered = containerRef && viewRef;
 
   //main set up
   useEffect(() => {
     if(!chart || !container){ return;}
     if(!containerRef || !containerRef.current){ return; }
 
-    //if(!d3ZoomRef.current){ d3ZoomRef.current = d3.zoom(); }
- 
-    //setupZoom(d3ZoomRef.current, container, chart, {
     setupZoom(zoom, container, chart, {
       onStart:callbacks.onStart ? callbacks.onStart : () => {},
       onZoom:(e : D3ZoomEvent<SVGElement, PositionedDatapoint>) => {
-        //@todo - find out why ZoomTransform obejct is deemed not assignable, when it is
         d3.select(viewRef.current).attr("transform", e.transform);
         //update react state so it can trigger any other changes needed
         setZoomTransform(e.transform);
@@ -71,13 +66,11 @@ export const useZoom : UseZoomFn = (containerRef, viewRef, container, chart, cal
 
     //call zoom
     d3.select(containerRef.current).call(zoom)
-    //d3.select(containerRef.current).call(d3ZoomRef.current)
       .on("dblclick.zoom", null);
   
   },[container, chart, callbacks, containerRef, viewRef])
 
   const isChartOnScreenChecker = useCallback((chartD : PositionedDatapoint) => {
-    //@todo - handle this better - throw error?
     if(!chart || !container){ return false;}
     const checker = isChartOnScreenCheckerFunc(container, chart, zoomTransform);
     return checker(chartD);
@@ -86,7 +79,6 @@ export const useZoom : UseZoomFn = (containerRef, viewRef, container, chart, cal
   const applyZoom = useCallback((
     requiredTransform : ZoomTransform, 
     requiredTransition : Transition | undefined, 
-    //next - work out the correct way to have a HandlerFn with no args
     callback : HandlerFnWithNoArgs = () => {}
   ) => { 
     if(!domElementsRendered){ return; }
@@ -98,23 +90,21 @@ export const useZoom : UseZoomFn = (containerRef, viewRef, container, chart, cal
         .transition()
         .duration(requiredTransition?.duration || 200)
         .call(zoom.transform, requiredTransform)
-          //.call(d3ZoomRef.current.transform, requiredTransform)
           .on("end", () => { 
             setZoomingInProgress(null); 
             callback();
           });
     }else{
       d3.select(containerRef.current).call(zoom.transform, requiredTransform);
-      //d3.select(containerRef.current).call(d3ZoomRef.current.transform, requiredTransform);
     }
-  }, [domElementsRendered, containerRef, zoom.transform])
+  }, [])
 
   const resetZoom = useCallback((withTransition=true) => { 
     if(!domElementsRendered){ return; }
 
     const requiredTransition : Transition | undefined = withTransition ? { duration: RESET_ZOOM_DURATION } : undefined;
     applyZoom(d3.zoomIdentity, requiredTransition)
-  }, [applyZoom, domElementsRendered])
+  }, [applyZoom, containerRef])
 
   const zoomTo = useCallback((chartDatum : PositionedDatapoint, callback=() => {}) => {
     if(!chart || !container || !domElementsRendered){ return;}
@@ -125,7 +115,7 @@ export const useZoom : UseZoomFn = (containerRef, viewRef, container, chart, cal
     if(!requiredTransform) { return; }
     const requiredTransition = { duration: ZOOM_AND_ARRANGE_TRANSITION_DURATION };
     applyZoom(requiredTransform, requiredTransition, callback)
-  },[applyZoom, container, chart, domElementsRendered]);
+  },[applyZoom, containerRef, container, chart]);
   
   useEffect(() => {
     if(externallyRequiredZoomTransformObject){

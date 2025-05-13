@@ -2,7 +2,6 @@ import { useContext } from "react";
 import { AppContext } from "@/app/context";
 import Intro from "../intro/page";
 import MainContent from "../main-content/page";
-import { HandlerFn } from "@/app/common-types/function-types";
 
 /**
  * @description Renders the appropriate component, either the intro or the home page
