@@ -47,6 +47,8 @@ const PerfectSquare : React.FC = () => {
     isChartOnScreenChecker 
    } = useContext(ZoomContext);
 
+   //console.log("PS")
+
   //dom refs
   const contentsGRef = useRef(null);
 

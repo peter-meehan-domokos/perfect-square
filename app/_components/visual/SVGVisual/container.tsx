@@ -91,8 +91,8 @@ const SVGContainer : React.FC<PropsWithChildren<SVGContainerProps>> = ({
     const chart : ContainerWithDatapointPositioning | null = !chartContainer ? null : {
         ...chartContainer,
         //each positionedDatapoint is guaranteed to have cellX and cellY values
-        _x : d => simulationIsOn && d.x ? d.x : d.cellX,
-        _y : d => simulationIsOn && d.y ? d.y : d.cellY
+        _x : d => d.cellX,// simulationIsOn && d.x ? d.x : d.cellX,
+        _y : d => d.cellY// simulationIsOn && d.y ? d.y : d.cellY
     }
     
     const context = {

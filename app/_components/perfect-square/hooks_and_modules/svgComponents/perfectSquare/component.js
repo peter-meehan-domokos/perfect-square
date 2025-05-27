@@ -81,6 +81,9 @@ export default function perfectSquare() {
     let zoomK = 1;
     let arrangeBy = DEFAULT_DISPLAY_SETTINGS.arrangeBy;
     //let withBarLabels;
+
+    let shouldUpdateMinLevelOfDetail = true;
+    let minLevelOfDetail;
     let levelOfDetail;
     let prevLevelOfDetail;
 
@@ -111,6 +114,12 @@ export default function perfectSquare() {
         updateDimns(selection);
         updateColourAccessors();
     };
+    //issues
+    //  the update transitions should be disabled for programmatic zoom,
+    //ie the update transition should be passed in as a dynamic option
+    //2nd, in sim on/off trans, the levels should changed at start or end, not halfway thru
+    //eg sim on, level of det goes down, so make this change at end,
+    //vice versa for simoff
 
     //sets the dimensions whenever a change occurs
     function updateDimns(selection){
@@ -118,7 +127,6 @@ export default function perfectSquare() {
 
         const maxContentsWidth = width - margin.left - margin.right;
         const maxContentsHeight = height - margin.top - margin.bottom;
-
         quadrantTitleHeight = 0;
         //withBarLabels = true;
         //level of detail 
@@ -127,8 +135,14 @@ export default function perfectSquare() {
         const disabledLevels = getDisabledLevelsForZoom(zoomingInProgress?.initLevelOfDetail, zoomingInProgress?.targLevelOfDetail);
         //store calculation funciton so can use it elsewhere dynamically
         calcLevelOfDetail = calcLevelOfDetailFromBase(baseSize, disabledLevels);
-        levelOfDetail = calcLevelOfDetail(zoomK);
-
+        //next - check this works for all the edge cases considered
+        if(shouldUpdateMinLevelOfDetail){
+            //must use k = 0 for this, even though k may not be 0 eg if user is zoomed in
+            minLevelOfDetail = calcLevelOfDetail(1);
+            shouldUpdateMinLevelOfDetail = false;
+        }
+        levelOfDetail = 2;// zoomK === 1 ? minLevelOfDetail : d3.max([minLevelOfDetail, calcLevelOfDetail(zoomK)]);
+        console.log("updatevis", levelOfDetail)
         //level of detail related flags
         shouldShowHeader =  _shouldShowHeader(levelOfDetail);
         shouldShowSubtitle =  _shouldShowSubtitle(levelOfDetail);
@@ -139,9 +153,8 @@ export default function perfectSquare() {
         shouldShowChartOutline = !shouldShowQuadrantOutlines && !isNumber(selectedQuadrantIndex);
         barsAreClickable  = _barsAreClickable(levelOfDetail);
 
-        //keep headerheight even if no header, so smooth changes if user zooms in/
-        headerHeight = (maxContentsHeight * (shouldShowSubtitle ? 0.18 : 0.15));
-
+        //keep headerheight even if no header or no subtitle, so smooth changes if user zooms in
+        headerHeight = maxContentsHeight * 0.15;
         //contentsheight includes space for quad titles, whereas contenstWidth doesnt
         contentsWidth = d3.min([maxContentsWidth, maxContentsHeight - headerHeight - 2 * quadrantTitleHeight]);
         contentsHeight = contentsWidth + headerHeight + 2 * quadrantTitleHeight;
@@ -261,10 +274,11 @@ export default function perfectSquare() {
      * 
      * @returns {D3SelectionObject} the original selection that is passed to it, to support chaining
      */
-    function chart(selection) {
+    function chart(selection, options = {}) {
         nrCharts = selection.nodes().length;
         if(nrCharts === 0){ return; }
         updateDimnsAndColourAccessors(selection);
+        const { transitions = {} } = options;
 
         selection
             .call(init)
@@ -284,12 +298,16 @@ export default function perfectSquare() {
                 container.append("rect").attr("class", "component-bg")
                     .attr("fill", "transparent");
 
-                const contentsG = container.append("g").attr("class", "component-contents");
+                const contentsG = container.append("g").attr("class", "component-contents")
+                    .attr("transform", `translate(${margin.left + extraHorizMargin}, ${margin.top + extraVertMargin})`);
+                
                 contentsG.append("rect").attr("class", "component-contents-bg")
                     .attr("fill", "transparent");
-
+;
                 //chart area is all the space under the header
-                const chartAreaG = contentsG.append("g").attr("class", "chart-area");
+                const chartAreaG = contentsG.append("g").attr("class", "chart-area")
+                    .attr("transform", `translate(0, ${headerHeight})`);
+
                 chartAreaG.append("rect").attr("class", "chart-area-bg")
                     .attr("fill", "transparent");
 
@@ -313,6 +331,7 @@ export default function perfectSquare() {
          * @returns {D3SelectionObject} the same selection is returned, as part of d3s call method, to support chaining
          */
         function update(selection){
+            //console.log("update", transitions)
             selection.each(function(chartData, i){
                 const container = d3.select(this);
                 //flags & values
@@ -325,7 +344,11 @@ export default function perfectSquare() {
                     .attr("width", `${width}px`)
                     .attr("height", `${height}px`);
 
-                const contentsG = container.select("g.component-contents")
+                const contentsG = container.select("g.component-contents");
+
+                contentsG
+                    .transition()
+                    .duration(transitions.update?.duration || 0)
                     .attr("transform", `translate(${margin.left + extraHorizMargin}, ${margin.top + extraVertMargin})`);
 
                 contentsG.select("rect.component-contents-bg")
@@ -343,16 +366,21 @@ export default function perfectSquare() {
                         shouldShowSubtitle,
                         shouldShowQuadrantsSummary,
                         _textColour:_headerTextColour,
-                        _quadrantSummaryTextColour
+                        _quadrantSummaryTextColour,
+                        transitions
                     });
 
 
-                const chartAreaG = contentsG.select("g.chart-area")
+                const chartAreaG = contentsG.select("g.chart-area");
+
+                chartAreaG
+                    .transition()
+                    .duration(transitions.update?.duration || 0)
                     .attr("transform", `translate(0, ${headerHeight})`);
 
                 chartAreaG.select("rect.chart-area-bg")
-                    //.transition()
-                    //.duration(750)
+                    .transition()
+                    .duration(transitions.update?.duration || 0)
                         .attr("width", `${chartAreaWidth}px`)
                         .attr("height", `${chartAreaHeight}px`)
                         //we use chart-area-bg as the default border when no quadrants are showing (ie when its the chart path showing)
@@ -385,14 +413,16 @@ export default function perfectSquare() {
                         _chartColour,
                         _colour:quadIndex => anotherQuadrantIsSelectedChecker(quadIndex) || anotherChartIsSelected ? GREY : chartColour,
                         getBarsAreaStrokeWidth:quadIndex => _scaleValue(anotherQuadrantIsSelectedChecker(quadIndex) || anotherChartIsSelected ? 0.1 : 0.3),
-                        onClickBar:(e, barD) => setSelectedMeasureKey(barD.measureKey)
+                        onClickBar:(e, barD) => setSelectedMeasureKey(barD.measureKey),
+                        transitions
                     });
 
                 //chart outline
                 chartAreaG.call(chartOutlinePath, quadrantBarWidths, barsAreaHeight, gapBetweenBars, {
                     shouldShowChartOutline,
                     colour: anotherChartIsSelected ? GREY : chartColour,
-                    onClick:() => { setSelectedChartKey(chartData) }
+                    onClick:() => { setSelectedChartKey(chartData) },
+                    transitions
                 })
             })
         }
@@ -434,6 +464,23 @@ export default function perfectSquare() {
     chart.selectedMeasureKey = function (value) {
         if (!arguments.length) { return selectedMeasureKey; }
         selectedMeasureKey = value;
+        return chart;
+    };
+    chart.minLevelOfDetail = function (value) {
+        if (!arguments.length) { return minLevelOfDetail; }
+        minLevelOfDetail = value;
+        return chart;
+    };
+    chart.shouldUpdateMinLevelOfDetail = function (value) {
+        if (!arguments.length) { return shouldUpdateMinLevelOfDetail; }
+        shouldUpdateMinLevelOfDetail = value;
+        return chart;
+    };
+    chart.levelOfDetail = function (func) {
+        if (!arguments.length) { return levelOfDetail; }
+        if(typeof func === "function"){
+            calcLevelOfDetail = func;
+        }
         return chart;
     };
     chart.zoomK = function (value) {

@@ -15,7 +15,7 @@ import { FADE_IN_OUT_DURATION } from '@/app/constants';
  */
 export function header(selection, width, height, settings={}){
     const { summaryComponent, onClick=() => {}, styles, _scaleValue, _textColour, _quadrantSummaryTextColour=() => "none",
-        shouldShowHeader, shouldShowSubtitle, shouldShowQuadrantsSummary } = settings;
+        shouldShowHeader, shouldShowSubtitle, shouldShowQuadrantsSummary, transitions={} } = settings;
         
     selection
         .each(function(data){
@@ -30,12 +30,23 @@ export function header(selection, width, height, settings={}){
                             .append("text")
                                 .attr("class", "primary-title title")
                                     .attr("dominant-baseline", "hanging")
-                                    .attr("opacity", 0);
+                                    .attr("opacity", 0)
+                                    .attr("font-size", styles.primaryTitle?.fontSize)
+                                    .attr("stroke-width", _scaleValue(0.12))
+                                    .attr("stroke", _textColour(data.key))
+                                    .attr("fill", _textColour(data.key))
+                                    .text(d.title || "");
                 
                         headerG
                             .append("text")
                                 .attr("class", "secondary-title title")
-                                    .attr("opacity", 0);
+                                    .attr("opacity", 0)
+                                    .attr("transform", `translate(0, ${height * 0.8})`)
+                                    .attr("font-size", styles.secondaryTitle?.fontSize)
+                                    .attr("stroke-width", _scaleValue(0.08))
+                                    .attr("stroke", _textColour(data.key))
+                                    .attr("fill", _textColour(data.key))
+                                    .text(d.subtitle || "");
 
                         headerG.append("rect")
                             .attr("class", "chart-header-hitbox")
@@ -48,7 +59,7 @@ export function header(selection, width, height, settings={}){
                         const headerG = d3.select(this);
                         headerG.select("text.primary-title")
                             .transition()
-                            .duration(FADE_IN_OUT_DURATION.FAST)
+                            .duration(transitions.update?.duration || 120)
                                 .attr("opacity", shouldShowHeader ? 0.45 : 0)
                                 .attr("font-size", styles.primaryTitle?.fontSize)
                                 .attr("stroke-width", _scaleValue(0.12))
@@ -58,7 +69,7 @@ export function header(selection, width, height, settings={}){
 
                         headerG.select("text.secondary-title")
                             .transition()
-                            .duration(FADE_IN_OUT_DURATION.FAST)
+                            .duration(transitions.update?.duration || 120)
                                 .attr("opacity", shouldShowSubtitle ? 0.45 : 0)
                                 .attr("transform", `translate(0, ${height * 0.8})`)
                                 .attr("font-size", styles.secondaryTitle?.fontSize)
@@ -74,11 +85,17 @@ export function header(selection, width, height, settings={}){
                         summaryContainerG.enter()
                             .append("g")
                                 .attr("class", "header-summary-cont")
-                                .call(fadeIn)
-                                .merge(summaryContainerG)
+                                .call(fadeIn, { transition : { duration: 500 } })
                                 .attr("transform", `translate(${width - summaryWidth},0)`)
+                                .merge(summaryContainerG)
+                                .each(function(){
+                                    d3.select(this)
+                                        .transition()
+                                        .duration(transitions.update?.duration || 0)
+                                            .attr("transform", `translate(${width - summaryWidth},0)`)
+                                })
                                 .call(summaryComponent, summaryWidth, summaryHeight, { 
-                                    _scaleValue, styles, _textColour:_quadrantSummaryTextColour
+                                    _scaleValue, styles, _textColour:_quadrantSummaryTextColour, transitions
                                 });
 
                         summaryContainerG.exit().call(remove);
@@ -107,7 +124,7 @@ export function header(selection, width, height, settings={}){
  * @returns {object} 
  */
 export function quadrantsSummary(selection, width, height, settings={}){
-    const { _scaleValue, styles={}, _textColour=() => "black" } = settings;
+    const { _scaleValue, styles={}, _textColour=() => "black", transitions={} } = settings;
     selection.each(function(data){
         const container = d3.select(this);
         const outlineG = container.selectAll("g.quadrants-summary-outline").data([1]);
@@ -119,35 +136,53 @@ export function quadrantsSummary(selection, width, height, settings={}){
                     outlineG
                         .append("rect")
                             .attr("class", "summary-box summary-outline")
+                            .attr("width", width)
+                            .attr("height", height)
                             .attr("fill", "none");
             
-                    outlineG.append("line").attr("class", "summary-vertical-line summary-outline");
-                    outlineG.append("line").attr("class", "summary-horizontal-line summary-outline");
-
-                    outlineG.selectAll(".summary-outline")
-                        .attr("stroke", "grey");
-                })
-                .merge(outlineG)
-                .each(function(){
-                    const outlineG = d3.select(this);
-                    outlineG.select("rect.summary-box")
-                        .attr("width", width)
-                        .attr("height", height);
-                    
-                    outlineG.select("line.summary-vertical-line")
+                    outlineG.append("line").attr("class", "summary-vertical-line summary-outline")
                         .attr("x1", width/2)
                         .attr("x2", width/2)
                         .attr("y1", 0)
                         .attr("y2", height);
-
-                    outlineG.select("line.summary-horizontal-line")
+                        
+                    outlineG.append("line").attr("class", "summary-horizontal-line summary-outline")
                         .attr("x1", 0)
                         .attr("x2", width)
                         .attr("y1", height/2)
                         .attr("y2", height/2);
 
                     outlineG.selectAll(".summary-outline")
+                        .attr("stroke", "grey")
                         .attr("stroke-width", _scaleValue(0.1));
+                })
+                .merge(outlineG)
+                .each(function(){
+                    const outlineG = d3.select(this);
+                    outlineG.select("rect.summary-box")
+                        .transition()
+                        .duration(transitions.update?.duration || 0)
+                            .attr("width", width)
+                            .attr("height", height)
+                            .attr("stroke-width", _scaleValue(0.1));
+                    
+                    outlineG.select("line.summary-vertical-line")
+                        .transition()
+                        .duration(transitions.update?.duration || 0)
+                            .attr("x1", width/2)
+                            .attr("x2", width/2)
+                            .attr("y1", 0)
+                            .attr("y2", height)
+                            .attr("stroke-width", _scaleValue(0.1));
+
+                    outlineG.select("line.summary-horizontal-line")
+                        .transition()
+                        .duration(transitions.update?.duration || 0)
+                            .attr("x1", 0)
+                            .attr("x2", width)
+                            .attr("y1", height/2)
+                            .attr("y2", height/2)
+                            .attr("stroke-width", _scaleValue(0.1));
 
                 })
 
@@ -155,25 +190,39 @@ export function quadrantsSummary(selection, width, height, settings={}){
         summaryG.enter()
             .append("g")
                 .attr("class", "quadrant-summary")
-                .each(function(){
+                .each(function(summaryD){
                     const summaryG = d3.select(this);
                     summaryG
                         .append("text")
                             .attr("text-anchor", "middle")
-                            .attr("dominant-baseline", "central");
+                            .attr("dominant-baseline", "central")
+                            .attr("x", width/4)
+                            .attr("y", height/4)
+                            .attr("font-size", styles.summary?.fontSize)
+                            .attr("stroke-width", _scaleValue(0.08))
+                            .attr("stroke", _textColour(summaryD, data.key))
+                            .attr("fill", _textColour(summaryD, data.key))
+                            .text(`${summaryD.metadata.mean}%`);
                 })
-                .merge(summaryG)
                 .attr("transform", (d,i) => `translate(${i === 0 || i === 2 ? 0 : width/2},${i <= 1 ? 0 : height/2})`)
-                .each(function(summaryD){
+                .merge(summaryG)
+                .each(function(summaryD, i){
                     const summaryG = d3.select(this);
+                    summaryG
+                        .transition()
+                        .duration(transitions.update?.duration || 0)
+                        .attr("transform", `translate(${i === 0 || i === 2 ? 0 : width/2},${i <= 1 ? 0 : height/2})`);
+
                     summaryG.select("text")
-                        .attr("x", width/4)
-                        .attr("y", height/4)
-                        .attr("font-size", styles.summary?.fontSize)
-                        .attr("stroke-width", _scaleValue(0.08))
-                        .attr("stroke", _textColour(summaryD, data.key))
-                        .attr("fill", _textColour(summaryD, data.key))
-                        .text(`${summaryD.metadata.mean}%`);
+                        .transition()
+                        .duration(transitions.update?.duration || 0)
+                            .attr("x", width/4)
+                            .attr("y", height/4)
+                            .attr("font-size", styles.summary?.fontSize)
+                            .attr("stroke-width", _scaleValue(0.08))
+                            .attr("stroke", _textColour(summaryD, data.key))
+                            .attr("fill", _textColour(summaryD, data.key))
+                            .text(`${summaryD.metadata.mean}%`);
                 })
 
             summaryG.exit().call(remove); 
@@ -192,7 +241,7 @@ export function quadrants(selection, quadrantWidth, quadrantHeight, quadrantTitl
     const { styles, _scaleValue, _colour=() => "none", getBarsAreaStrokeWidth=() => 1,
         selectedQuadrantIndex, shouldShowSelectedQuadrantTitle,
         quadrantBarWidths, gapBetweenBars, _quadrantsContainerTransform=() => null, 
-        shouldShowBars, shouldShowQuadrantOutlines, onClickBar
+        shouldShowBars, shouldShowQuadrantOutlines, onClickBar, transitions={}
     } = settings;
 
     const barsAreaHeight = quadrantHeight - quadrantTitleHeight;
@@ -219,17 +268,23 @@ export function quadrants(selection, quadrantWidth, quadrantHeight, quadrantTitl
                     barsAreaG
                         .append("rect")
                             .attr("class", "bars-area-bg")
-                            .attr("fill", "transparent");
+                            .attr("fill", "transparent")
+                            .attr("width", quadrantWidth)
+                            .attr("height", barsAreaHeight);
                      
                     barsAreaG.append("g").attr("class", "bars");
                 })
-                .merge(quadrantContainerG)
                 .attr("transform", _quadrantsContainerTransform)
+                .merge(quadrantContainerG)
                 .each(function(quadD){
                     //func passes parent key too, in case this function is called as part of a selectAll chain on parent types
                     const colour = _colour(quadD.i, data.key);
                     const isSelected = selectedQuadrantIndex === quadD.i ;
                     const quadrantContainerG = d3.select(this);
+                    quadrantContainerG
+                        .transition()
+                        .duration(transitions.update?.duration || 0)
+                            .attr("transform", _quadrantsContainerTransform)
 
                     //make sure bar labels etc are on top of DOM
                     if(isSelected){ quadrantContainerG.raise(); }
@@ -253,10 +308,12 @@ export function quadrants(selection, quadrantWidth, quadrantHeight, quadrantTitl
                         .attr("transform", `translate(0, ${barAreaShiftVert})`);
 
                     barsAreaG.select("rect.bars-area-bg")
-                        .attr("width", quadrantWidth)
-                        .attr("height", barsAreaHeight)
-                        .attr("stroke", colour) 
-                        .attr("stroke-width", getBarsAreaStrokeWidth(quadD.i))
+                        .transition()
+                        .duration(transitions.update?.duration || 0)
+                            .attr("width", quadrantWidth)
+                            .attr("height", barsAreaHeight)
+                            .attr("stroke", colour) 
+                            .attr("stroke-width", getBarsAreaStrokeWidth(quadD.i))
 
                     //bars and quadrant outline paths
                     const barsDirection = quadD.i < 2 ? "up" : "down";
@@ -264,10 +321,10 @@ export function quadrants(selection, quadrantWidth, quadrantHeight, quadrantTitl
                         .datum(quadD)
                         //width, barsAreaHeight, barWidth, gapBetweenBars
                         .call(bars, barsAreaHeight, quadrantBarWidths[quadD.i], gapBetweenBars,{
-                            shouldShowBars, barsDirection, styles:styles.bar, colour, onClick:onClickBar
+                            shouldShowBars, barsDirection, styles:styles.bar, colour, onClick:onClickBar, transitions
                         })
                         .call(quadrantOutlinePath, barsAreaHeight, quadrantBarWidths[quadD.i], gapBetweenBars, {
-                            shouldShowQuadrantPaths:!shouldShowBars, styles:styles.outlinePath, colour
+                            shouldShowQuadrantPaths:!shouldShowBars, styles:styles.outlinePath, colour, transitions
                         });
                 })
         
@@ -285,7 +342,7 @@ export function quadrants(selection, quadrantWidth, quadrantHeight, quadrantTitl
  * @returns {object} 
  */
 function bars(selection, barsAreaHeight, barWidth, gapBetweenBars, settings={}){
-    const { styles, shouldShowBars, barsDirection="up", colour, onClick=() => {} } = settings;
+    const { styles, shouldShowBars, barsDirection="up", colour, onClick=() => {}, transitions={} } = settings;
     selection.each(function(data){
         const container = d3.select(this);
         //bars
@@ -296,12 +353,13 @@ function bars(selection, barsAreaHeight, barWidth, gapBetweenBars, settings={}){
             .append("g")
                 .attr("class", `bar`)
                 .attr("cursor", "pointer")
-                .each(function(barD){
+                .each(function(barD, barIndex){
                     const barHeight = barD.calcBarHeight(barsAreaHeight);
                     const barG = d3.select(this);
                     barG
                         .append("rect")
                             .attr("class", "bar")
+                                .attr("transform", `translate(${barIndex * (barWidth + gapBetweenBars)},${barsDirection === "up" ? barsAreaHeight - barHeight : 0})`)
                                 .attr("width", barWidth)
                                 .attr("height", barHeight);
                 })
@@ -314,14 +372,17 @@ function bars(selection, barsAreaHeight, barWidth, gapBetweenBars, settings={}){
                     //update content and fill
                     const barHeight = barD.calcBarHeight(barsAreaHeight);
                     //no space between bars and outer edge of chart
-                    barG
-                        .attr("transform", `translate(${barIndex * (barWidth + gapBetweenBars)},${barsDirection === "up" ? barsAreaHeight - barHeight : 0})`)
-
                     barG.select("rect.bar")
-                        .transition()
-                        .duration(100)
+                        .transition("pos-and-size")
+                        .duration(transitions.update?.duration || 0)
+                            .attr("transform", `translate(${barIndex * (barWidth + gapBetweenBars)},${barsDirection === "up" ? barsAreaHeight - barHeight : 0})`)
                             .attr("width", barWidth)
                             .attr("height", barHeight)
+                            .attr("fill", colour)
+                    
+                    barG.select("rect.bar")
+                        .transition("fill")
+                        .duration(750)
                             .attr("fill", colour)
                 })
 
@@ -338,7 +399,7 @@ function bars(selection, barsAreaHeight, barWidth, gapBetweenBars, settings={}){
  * @returns {object} 
  */
 export function quadrantOutlinePath(selection, barsAreaHeight, barWidth, gapBetweenBars, settings={}){
-    const { styles, shouldShowQuadrantPaths, colour } = settings;
+    const { styles, shouldShowQuadrantPaths, colour, transitions={} } = settings;
     selection.each(function(quadD){
         const container = d3.select(this);
         //outline paths
@@ -355,12 +416,15 @@ export function quadrantOutlinePath(selection, barsAreaHeight, barWidth, gapBetw
                 .merge(outlineG)
                 .each(function(values) {
                     //update content and fill
-                    d3.select(this).select("path")
-                        //need this here if sizes change eg sim turned on
-                        .attr("fill", colour)
-                        .transition()
-                        .duration(750)
+                    const path = d3.select(this).select("path");
+                    path
+                        .transition("d")
+                        .duration(transitions.update?.duration || 0)
                             .attr("d", quadrantPathD(values, quadD.i, barsAreaHeight, barWidth, gapBetweenBars))
+                    path
+                        .transition("fill")
+                        .duration(750)
+                            .attr("fill", colour);
                 })
 
         outlineG.exit().remove()//call(remove);
@@ -377,7 +441,7 @@ export function quadrantOutlinePath(selection, barsAreaHeight, barWidth, gapBetw
  * @returns {object} 
  */
 export function chartOutlinePath(selection, quadrantBarWidths, barsAreaHeight, gapBetweenBars, settings={}){
-    const { colour, onClick=() => {}, shouldShowChartOutline } = settings;
+    const { colour, onClick=() => {}, shouldShowChartOutline, transitions={} } = settings;
 
     selection.each(function(data, i){
         const container = d3.select(this);
@@ -392,10 +456,19 @@ export function chartOutlinePath(selection, quadrantBarWidths, barsAreaHeight, g
                 .on("click", onClick)
                 .merge(outlinePath)
                 //need this if sizes change eg sim turned on
-                .transition()
-                .duration(750)
-                    .attr("d", chartPathD(data, quadrantBarWidths, barsAreaHeight, gapBetweenBars))
-                    .attr("fill", colour)
+                .each(function(){
+                    const path = d3.select(this);
+                    path
+                        .transition("d")
+                        .duration(transitions.update?.duration || 0)
+                            .attr("d", chartPathD(data, quadrantBarWidths, barsAreaHeight, gapBetweenBars));
+                    
+                    path
+                        .transition("fill")
+                        .duration(750)
+                            .attr("d", chartPathD(data, quadrantBarWidths, barsAreaHeight, gapBetweenBars))
+                            .attr("fill", colour)
+                });
 
         outlinePath.exit().remove()//call(remove);
 

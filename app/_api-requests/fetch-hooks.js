@@ -1,11 +1,9 @@
 'use client'
 import { useState, useEffect } from "react";
 
-/*const URL = process.env.NODE_ENV === "development" ?
+const URL = process.env.NODE_ENV === "development" ?
   "http://localhost:8080/graphql" :
-  "https://data-server-e2504705c003.herokuapp.com/graphql";*/
-
-const URL = "https://data-server-e2504705c003.herokuapp.com/graphql";
+  "https://data-server-e2504705c003.herokuapp.com/graphql";
 
 export const useFetch = (query) => {
   const [data, setData] = useState({});
@@ -30,7 +28,6 @@ export const useFetch = (query) => {
         });
         if (!response.ok) throw new Error(response.statusText);
         const json = await response.json();
-        console.log("json", json)
         setLoading(false);
         //store with key=stringifiedQuery
         setData(prevState => ({ ...prevState, [stringifiedQuery]: json.data }));

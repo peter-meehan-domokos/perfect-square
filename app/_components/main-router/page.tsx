@@ -15,7 +15,7 @@ const MainRouter: React.FC<{}> = () => {
     const { introIsDisplayed, setIntroIsDisplayed } = useContext(AppContext);
     return (
       <>
-        {introIsDisplayed ? 
+        {introIsDisplayed && 2 === 3 ? 
           <Intro />
           :
           <MainContent/>

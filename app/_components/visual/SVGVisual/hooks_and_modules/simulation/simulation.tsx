@@ -56,25 +56,41 @@ export const useSimulation : UseSimulationFn = (containerRef, data) => {
 
   //simulation
   useEffect(() => {
+    console.log("simue")
     if(!data){ return; }
     if(!simulationIsOn || !dimensions.container || !dimensions.simulation){ return; }
     const { nodesData, metadata } = data;
-    //console.log("simue")
 
+    console.log("simue apply")
     //create the sim with the right forces
-    simRef.current = d3.forceSimulation(nodesData).stop();
+    next only set once and reheat instead .. see https://stackoverflow.com/questions/57277281/d3-how-to-update-force-simulation-when-data-values-change
+    //and https://d3js.org/d3-force/simulation
+    simRef.current = d3.forceSimulation(nodesData);
     applyForces(simRef.current, dimensions.container, dimensions.simulation, arrangeBy, metadata);
 
     //handle tick events
     simRef.current
       .on("tick", () => {
+        console.log("tick")
         //return;
         if(!simTicksInProcessRef.current){ simTicksInProcessRef.current = true; }
         if(!simIsStartedRef.current){ return; }
+        
         //@todo - set the anonymous function as ValueFn of the correct type
+
+        //issue - nodesData not binded to charts, and thtas where x,y props are
         d3.select(containerRef.current).selectAll("g.chart")
+          .each((d, i) => {
+            //if(i === 0){
+              //console.log("nodesData[0]", nodesData[i].y)
+            //}
+          })
         // @ts-ignore
-          .attr("transform", (d : PerfectSquareDatapoint) => `translate(${d.x}, ${d.y})`)
+          .attr("transform", (d : PerfectSquareDatapoint, i : number) => {
+            const nodeDatum = nodesData[i];
+            //const x = nodeDatum.x
+            return `translate(${nodeDatum.x}, ${nodeDatum.y})`
+          })
       })
       .on("end", () => { simTicksInProcessRef.current = false; })
   //@todo - data on causes sim to run again when zoom changes. find a better design.
@@ -184,11 +200,13 @@ function applyForces(
           return contentsHeight - vertSpacePerChart - ((vertSpace - vertSpacePerChart) * proportionOfScreenHeight) + adjuster;
         }
         if(arrangeBy.y === "deviation"){
+          //console.log("y force")
           //@todo - replace guards with call to isNumber and assert types after that
           if(typeof d.metadata.deviation !== "number" || typeof deviation.min !== "number" || typeof deviation.range !== "number"){ return 0; }
           if(isNaN(d.metadata.deviation) || isNaN(deviation.min) || isNaN(deviation.range)){ return 0; }
 
           const proportionOfScreenHeight = 1 - (d.metadata.deviation - deviation.min)/deviation.range;
+          //console.log("ret yforce", contentsHeight - vertSpacePerChart - ((vertSpace - vertSpacePerChart) * proportionOfScreenHeight) + adjuster)
           return contentsHeight - vertSpacePerChart - ((vertSpace - vertSpacePerChart) * proportionOfScreenHeight) + adjuster;
         }
 
