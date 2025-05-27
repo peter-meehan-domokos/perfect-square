@@ -110,6 +110,7 @@ export const useZoom : UseZoomFn = (containerRef, viewRef, container, chart, cal
     if(!chart || !container || !domElementsRendered){ return;}
     //issue - this next line could be undefined if chart.width or height are 0.
     //ideal soln is make them non-zero by defn of Container (perhaps use a brand) 
+    console.log("zoomTo::::::chart", chartDatum)
     const calcZoomTransform = calcZoomTransformFunc(container, chart);
     const requiredTransform = calcZoomTransform(chartDatum);
     if(!requiredTransform) { return; }

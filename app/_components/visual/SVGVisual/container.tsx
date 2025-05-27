@@ -91,8 +91,17 @@ const SVGContainer : React.FC<PropsWithChildren<SVGContainerProps>> = ({
     const chart : ContainerWithDatapointPositioning | null = !chartContainer ? null : {
         ...chartContainer,
         //each positionedDatapoint is guaranteed to have cellX and cellY values
-        _x : d => d.cellX,// simulationIsOn && d.x ? d.x : d.cellX,
-        _y : d => d.cellY// simulationIsOn && d.y ? d.y : d.cellY
+        _x : d => {
+            //error - d.x is saying 7 here, even though its -0.12 approx in the sim,
+            //and hence in the transform. cellX is 0 ofcourse, but here its d.x that counts
+            //when sim is on
+            //how is d.x set to 7 here?????
+            //also really Need to sort out why d.x is undefined simulation tick handler
+            if(d.key === "session-0")
+            console.log("chart._x....simOn d.cellX d.x", d, simulationIsOn, d.cellX, d.x)
+            return simulationIsOn && d.x ? d.x : d.cellX
+        },
+        _y : d => simulationIsOn && d.y ? d.y : d.cellY
     }
     
     const context = {

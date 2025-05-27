@@ -142,7 +142,7 @@ export default function perfectSquare() {
             shouldUpdateMinLevelOfDetail = false;
         }
         levelOfDetail = 2;// zoomK === 1 ? minLevelOfDetail : d3.max([minLevelOfDetail, calcLevelOfDetail(zoomK)]);
-        console.log("updatevis", levelOfDetail)
+        //console.log("updatevis", levelOfDetail)
         //level of detail related flags
         shouldShowHeader =  _shouldShowHeader(levelOfDetail);
         shouldShowSubtitle =  _shouldShowSubtitle(levelOfDetail);

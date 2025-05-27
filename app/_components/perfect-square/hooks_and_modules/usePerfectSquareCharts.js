@@ -95,7 +95,7 @@ const usePerfectSquareCharts = (containerElement, data, perfectSquare, simulatio
   //main render/update visual
   useEffect(() => {
     if (!data | !containerElement) { return; }
-    console.log("MAIN_UE", !!zoomingInProgress)
+    //console.log("MAIN_UE", !!zoomingInProgress)
     const simHasBeenTurnedOff = onRef.current !== simulationIsOn && !simulationIsOn;
     const simHasBeenTurnedOn = onRef.current !== simulationIsOn && simulationIsOn;
     if(simHasBeenTurnedOff || simHasBeenTurnedOn) {
@@ -114,7 +114,7 @@ const usePerfectSquareCharts = (containerElement, data, perfectSquare, simulatio
   //const simulationHasBeenToggledRef = useRef(false);
   useEffect(() => {
     if (!data || !containerElement) { return; }
-    console.log("SIMON_UE simison", simulationIsOn)
+   //console.log("SIMON_UE simison", simulationIsOn)
     if(simulationIsOn){
       //x,y provided by sim, so just call chart
       d3.select(containerElement).selectAll(".chart").call(perfectSquare)

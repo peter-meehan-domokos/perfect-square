@@ -52,26 +52,23 @@ export const useSimulation : UseSimulationFn = (containerRef, data) => {
     })
   }
 
-  const simRef = useRef<PerfectSquareForceSimulation | null>(null)
-
+  //const simRef = useRef<PerfectSquareForceSimulation | null>(null)
+  const simRef = useRef<PerfectSquareForceSimulation>(d3.forceSimulation());
   //simulation
   useEffect(() => {
-    console.log("simue")
-    if(!data){ return; }
+    //console.log("simue")
+    if(!data || !simRef.current){ return; }
     if(!simulationIsOn || !dimensions.container || !dimensions.simulation){ return; }
     const { nodesData, metadata } = data;
 
-    console.log("simue apply")
-    //create the sim with the right forces
-    next only set once and reheat instead .. see https://stackoverflow.com/questions/57277281/d3-how-to-update-force-simulation-when-data-values-change
-    //and https://d3js.org/d3-force/simulation
-    simRef.current = d3.forceSimulation(nodesData);
+    //console.log("simue apply-----------------------")
+    //sim forces
+    simRef.current.nodes(nodesData);
     applyForces(simRef.current, dimensions.container, dimensions.simulation, arrangeBy, metadata);
 
     //handle tick events
     simRef.current
       .on("tick", () => {
-        console.log("tick")
         //return;
         if(!simTicksInProcessRef.current){ simTicksInProcessRef.current = true; }
         if(!simIsStartedRef.current){ return; }
@@ -81,21 +78,22 @@ export const useSimulation : UseSimulationFn = (containerRef, data) => {
         //issue - nodesData not binded to charts, and thtas where x,y props are
         d3.select(containerRef.current).selectAll("g.chart")
           .each((d, i) => {
-            //if(i === 0){
-              //console.log("nodesData[0]", nodesData[i].y)
-            //}
+            if(i === 0){
+              console.log("nodesData[0]", nodesData[i].x)
+            }
           })
         // @ts-ignore
           .attr("transform", (d : PerfectSquareDatapoint, i : number) => {
             const nodeDatum = nodesData[i];
-            //const x = nodeDatum.x
             return `translate(${nodeDatum.x}, ${nodeDatum.y})`
+            //return `translate(${d.x}, ${d.y})`
+
           })
       })
       .on("end", () => { simTicksInProcessRef.current = false; })
   //@todo - data on causes sim to run again when zoom changes. find a better design.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dimensions.container, dimensions.simulation, arrangeBy, /*data,*/ simulationIsOn]);
+  }, [dimensions.container, dimensions.simulation, arrangeBy, data, simulationIsOn]);
 
   useEffect(() => {
     if(!simRef.current){ return; }
@@ -104,10 +102,10 @@ export const useSimulation : UseSimulationFn = (containerRef, data) => {
       simRef.current.stop();
       simIsStartedRef.current = false;
     }else{
-      simRef.current.restart();
+      simRef.current.alpha(1).restart();
       simIsStartedRef.current = true;
     }
-  }, [simulationIsOn])
+  }, [simulationIsOn, arrangeBy.x, arrangeBy.y])
   
   return { 
     simulationIsOn,
