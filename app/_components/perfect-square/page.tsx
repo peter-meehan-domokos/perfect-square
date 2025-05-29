@@ -84,6 +84,8 @@ const PerfectSquare : React.FC = () => {
     return perfectSquareLayout(data, grid)
   }, [data, grid]);
 
+  console.log("psData0", perfectSquareData?.datapoints[0]?.x)
+
   const simulationData : SimulationData  | null = useMemo(() => {
     if(!perfectSquareData) { return null }
     return {
@@ -91,6 +93,8 @@ const PerfectSquare : React.FC = () => {
       metadata : perfectSquareData.metadata
     } 
   },[perfectSquareData]);
+
+  console.log("simData0", simulationData?.nodesData[0]?.x)
 
   const { 
     simulationIsOn, 
