@@ -29,7 +29,6 @@ interface UseSimulationFn {
  * @return {object} an object containing getter and setter for the settings, the node dimensions, and a simulationIsOn flag
  */
 export const useSimulation : UseSimulationFn = (containerRef, data) => {
-  console.log("useSimData0", data?.nodesData[0]?.x)
   const { 
     displaySettings: { arrangeBy }
   } = useContext(VisualContext);
@@ -44,65 +43,39 @@ export const useSimulation : UseSimulationFn = (containerRef, data) => {
   const simulationWasAlreadyOn = _simulationIsOn(prevArrangeByRef.current);
   //update flag for next time
   prevArrangeByRef.current = arrangeBy;
-  console.log(simulationIsOn, simulationWasAlreadyOn)
 
   //if moving from a grid (ie non-arranged), we set d.x and d.y properties so transitions starts from current position
   if(data && simulationIsOn && !simulationWasAlreadyOn){
-    console.log("init d.x and d.y.....")
     data.nodesData.forEach(d => {
       d.x = d.cellX;
       d.y = d.cellY;
     })
-    /*
-    d3.select(containerRef.current).selectAll("g.chart")
-      .each((d) => {
-        d.x = d.cellX;
-        d.y = d.cellY;
-      })
-    */
   }
 
-  //const simRef = useRef<PerfectSquareForceSimulation | null>(null)
   const simRef = useRef<PerfectSquareForceSimulation>(d3.forceSimulation());
   //simulation
   useEffect(() => {
-    console.log("simue nodesData[0].x", data?.nodesData[0]?.x)
     if(!data){ return; }
     if(!simulationIsOn || !dimensions.container || !dimensions.simulation){ return; }
     const { nodesData, metadata } = data;
 
-    //console.log("simue apply-----------------------")
     //sim forces
-    if(simRef.current.nodes().length === 0)
-      simRef.current.nodes(nodesData);
+    simRef.current.nodes(nodesData);
     applyForces(simRef.current, dimensions.container, dimensions.simulation, arrangeBy, metadata);
 
     //handle tick events
     simRef.current
       .on("tick", () => {
-        //return;
         if(!simTicksInProcessRef.current){ simTicksInProcessRef.current = true; }
         if(!simIsStartedRef.current){ return; }
         
         //@todo - set the anonymous function as ValueFn of the correct type
-
-        //issue - nodesData not binded to charts, and thtas where x,y props are
         d3.select(containerRef.current).selectAll("g.chart")
-          .each((d, i) => {
-            //why is the bound datum not referencing the same object as the nodesData item?
-            if(i === 0){
-              console.log("tick d.x nodesData[0].x", d.x, nodesData[i].x)
-            }
-          })
         // @ts-ignore
-          .attr("transform", (d : PerfectSquareDatapoint, i : number) => {
-            const nodeDatum = nodesData[i];
-            //return `translate(${nodeDatum.x}, ${nodeDatum.y})`
-            return `translate(${d.x}, ${d.y})`
-
-          })
-      })
+          .attr("transform", (d : PerfectSquareDatapoint, i : number) =>  `translate(${d.x}, ${d.y})`)
       .on("end", () => { simTicksInProcessRef.current = false; })
+
+      })
   //@todo - data on causes sim to run again when zoom changes. find a better design.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dimensions.container, dimensions.simulation, arrangeBy, data, simulationIsOn]);

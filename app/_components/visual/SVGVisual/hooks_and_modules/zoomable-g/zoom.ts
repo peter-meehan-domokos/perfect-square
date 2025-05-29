@@ -58,6 +58,8 @@ export const useZoom : UseZoomFn = (containerRef, viewRef, container, chart, cal
       onZoom:(e : D3ZoomEvent<SVGElement, PositionedDatapoint>) => {
         d3.select(viewRef.current).attr("transform", e.transform);
         //update react state so it can trigger any other changes needed
+
+        //next - check does this trigger isonscreen to run in usePSCharts? if so, is the checker updatd properly?
         setZoomTransform(e.transform);
         //callback
         if(callbacks.onZoom){ callbacks.onZoom(e); }
@@ -100,6 +102,7 @@ export const useZoom : UseZoomFn = (containerRef, viewRef, container, chart, cal
   }, [])
 
   const resetZoom = useCallback((withTransition=true) => { 
+    //next - this must initially send message to color the greyed out charts
     if(!domElementsRendered){ return; }
 
     const requiredTransition : Transition | undefined = withTransition ? { duration: RESET_ZOOM_DURATION } : undefined;
@@ -110,7 +113,6 @@ export const useZoom : UseZoomFn = (containerRef, viewRef, container, chart, cal
     if(!chart || !container || !domElementsRendered){ return;}
     //issue - this next line could be undefined if chart.width or height are 0.
     //ideal soln is make them non-zero by defn of Container (perhaps use a brand) 
-    console.log("zoomTo::::::chart", chartDatum)
     const calcZoomTransform = calcZoomTransformFunc(container, chart);
     const requiredTransform = calcZoomTransform(chartDatum);
     if(!requiredTransform) { return; }

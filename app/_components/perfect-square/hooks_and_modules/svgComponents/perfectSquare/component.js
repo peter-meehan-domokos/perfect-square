@@ -141,8 +141,7 @@ export default function perfectSquare() {
             minLevelOfDetail = calcLevelOfDetail(1);
             shouldUpdateMinLevelOfDetail = false;
         }
-        levelOfDetail = 2;// zoomK === 1 ? minLevelOfDetail : d3.max([minLevelOfDetail, calcLevelOfDetail(zoomK)]);
-        //console.log("updatevis", levelOfDetail)
+        levelOfDetail = zoomK === 1 ? minLevelOfDetail : d3.max([minLevelOfDetail, calcLevelOfDetail(zoomK)]);
         //level of detail related flags
         shouldShowHeader =  _shouldShowHeader(levelOfDetail);
         shouldShowSubtitle =  _shouldShowSubtitle(levelOfDetail);
@@ -214,7 +213,9 @@ export default function perfectSquare() {
         }
         _chartColour = d => {
             const anotherChartIsSelected = selectedChartKey && selectedChartKey !== d.key ? true : false;
-            if(anotherChartIsSelected){ return GREY; }
+            if(anotherChartIsSelected){ 
+                return GREY; 
+            }
             return _chartColourWhenNotGreyedOut(d);
         };
 

@@ -47,8 +47,6 @@ const PerfectSquare : React.FC = () => {
     isChartOnScreenChecker 
    } = useContext(ZoomContext);
 
-   //console.log("PS")
-
   //dom refs
   const contentsGRef = useRef(null);
 
@@ -79,12 +77,12 @@ const PerfectSquare : React.FC = () => {
     prevDataKeyRef.current = data?.key || "";
   }, [data?.key])
 
+  //@todo - refactor so we dont need to stringify grid - we need to prevent it being called duirng simulation 
+  //as it overides the sim properties eg x and y on each datapoint
   const perfectSquareData : PerfectSquareData | null = useMemo(() => {
     if(!data || !grid) { return null; }
     return perfectSquareLayout(data, grid)
-  }, [data, grid]);
-
-  console.log("psData0", perfectSquareData?.datapoints[0]?.x)
+  }, [data, JSON.stringify(grid)]);
 
   const simulationData : SimulationData  | null = useMemo(() => {
     if(!perfectSquareData) { return null }
@@ -93,8 +91,6 @@ const PerfectSquare : React.FC = () => {
       metadata : perfectSquareData.metadata
     } 
   },[perfectSquareData]);
-
-  console.log("simData0", simulationData?.nodesData[0]?.x)
 
   const { 
     simulationIsOn, 

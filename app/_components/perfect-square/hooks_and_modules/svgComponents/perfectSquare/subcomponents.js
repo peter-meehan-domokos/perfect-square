@@ -381,8 +381,8 @@ function bars(selection, barsAreaHeight, barWidth, gapBetweenBars, settings={}){
                             .attr("fill", colour)
                     
                     barG.select("rect.bar")
-                        .transition("fill")
-                        .duration(750)
+                        .transition("fill-rect")
+                        .duration(200)
                             .attr("fill", colour)
                 })
 
@@ -421,10 +421,12 @@ export function quadrantOutlinePath(selection, barsAreaHeight, barWidth, gapBetw
                         .transition("d")
                         .duration(transitions.update?.duration || 0)
                             .attr("d", quadrantPathD(values, quadD.i, barsAreaHeight, barWidth, gapBetweenBars))
+
                     path
-                        .transition("fill")
-                        .duration(750)
+                        .transition("fill-quad")
+                        .duration(200)
                             .attr("fill", colour);
+                    
                 })
 
         outlineG.exit().remove()//call(remove);
@@ -464,9 +466,8 @@ export function chartOutlinePath(selection, quadrantBarWidths, barsAreaHeight, g
                             .attr("d", chartPathD(data, quadrantBarWidths, barsAreaHeight, gapBetweenBars));
                     
                     path
-                        .transition("fill")
-                        .duration(750)
-                            .attr("d", chartPathD(data, quadrantBarWidths, barsAreaHeight, gapBetweenBars))
+                        .transition("fill-chart")
+                        .duration(200)
                             .attr("fill", colour)
                 });
 
