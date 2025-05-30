@@ -46,15 +46,14 @@ const usePerfectSquareCharts = (containerElement, data, perfectSquare, simulatio
   //CHARTS RELATED USE-EFFECTS
   const onRef = useRef(false);
   const simulationHasBeenToggledRef = useRef(false);
+  useEffect(() => {
+    simulationHasBeenToggledRef.current = !simulationHasBeenToggledRef.current;
+  }, [simulationIsOn])
+
   //apply dimensions
   useEffect(() => {
     if(!chart){ return; }
-    //console.log("DIMNS_UE onref simison", onRef.current, simulationIsOn)
-    /*const simHasBeenTurnedOff = onRef.current !== simulationIsOn && !simulationIsOn;
-    if(simHasBeenTurnedOff) {
-      console.log("dont change dimns as sim turned off") 
-      return; 
-    }*/
+
     perfectSquare
       .width(chart.width)
       .height(chart.height)
@@ -81,8 +80,6 @@ const usePerfectSquareCharts = (containerElement, data, perfectSquare, simulatio
 
   }, [!data, perfectSquare, selectedChartKey, selectedQuadrantIndex, selectedMeasureKey, zoomTransform?.k, arrangeBy])
 
-  //console.log("selChartKey", selectedChartKey)
-
   //apply handlers
   useEffect(() => {
     perfectSquare
@@ -93,17 +90,12 @@ const usePerfectSquareCharts = (containerElement, data, perfectSquare, simulatio
         .setSelectedMeasureKey(setSelectedMeasureKey);
 
   },[perfectSquare, setSelectedChartKey, zoomTo, setSelectedMeasureKey, data?.key])
-  
+  useEffect(() => {
+    //console.log("toggled1", simulationHasBeenToggledRef.current)
+  })
   //main render/update visual
   useEffect(() => {
     if (!data | !containerElement) { return; }
-    //console.log("MAIN_UE", !!zoomingInProgress)
-    const simHasBeenTurnedOff = onRef.current !== simulationIsOn && !simulationIsOn;
-    const simHasBeenTurnedOn = onRef.current !== simulationIsOn && simulationIsOn;
-    if(simHasBeenTurnedOff || simHasBeenTurnedOn) {
-      return; 
-    }
-    if(zoomingInProgress){ return; }
     //call charts
     //console.log("call render from mainue...")
     renderCharts.call(containerElement, data.datapoints, perfectSquare, simulationIsOn, {
@@ -128,7 +120,7 @@ const usePerfectSquareCharts = (containerElement, data, perfectSquare, simulatio
         transitions:{ update: { duration:ZOOM_AND_ARRANGE_TRANSITION_DURATION }}
       });
     }
-    simulationHasBeenToggledRef.current = true;
+    //simulationHasBeenToggledRef.current = true;
   }, [perfectSquare, arrangeBy]);
 
   //zooming in progress flag - note that dom will update due to zoom state changes
