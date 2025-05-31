@@ -68,7 +68,7 @@ const SettingsCtrls = ({ settings=DEFAULT_DISPLAY_SETTINGS, setSettings, setHead
       setHeaderTooltipsData(prevState => {
         const currentHeaderTooltip = prevState.find(d => d.type === "header");
         if(currentHeaderTooltip){
-          return prevState.map(d => d.key !== "header" ? d : newTooltipDatum)
+          return prevState.map(d => d.type !== "header" ? d : newTooltipDatum)
         }else{
           return [...prevState, newTooltipDatum]
         }

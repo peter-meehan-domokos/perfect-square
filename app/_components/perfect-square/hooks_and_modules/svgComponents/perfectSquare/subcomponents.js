@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import { remove, fadeIn } from '@/app/_helpers/domHelpers';
 import { chartPathD, quadrantPathD, quadrantTransform } from './helpers';
-import { FADE_IN_OUT_DURATION } from '@/app/constants';
+import { FILL_CHANGE_DURATION } from '@/app/constants';
 
 /**
  * @description  
@@ -382,7 +382,7 @@ function bars(selection, barsAreaHeight, barWidth, gapBetweenBars, settings={}){
                     
                     barG.select("rect.bar")
                         .transition("fill-rect")
-                        .duration(200)
+                        .duration(FILL_CHANGE_DURATION)
                             .attr("fill", colour)
                 })
 
@@ -424,7 +424,7 @@ export function quadrantOutlinePath(selection, barsAreaHeight, barWidth, gapBetw
 
                     path
                         .transition("fill-quad")
-                        .duration(200)
+                        .duration(FILL_CHANGE_DURATION)
                             .attr("fill", colour);
                     
                 })
@@ -467,7 +467,7 @@ export function chartOutlinePath(selection, quadrantBarWidths, barsAreaHeight, g
                     
                     path
                         .transition("fill-chart")
-                        .duration(200)
+                        .duration(FILL_CHANGE_DURATION)
                             .attr("fill", colour)
                 });
 

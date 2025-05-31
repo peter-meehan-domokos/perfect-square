@@ -7,6 +7,7 @@ export const COLOURS = {
 }
 
 export const FADE_IN_OUT_DURATION = { FAST:50, MED:200, SLOW:500 }
+export const FILL_CHANGE_DURATION = 200;
 
 export const CHART_IN_DURATION = 500;
 export const CHART_OUT_DURATION = 500;

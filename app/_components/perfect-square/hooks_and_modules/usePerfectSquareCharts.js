@@ -44,10 +44,10 @@ const usePerfectSquareCharts = (containerElement, data, perfectSquare, simulatio
    } = useContext(ZoomContext);
 
   //CHARTS RELATED USE-EFFECTS
-  const onRef = useRef(false);
-  const simulationHasBeenToggledRef = useRef(false);
+  //flag
+  const simulationHasBeenToggledOnOffRef = useRef(false);
   useEffect(() => {
-    simulationHasBeenToggledRef.current = !simulationHasBeenToggledRef.current;
+    simulationHasBeenToggledOnOffRef.current = !simulationHasBeenToggledOnOffRef.current;
   }, [simulationIsOn])
 
   //apply dimensions
@@ -90,9 +90,7 @@ const usePerfectSquareCharts = (containerElement, data, perfectSquare, simulatio
         .setSelectedMeasureKey(setSelectedMeasureKey);
 
   },[perfectSquare, setSelectedChartKey, zoomTo, setSelectedMeasureKey, data?.key])
-  useEffect(() => {
-    //console.log("toggled1", simulationHasBeenToggledRef.current)
-  })
+
   //main render/update visual
   useEffect(() => {
     if (!data | !containerElement) { return; }
@@ -103,37 +101,28 @@ const usePerfectSquareCharts = (containerElement, data, perfectSquare, simulatio
     });
   }, [perfectSquare, data]);
 
-  //next - color arrangyBy not uodating
-  //update due to arrangeBy changing
-  //flag to prevent the zoom useEffect running when sim changes the zoom functions eg isChartOnScreenChecker
-  //const simulationHasBeenToggledRef = useRef(false);
   useEffect(() => {
     if (!data || !containerElement) { return; }
-   //console.log("SIMON_UE simison", simulationIsOn)
     if(simulationIsOn){
       //x,y provided by sim, so just call chart
       d3.select(containerElement).selectAll(".chart").call(perfectSquare)
     }else{
-      //@todo - add transition to size of charts
-      //console.log("call render from simue...")
       renderCharts.call(containerElement, data.datapoints, perfectSquare, simulationIsOn, {
         transitions:{ update: { duration:ZOOM_AND_ARRANGE_TRANSITION_DURATION }}
       });
     }
-    //simulationHasBeenToggledRef.current = true;
   }, [perfectSquare, arrangeBy]);
 
-  //zooming in progress flag - note that dom will update due to zoom state changes
+  //zooming in progress flag in perfectSquareComponent - note that dom will update due to zoom state changes
   useEffect(() => {
     perfectSquare.zoomingInProgress(zoomingInProgress);
   }, [perfectSquare, zoomingInProgress]);
 
   //update due to zoom
   useEffect(() => {
-    //console.log("zoomUE....")
     if (!data || !containerElement) { return; }
-    //console.log("ZOOM_UE", !!zoomingInProgress, perfectSquare.levelOfDetail())
-    if(simulationHasBeenToggledRef.current){ return; }
+    //if isChartOnScreenChecker has updated due to sim, dont need to render charts here assim useEffect handles it
+    if(simulationHasBeenToggledOnOffRef.current){ return; }
     //TOOK THIS OUT - not sure why i put it in, but it prevents manual zoom from processing isChartOnScreenChecker
     //if(!zoomingInProgress){ return; }
 
@@ -163,8 +152,7 @@ const usePerfectSquareCharts = (containerElement, data, perfectSquare, simulatio
 
   useEffect(() => {
     //reset flags
-    simulationHasBeenToggledRef.current = false;
-    onRef.current = simulationIsOn;
+    simulationHasBeenToggledOnOffRef.current = false;
   }, [simulationIsOn]);
   
   return null;
