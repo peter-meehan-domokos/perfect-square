@@ -15,7 +15,7 @@ const GET_EXAMPLES = `
   }
 `
 
-type ExamplesWrapper = {
+interface ExamplesWrapper {
   examples:Examples
 }
 

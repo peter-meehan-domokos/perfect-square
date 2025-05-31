@@ -18,22 +18,8 @@ export interface HandlerFnWith2Args<T, U> {
     (arg: U): void;
 }
 
-/*
-export interface HandlerFn<T, U, V> {
-    (arg1 : T, arg2 : U, arg3 : V): void;
-}*/
+export interface QueryResultHandlerFn<T> extends HandlerFn<QueryResult<T>> {}
 
-//export type Handler1<T> = (argObj: T) => void;
-
-//@todo - use interface instead
-export type QueryResultHandlerFn<T> = HandlerFn<QueryResult<T>>
-/*
-export interface QueryResultHandlerFn<T> {
-    HandlerFn<QueryResult<T>>
-}
-*/
-
-//@todo - use reacts own type for this
 export interface FunctionalComponentWithNoProps {
     (): ReactElement;
 }
@@ -46,16 +32,9 @@ export interface SecondOrderTransformFn<T, U> {
     (t : T):TransformFn<T, U>;
 }
 
-/*
-export interface TransformFnWithOptions<T,U> {
-    (t : T, u : U): T
+export interface TransformerFactory<T, U, Options> { 
+    (targetValue : T, options : Options): TransformFn<T, U>
 }
-*/
-
-export type TransformerFactory<T, U, Options> = (
-    targetValue : T, 
-    options : Options
-) => TransformFn<T, U>
 
 export interface AccessorFn<T , R> {
     (t : T):R

@@ -9,7 +9,7 @@ type ExamplesResult = QueryResult<Examples>;
 type VisualDataResult = QueryResult<ExampleData>;
 
 type Device = "mobile" | "tablet" | "laptop-or-pc";
-type AppContext = {
+interface AppContext {
   introIsDisplayed : boolean,
   device : Device | "",
   examplesResult : ExamplesResult,
@@ -20,6 +20,7 @@ type AppContext = {
   updateSelectedExample : HandlerFn<string>,
   updateVisualDataResult : HandlerFn<VisualDataResult>,
 }
+
 const nullResult = { data: null, loading: false, error: null };
 const initAppContext : AppContext = {
   introIsDisplayed:true,

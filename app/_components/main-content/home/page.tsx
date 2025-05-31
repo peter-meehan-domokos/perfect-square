@@ -15,7 +15,7 @@ const GET_EXAMPLE_DATA = (exampleKey: string) => `
   }
 `
 
-type ExampleDataResultWrapper = {
+interface ExampleDataResultWrapper {
   exampleData:{
     //the data received is stringified on the server, separately to the query stringification
     data: string //ExampleData

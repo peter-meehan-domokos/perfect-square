@@ -6,13 +6,13 @@ import { DEFAULT_DISPLAY_SETTINGS } from "../perfect-square/constants";
 import { HandlerFnWithNoArgs } from "@/app/common-types/function-types";
 import { DisplaySettings, Transition } from "@/app/common-types/data-types";
 
-type ExternallyRequiredZoomTransformObject = {
+interface ExternallyRequiredZoomTransformObject {
     requiredTransform: ZoomTransform,
     requiredTransition: Transition, 
     callback: HandlerFnWithNoArgs
 }
 
-type PerfectSquareContext = {
+interface PerfectSquareContext {
     selectedChartKey: string,
     selectedQuadrantIndex: number | null,
     selectedMeasureKey: string,
@@ -21,24 +21,24 @@ type PerfectSquareContext = {
     setSelectedMeasureKey: Dispatch<SetStateAction<string>>,
 }
 
-type ExternalZoomContext = {
+interface ExternalZoomContext {
     zoomTransform : ZoomTransform,
     setZoomTransform: Dispatch<SetStateAction<ZoomTransform>>,
     externallyRequiredZoomTransformObject:ExternallyRequiredZoomTransformObject | null,
     setExternallyRequiredZoomTransformObject:Dispatch<SetStateAction<ExternallyRequiredZoomTransformObject | null>>
 }
 
-type HeaderContext = {
+interface HeaderContext {
     headerExtended:boolean,
     setHeaderExtended:Dispatch<SetStateAction<boolean>>
 }
 
-type DisplayContext = {
+interface DisplayContext {
     displaySettings: DisplaySettings,
     setDisplaySettings:Dispatch<SetStateAction<DisplaySettings>>
 }
 
-type VisualContext = PerfectSquareContext & ExternalZoomContext & DisplayContext & HeaderContext;
+interface VisualContext extends PerfectSquareContext, ExternalZoomContext, DisplayContext, HeaderContext {}
 
 const initPerfectSquareContext : PerfectSquareContext = {
     selectedChartKey:"",

@@ -30,29 +30,20 @@ interface Category {
     title : string,
     i : number
 }
-/*
-interface Categories {
-}
-const cats : Category[] = [
-    { key: "c1", title : "C1", i : 0 },
-    { key: "c2", title : "C2", i : 1 }
-]
-*/
 
 //interface Measure <T> {
 interface Measure {
     key : string,
     name : string,
     label : string,
-    //@todo - need to work out how to get the cats in here..define teh Category keys
-    //as being one of the actual catoegories I htink, then pass in 
+    //@todo - need to decide how best to get the cats as one of the actual categories- useca Cats generic
     categoryKey : string, // keyof T,
     range : [number, number],
     optimalValue : OptimalValue,
     preInjuryValue : number
 }
 
-//interface MeasureImpl = Measure<Categories> ??????????
+//interface MeasureImpl = Measure<Categories>
 interface DatapointCategoryValue {
     key : string,
     measureKey : string,
