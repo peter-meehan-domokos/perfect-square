@@ -25,17 +25,19 @@ interface ExamplesWrapper {
  * @returns {ReactElement} 
  */
  const MainContent : React.FC<{}> = () => {
-    const { setIntroIsDisplayed, updateSelectedExample, setExamplesResult } = useContext(AppContext);
+    const { updateSelectedExample, setExamplesResult } = useContext(AppContext);
     const successCallback : HandlerFn<Examples> = useCallback(
       (extractedExampleData) => updateSelectedExample(extractedExampleData[0]?.key), //set first example as selected initially
       [updateSelectedExample]
     );
+
+    const extractData = useCallback((data:ExamplesWrapper) => data.examples, [])
   
     return (
       <DataLoader<Examples>
         query={GET_EXAMPLES} 
         save={setExamplesResult}
-        extractData={(data:ExamplesWrapper) => data.examples}
+        extractData={extractData}
         successCallback={successCallback}
       >
           <HomeLayout>

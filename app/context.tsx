@@ -1,5 +1,5 @@
 'use client'
-import React, { PropsWithChildren, Dispatch, SetStateAction, useState, useEffect, createContext, useRef } from "react";
+import React, { PropsWithChildren, Dispatch, SetStateAction, useState, useEffect, createContext, useRef, useCallback } from "react";
 import { mobileAndTabletCheck, mobileCheck } from "@/app/_helpers/deviceDetectionHelpers";
 import { CHART_OUT_TRANSITION, DELAY_FOR_DOM_CLEAN_UP } from '@/app/constants';
 import { Examples, ExampleData, QueryResult } from "./common-types/data-types";
@@ -43,7 +43,7 @@ export const AppContext = createContext(initAppContext);
  * @returns {ReactElement} the context provider
  */
 const AppContextProvider : React.FC<PropsWithChildren> = ({ children }) => {
-  const [introIsDisplayed, setIntroIsDisplayed] = useState(true);
+  const [introIsDisplayed, setIntroIsDisplayed] = useState(false);
   const [device, setDevice] = useState<Device | "">("");
   const [examplesResult, setExamplesResult] = useState<ExamplesResult>(nullResult);
   const [selectedExampleKey, setSelectedExampleKey] = useState("");
@@ -53,14 +53,7 @@ const AppContextProvider : React.FC<PropsWithChildren> = ({ children }) => {
   const pendingVisualDataResultRef = useRef<VisualDataResult | null>(null);
 
   //managed updates
-  const updateSelectedExample : HandlerFn<string> = key => {
-    //wipe visual data if not aligned eg if new data not loaded yet
-    if(visualDataResult.data && visualDataResult.data.key !== key){ 
-      updateVisualDataResult(nullResult); }
-    setSelectedExampleKey(key);
-  }
-
-  const updateVisualDataResult : HandlerFn<VisualDataResult> = (newVisualDataResult) => {
+  const updateVisualDataResult : HandlerFn<VisualDataResult> = useCallback((newVisualDataResult) => {
     //helper
     //this function provides time between data changes for the dom to be cleaned up smoothly elsewhere eg zoom reset,
     const startCleanup = () => {
@@ -91,7 +84,14 @@ const AppContextProvider : React.FC<PropsWithChildren> = ({ children }) => {
       //can set data immediately
       setVisualDataResult(newVisualDataResult);
     }
-  }
+  },[setVisualDataResult])
+
+  const updateSelectedExample : HandlerFn<string> = useCallback((key) => {
+    //wipe visual data if not aligned eg if new data not loaded yet
+    if(visualDataResult.data && visualDataResult.data.key !== key){ 
+      updateVisualDataResult(nullResult); }
+    setSelectedExampleKey(key);
+  }, [updateVisualDataResult])
 
   const context = {
     introIsDisplayed,

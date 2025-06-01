@@ -1,5 +1,6 @@
 'use client';
-import { ReactElement, useContext } from "react";
+import { useCallback, useContext } from "react";
+import { QueryResultHandlerFn } from "@/app/common-types/function-types";
 import { AppContext } from "@/app/context";
 import DataLoader from "../../utility/data-loader/page";
 import { VisualContextProvider } from "../../visual/context";
@@ -31,14 +32,17 @@ interface ExampleDataResultWrapper {
 
 const Home = () => {
   const { selectedExampleKey, updateVisualDataResult } = useContext(AppContext);
+  const extractData = useCallback((data:ExampleDataResultWrapper) => JSON.parse(data.exampleData.data), [])
+
   if(!selectedExampleKey){
     return null;
   }
+
   return (
       <DataLoader
         query={GET_EXAMPLE_DATA(selectedExampleKey)}
-        save={newVisualDataResult => updateVisualDataResult(newVisualDataResult)}
-        extractData={(data:ExampleDataResultWrapper) => JSON.parse(data.exampleData.data)}
+        save={updateVisualDataResult}
+        extractData={extractData}
       >
         <VisualContextProvider>
           <TooltipsContextProvider>

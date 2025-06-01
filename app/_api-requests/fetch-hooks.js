@@ -20,7 +20,6 @@ export const useFetch = (query) => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        //@todo - learn how to add the graphql query to the request as data
         const response = await fetch(URL, { 
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

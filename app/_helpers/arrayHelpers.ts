@@ -2,7 +2,7 @@ import { AccessorFn, TransformWithAccessorFn, TransformFn } from '../common-type
 import * as d3 from 'd3';
 
 //helpers
-//@todo - add a type that extends Sortable or whatever the type, so accessor can return other sortable types eg dates
+//@todo - use something like T extends Sortable so it works for number, date, string and not much else
 export function sortAscending<T>(
   arr : T[], 
   accessor : AccessorFn<T, number | null | undefined>

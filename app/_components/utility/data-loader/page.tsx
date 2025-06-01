@@ -21,7 +21,7 @@ import { FunctionalComponentWithNoProps, HandlerFn, QueryResultHandlerFn, Noop }
 function DataLoader<T> (props: { 
   query : string, 
   save : QueryResultHandlerFn<T>,
-  extractData : (data:any) => T, //@todo - replace any
+  extractData : (data:any) => T, //@todo - replace any with another generic parameter
   successCallback? : HandlerFn<T>,
   loadingFallback? : FunctionalComponentWithNoProps | null,
   children  : ReactNode
@@ -35,7 +35,7 @@ function DataLoader<T> (props: {
       if(extractedData && successCallback){ 
         successCallback(extractedData)
       };
-  }, [data, error, loading, /*extractData,save, successCallback*/])
+  }, [data, error, loading, extractData, save, successCallback])
 
     return (
       <>
