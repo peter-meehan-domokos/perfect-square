@@ -85,7 +85,6 @@ export default function perfectSquare() {
     let shouldUpdateMinLevelOfDetail = true;
     let minLevelOfDetail;
     let levelOfDetail;
-    let prevLevelOfDetail;
 
     let nrCharts;
 
@@ -130,7 +129,6 @@ export default function perfectSquare() {
         quadrantTitleHeight = 0;
         //withBarLabels = true;
         //level of detail 
-        prevLevelOfDetail = levelOfDetail;
         baseSize = d3.min([maxContentsWidth, maxContentsHeight]);
         const disabledLevels = getDisabledLevelsForZoom(zoomingInProgress?.initLevelOfDetail, zoomingInProgress?.targLevelOfDetail);
         //store calculation funciton so can use it elsewhere dynamically
