@@ -46,6 +46,7 @@ export const useZoom : UseZoomFn = (containerRef, viewRef, container, chart, cal
   useEffect(() => {
     if(!chart || !container){ return;}
     if(!containerRef || !containerRef.current){ return; }
+    console.log("zoom")
 
     // @ts-ignore - d3-zoom type inference is complex, ignoring to preserve working functionality
     setupZoom(zoom, container, chart, {
@@ -67,7 +68,7 @@ export const useZoom : UseZoomFn = (containerRef, viewRef, container, chart, cal
     d3.select(containerRef.current).call(zoom)
       .on("dblclick.zoom", null);
   
-  },[container, chart, callbacks, containerRef, viewRef])
+  },[container, chart, callbacks, containerRef, viewRef, zoom])
 
   const isChartOnScreenChecker = useCallback((chartD : PositionedDatapoint) => {
     if(!chart || !container){ return false;}
@@ -98,7 +99,7 @@ export const useZoom : UseZoomFn = (containerRef, viewRef, container, chart, cal
       // @ts-ignore
       d3.select(containerRef.current).call(zoom.transform, requiredTransform);
     }
-  }, [])
+  }, [containerRef, zoom.transform, domElementsRendered])
 
   const resetZoom = useCallback((withTransition=true) => { 
     //next - this must initially send message to color the greyed out charts
@@ -106,7 +107,7 @@ export const useZoom : UseZoomFn = (containerRef, viewRef, container, chart, cal
 
     const requiredTransition : Transition | undefined = withTransition ? { duration: RESET_ZOOM_DURATION } : undefined;
     applyZoom(d3.zoomIdentity, requiredTransition)
-  }, [applyZoom, containerRef])
+  }, [/*applyZoom, containerRef, domElementsRendered*/])
 
   const zoomTo = useCallback((chartDatum : PositionedDatapoint, callback=() => {}) => {
     if(!chart || !container || !domElementsRendered){ return;}

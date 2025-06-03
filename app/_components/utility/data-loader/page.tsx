@@ -28,9 +28,8 @@ function DataLoader<T> (props: {
 }) {
     const { query, save, extractData, successCallback, loadingFallback, children } = props;
     const { data, error, loading } = useFetch(query);
-    console.log("dl")
+    
     useEffect(() => {
-      console.log("ue dl")
       const extractedData = data !== null ? extractData(data) : null;
       save({ error, loading, data:extractedData });
       if(extractedData && successCallback){ 
