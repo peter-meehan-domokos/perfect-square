@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import { header, quadrantsSummary, quadrants, chartOutlinePath } from './subcomponents';
 import { quadrantsContainerTransform } from './helpers';
-import { isNumber } from '@/app/_helpers/dataHelpers';
+import { isActualNumber } from '@/app/_helpers/dataHelpers';
 import { calcLevelOfDetailFromBase, getDisabledLevelsForZoom } from '../../../helpers';
 import { COLOURS } from "@/app/constants";
 import { DEFAULT_DISPLAY_SETTINGS } from '../../../constants';
@@ -149,7 +149,7 @@ export default function perfectSquare() {
         shouldShowSelectedQuadrantTitle = _shouldShowSelectedQuadrantTitle(levelOfDetail, selectedQuadrantIndex);
         shouldShowBars = _shouldShowBars(levelOfDetail);
         shouldShowQuadrantOutlines = _shouldShowQuadrantOutlines(levelOfDetail);
-        shouldShowChartOutline = !shouldShowQuadrantOutlines && !isNumber(selectedQuadrantIndex);
+        shouldShowChartOutline = !shouldShowQuadrantOutlines && !isActualNumber(selectedQuadrantIndex);
         barsAreClickable  = _barsAreClickable(levelOfDetail);
 
         //keep headerheight even if no header or no subtitle, so smooth changes if user zooms in
@@ -224,7 +224,7 @@ export default function perfectSquare() {
             if(quadD.i === selectedQuadrantIndex){ return _chartColourWhenNotGreyedOut(chartD); }
             //quadrant isnt selected, so depends on other issues
             //Case 2. other quadrant selected greys it out
-            const anotherQuadrantIsSelected = isNumber(selectedQuadrantIndex) && selectedQuadrantIndex !== quadDIndex;
+            const anotherQuadrantIsSelected = isActualNumber(selectedQuadrantIndex) && selectedQuadrantIndex !== quadDIndex;
             if(anotherQuadrantIsSelected){ return GREY; }
             //Case 3. default to chart
             return _chartColour(chartD);
@@ -238,7 +238,7 @@ export default function perfectSquare() {
         _quadrantSummaryTextColour = (summaryD, chartKey) => {
             //Case 1. greyed out
             const anotherChartIsSelected = selectedChartKey && selectedChartKey !== chartKey ? true : false;
-            const anotherQuadrantIsSelected = isNumber(selectedQuadrantIndex) && selectedQuadrantIndex !== summaryD.i;
+            const anotherQuadrantIsSelected = isActualNumber(selectedQuadrantIndex) && selectedQuadrantIndex !== summaryD.i;
             if(anotherChartIsSelected || anotherQuadrantIsSelected){ return GREY; }
             //Case 2. highlighhted in red
             if(summaryD.metadata.mean < 50){ return "red";}
@@ -338,7 +338,7 @@ export default function perfectSquare() {
                 //flags & values
                 const anotherChartIsSelected = selectedChartKey && selectedChartKey !== chartData.key ? true : false;
                 const chartColour = _chartColour(chartData);
-                const anotherQuadrantIsSelectedChecker = quadIndex => isNumber(selectedQuadrantIndex) && selectedQuadrantIndex !== quadIndex;
+                const anotherQuadrantIsSelectedChecker = quadIndex => isActualNumber(selectedQuadrantIndex) && selectedQuadrantIndex !== quadIndex;
 
                 //bg
                 container.select("rect.component-bg")
@@ -385,7 +385,7 @@ export default function perfectSquare() {
                         .attr("width", `${chartAreaWidth}px`)
                         .attr("height", `${chartAreaHeight}px`)
                         //we use chart-area-bg as the default border when no quadrants are showing (ie when its the chart path showing)
-                        .attr("stroke", shouldShowQuadrantOutlines || isNumber(selectedQuadrantIndex)  ? "none" : chartColour)
+                        .attr("stroke", shouldShowQuadrantOutlines || isActualNumber(selectedQuadrantIndex)  ? "none" : chartColour)
                         .attr("stroke-width", _scaleValue(0.2));
 
                 //hitbox (title is always clickable, but chart itself is only clickable when bars are not)

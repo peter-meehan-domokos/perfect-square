@@ -1,6 +1,5 @@
 'use client';
 import { useCallback, useContext } from "react";
-import { QueryResultHandlerFn } from "@/app/common-types/function-types";
 import { AppContext } from "@/app/context";
 import DataLoader from "../../utility/data-loader/page";
 import { VisualContextProvider } from "../../visual/context";

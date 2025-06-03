@@ -11,6 +11,7 @@ export const useFetch = (query) => {
   const [error, setError] = useState(null);
 
   const stringifiedQuery = JSON.stringify({ query });
+  const _q = query.includes("getExamples") ? "get-examples" : query
 
   useEffect(() => {
     //check if fetched previously

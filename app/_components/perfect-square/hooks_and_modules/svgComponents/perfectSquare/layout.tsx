@@ -5,7 +5,7 @@ import { ExampleData, PerfectSquareData, Grid, DatapointQuadrantValue,
 import { TransformFn } from '@/app/common-types/function-types';
 import * as d3 from 'd3';
 import { sortAscending, sortDescending } from '../../../../../_helpers/arrayHelpers';
-import { isNumber, percentageScoreConverterFactory } from '../../../../../_helpers/dataHelpers';
+import { isActualNumber, percentageScoreConverterFactory } from '../../../../../_helpers/dataHelpers';
 
 /**
  * @description converts the data it receives into the format expected by the perfectSquareComponent (d3 layout pattern),
@@ -98,7 +98,7 @@ import { isNumber, percentageScoreConverterFactory } from '../../../../../_helpe
             return {
                 ...q,
                 metadata: { 
-                    mean: isNumber(meanValue) ? Math.round(meanValue!) : undefined
+                    mean: isActualNumber(meanValue) ? Math.round(meanValue!) : undefined
                 }
             }
         })
@@ -114,8 +114,8 @@ import { isNumber, percentageScoreConverterFactory } from '../../../../../_helpe
             quadrantsData : quadrantsWithMetadata,
             metadata : {
                 ...datapoint.metadata,
-                mean : isNumber(datapointMeanValue) ? Math.round(datapointMeanValue!) : undefined,
-                deviation : isNumber(datapointDeviationValue) ? Number(datapointDeviationValue!.toFixed(1)) : undefined,
+                mean : isActualNumber(datapointMeanValue) ? Math.round(datapointMeanValue!) : undefined,
+                deviation : isActualNumber(datapointDeviationValue) ? Number(datapointDeviationValue!.toFixed(1)) : undefined,
             }
         }
     });
@@ -145,11 +145,11 @@ import { isNumber, percentageScoreConverterFactory } from '../../../../../_helpe
     //calc summary values of the entire set of datapoints    
     const minMean = d3.min(datapointsWithMetadata, d => d.metadata.mean);
     const maxMean = d3.max(datapointsWithMetadata, d => d.metadata.mean);
-    const meanRange = isNumber(minMean) && isNumber(maxMean) ? maxMean! - minMean! : undefined;
+    const meanRange = isActualNumber(minMean) && isActualNumber(maxMean) ? maxMean! - minMean! : undefined;
 
     const minDeviation = d3.min(datapointsWithMetadata, d => d.metadata.deviation);
     const maxDeviation = d3.max(datapointsWithMetadata, d => d.metadata.deviation);
-    const deviationRange = isNumber(minDeviation) && isNumber(maxDeviation) ? maxDeviation! - minDeviation! : undefined;
+    const deviationRange = isActualNumber(minDeviation) && isActualNumber(maxDeviation) ? maxDeviation! - minDeviation! : undefined;
 
     const dataMetadata : DatasetMetadata<MeasureDataSummaryItem> = {
         mean:{ 

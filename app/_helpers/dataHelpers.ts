@@ -3,8 +3,9 @@ import { TransformerFactory, ConvertToPercentageOptions } from "../common-types/
 import * as d3 from 'd3';
 
 //guards against NaN for number types, and other invalid states for LiberalNumber types,
-// and also returns true for 0, so a better way to check using than !number
-export const isNumber = (number : LiberalNumber) => typeof number === "number" && !isNaN(number);
+// and also returns true for 0, so its a better way to check using than !number
+export const isActualNumber = (n : LiberalNumber) => typeof n === "number" && !isNaN(n);
+export const areActualNumbers = (...nrs : LiberalNumber[]) => nrs.filter(n => !isActualNumber(n)).length === 0;
 
 export const percentageScoreConverterFactory : TransformerFactory<LiberalNumber, number | undefined, ConvertToPercentageOptions> = (
     liberalTargetValue, 

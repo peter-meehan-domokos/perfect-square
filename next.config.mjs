@@ -2,7 +2,7 @@
 const nextConfig = {
     /*basePath:"./perfect-square",*/
     output: "export",
-    /*reactStrictMode: true*/
+    reactStrictMode: false,
     images: {
         unoptimized: true
     }

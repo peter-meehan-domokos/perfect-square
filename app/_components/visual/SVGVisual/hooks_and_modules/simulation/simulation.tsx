@@ -6,7 +6,7 @@ Container, SimulationDimensions } from "@/app/common-types/data-types";
 import { VisualContext } from "../../../context";
 import { SVGDimensionsContext } from "../../container";
 import { _simulationIsOn } from "../../../helpers";
-
+import { isActualNumber } from "@/app/_helpers/dataHelpers";
 //constants
 const COLLISION_FORCE_RADIUS_FACTOR = 1.15;
 const EXTRA_HORIZ_MARGIN_FACTOR_FOR_FORCE = 0.15;
@@ -147,7 +147,8 @@ function applyForces(
           return horizSpacePerChart * d.i + adjuster;
         }
         if(arrangeBy.x === "mean"){
-          //@todo - replace guards with call to isNumber and assert types after that
+          //@todo - replace guards with call to isActualNumber and assert types after that
+          //if(!isActualNumber())
           if(typeof d.metadata.mean !== "number" || typeof mean.min !== "number" || typeof mean.range !== "number"){ return 0; }
           if(isNaN(d.metadata.mean) || isNaN(mean.min) || isNaN(mean.range)){ return 0; }
 
@@ -156,7 +157,7 @@ function applyForces(
           return (horizSpace - horizSpacePerChart) * proportionOfScreenLength + adjuster;
         }
         if(arrangeBy.x === "deviation"){
-          //@todo - replace guards with call to isNumber and assert types after that
+          //@todo - replace guards with call to isActualNumber and assert types after that
           if(typeof d.metadata.deviation !== "number" || typeof deviation.min !== "number" || typeof deviation.range !== "number"){ return 0; }
           if(isNaN(d.metadata.deviation) || isNaN(deviation.min) || isNaN(deviation.range)){ return 0; }
           //invert it by subtracting the proportion from 1 to get prop value
@@ -175,7 +176,7 @@ function applyForces(
           return contentsHeight - (d.i + 1) * vertSpacePerChart + adjuster;
         }
         if(arrangeBy.y === "mean"){
-          //@todo - replace guards with call to isNumber and assert types after that
+          //@todo - replace guards with call to isActualNumber and assert types after that
           if(typeof d.metadata.mean !== "number" || typeof mean.min !== "number" || typeof mean.range !== "number"){ return 0; }
           if(isNaN(d.metadata.mean) || isNaN(mean.min) || isNaN(mean.range)){ return 0; }
 
@@ -184,7 +185,7 @@ function applyForces(
         }
         if(arrangeBy.y === "deviation"){
           //console.log("y force")
-          //@todo - replace guards with call to isNumber and assert types after that
+          //@todo - replace guards with call to isActualNumber and assert types after that
           if(typeof d.metadata.deviation !== "number" || typeof deviation.min !== "number" || typeof deviation.range !== "number"){ return 0; }
           if(isNaN(d.metadata.deviation) || isNaN(deviation.min) || isNaN(deviation.range)){ return 0; }
 

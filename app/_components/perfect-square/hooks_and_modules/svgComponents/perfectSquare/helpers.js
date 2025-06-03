@@ -1,5 +1,5 @@
 
-import { isNumber } from '@/app/_helpers/dataHelpers';
+import { isActualNumber } from '@/app/_helpers/dataHelpers';
 import { immutableReverse } from '@/app/_helpers/arrayHelpers';
 
 export function quadrantsContainerTransform(selection, width, height, selectedQuadrantIndex){
@@ -9,10 +9,10 @@ export function quadrantsContainerTransform(selection, width, height, selectedQu
         selectedQuadrantIndex === 2 ? `${width} 0` :
         `0 0`;
 
-    const chartTransform = `scale(${isNumber(selectedQuadrantIndex) ? 0.5 : 1})`;
+    const chartTransform = `scale(${isActualNumber(selectedQuadrantIndex) ? 0.5 : 1})`;
     selection
         .transition()
-        .delay(isNumber(selectedQuadrantIndex) ? 0 : 75)
+        .delay(isActualNumber(selectedQuadrantIndex) ? 0 : 75)
         .duration(500)
             .attr("transform", chartTransform)
             .attr("transform-origin", chartTransformOrigin)
@@ -28,7 +28,7 @@ export function quadrantTransform(selection, quadrantWidth, quadrantHeight, sele
 
     selection.select("g.quadrant")
         .transition()
-        .delay(isNumber(selectedQuadrantIndex) ? 75 : 0)
+        .delay(isActualNumber(selectedQuadrantIndex) ? 75 : 0)
         .duration(500)
             .attr("transform", quadD => `scale(${quadD.i === selectedQuadrantIndex ? 3 : 1})`)
             .attr("transform-origin", transformOrigin);

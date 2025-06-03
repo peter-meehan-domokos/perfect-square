@@ -1,4 +1,3 @@
-//@ts-nocheck
 'use client'
 import { RefObject, useState, useEffect, useCallback, useContext, useMemo } from "react";
 import * as d3 from 'd3';
@@ -55,7 +54,9 @@ export const useZoom : UseZoomFn = (containerRef, viewRef, container, chart, cal
 
     setupZoom(zoom, container, chart, {
       onStart:callbacks.onStart ? callbacks.onStart : () => {},
+      // @ts-ignore
       onZoom:(e : D3ZoomEvent<SVGElement, PositionedDatapoint>) => {
+        // @ts-ignore
         d3.select(viewRef.current).attr("transform", e.transform);
         //update react state so it can trigger any other changes needed
 
@@ -67,6 +68,7 @@ export const useZoom : UseZoomFn = (containerRef, viewRef, container, chart, cal
     });
 
     //call zoom
+    // @ts-ignore
     d3.select(containerRef.current).call(zoom)
       .on("dblclick.zoom", null);
   
@@ -91,12 +93,14 @@ export const useZoom : UseZoomFn = (containerRef, viewRef, container, chart, cal
       d3.select(containerRef.current)
         .transition()
         .duration(requiredTransition?.duration || 200)
+        // @ts-ignore
         .call(zoom.transform, requiredTransform)
           .on("end", () => { 
             setZoomingInProgress(null); 
             callback();
           });
     }else{
+      // @ts-ignore
       d3.select(containerRef.current).call(zoom.transform, requiredTransform);
     }
   }, [])
