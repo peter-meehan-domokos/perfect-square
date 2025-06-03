@@ -11,13 +11,23 @@ import { robotoMonoFont } from '@/app/assets/fonts';
  */
  const Footer = ({ image, items=[] }) => {
     return (
-        <div className="slide-footer-container">
-            <div className="slide-footer">
-                {/**image &&
-                    <div className="slide-footer-visual">
-                        <Image className="image" src={image.src} alt="profile-photo" width={0} height={0} />
+        <div className="slide-footer-container" style={{ border : "1px solid red" }}>
+            <div className="slide-footer" style={{ border : "1px solid blue" }}>
+                {image &&
+                    <div className="slide-footer-visual" style={{ border : "1px solid green" }}>
+                        <Image 
+                            className="image" 
+                            src={image.src} 
+                            alt="profile-photo" 
+                            width={100}
+                            height={100}
+                            style={{
+                                width: '85%',
+                                height: 'auto'
+                            }}
+                        />
                     </div>
-                */}
+                }
                 <ul className="slide-footer-items-list">
                     {items.map(item => 
                         <li key={item.key}>
