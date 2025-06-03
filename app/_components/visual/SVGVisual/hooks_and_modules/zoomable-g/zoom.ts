@@ -107,7 +107,7 @@ export const useZoom : UseZoomFn = (containerRef, viewRef, container, chart, cal
 
     const requiredTransition : Transition | undefined = withTransition ? { duration: RESET_ZOOM_DURATION } : undefined;
     applyZoom(d3.zoomIdentity, requiredTransition)
-  }, [/*applyZoom, containerRef, domElementsRendered*/])
+  }, [domElementsRendered, applyZoom])
 
   const zoomTo = useCallback((chartDatum : PositionedDatapoint, callback=() => {}) => {
     if(!chart || !container || !domElementsRendered){ return;}
@@ -118,7 +118,7 @@ export const useZoom : UseZoomFn = (containerRef, viewRef, container, chart, cal
     if(!requiredTransform) { return; }
     const requiredTransition = { duration: ZOOM_AND_ARRANGE_TRANSITION_DURATION };
     applyZoom(requiredTransform, requiredTransition, callback)
-  },[applyZoom, containerRef, container, chart]);
+  },[applyZoom, container, chart, domElementsRendered]);
   
   useEffect(() => {
     if(externallyRequiredZoomTransformObject){
