@@ -1,4 +1,4 @@
-import { AccessorFn, TransformWithAccessorFn, TransformFn } from '../common-types/function-types';
+import { AccessorFn } from '../common-types/function-types';
 import * as d3 from 'd3';
 
 //helpers
@@ -12,6 +12,14 @@ export function sortAscending<T>(
   return dataCopy.sort((a, b) => d3.ascending(accessor(a) || undefined, accessor(b) || undefined))
 };
 
+/**
+ * @description Sorts an array in descending order based on values returned by an accessor function
+ * 
+ * @template T - The type of elements in the array
+ * @param {T[]} arr - The array to sort
+ * @param {(item: T) => number | null | undefined} accessor - Function to access the numeric value to sort by
+ * @returns {T[]} A new sorted array
+ */
 export function sortDescending<T>(
   arr : T[], 
   accessor : AccessorFn<T, number | null | undefined>

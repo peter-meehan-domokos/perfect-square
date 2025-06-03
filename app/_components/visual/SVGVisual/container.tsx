@@ -1,7 +1,6 @@
 'use client'
-import { useContext, useRef, useMemo, createContext, useCallback, PropsWithChildren } from 'react';
-import { Margin, Grid, SimulationDimensions, Container, ContainerWithDatapointPositioning } from '@/app/common-types/data-types';
-import * as d3 from 'd3';
+import { useContext, useRef, useMemo, createContext, PropsWithChildren } from 'react';
+import { Grid, SimulationDimensions, Container, ContainerWithDatapointPositioning } from '@/app/common-types/data-types';
 import { AppContext } from '@/app/context';
 import { VisualContext } from "../context";
 import useContainerDimensions from './hooks_and_modules/useContainerDimensions';
@@ -32,16 +31,17 @@ const defaultSVGDimensionsContext : SVGDimensionsContext = {
 export const SVGDimensionsContext = createContext(defaultSVGDimensionsContext);
 
 /**
- * @description a component that renders an svg that takes up all available space, 
- * and also calculates its dimensions. Optionally provides other layout-related dimensional info (see params)
+ * @description A component that renders an svg that takes up all available space and calculates its dimensions.
+ * Optionally provides other layout-related dimensional info through context.
  *
- * @param {boolean} withGridDimensions if true, the context will also store the information required for any consumer to 
- * render a grid of the datapoints, with the number of rows and columns that make maximum use of the space.
+ * @param {Object} props - The component props
+ * @param {boolean} [props.withGridDimensions=false] - If true, the context will store information required for rendering 
+ * a grid of datapoints, with optimized rows and columns for maximum space utilization
+ * @param {boolean} [props.withSimulationDimensions=true] - If true, the context will contain nodeWidth and nodeHeight values
+ * for a simulation of datapoints, sized to fit all datapoints on screen
+ * @param {import('react').ReactNode} props.children - The content to render within the SVG container
  * 
- * @param {boolean} withSimulationDimensions if true, the context will also contain nodeWidth and nodeHeight values 
- * for a simulation if the datapoints, with values such that all datapoints will fit on screen
- * 
- * @returns {ReactElement} the context, and the svg element inside it
+ * @returns {import('react').ReactElement} The context provider wrapping the SVG element
  */
 
 //@todo - remove the div and just use the svg

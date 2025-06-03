@@ -1,6 +1,6 @@
 /* eslint react-hooks/exhaustive-deps: 0 */
 'use client'
-import React, { useEffect, useRef, useMemo, useCallback, useContext } from 'react'
+import { useEffect, useRef, useContext } from 'react'
 import * as d3 from 'd3';
 import { VisualContext } from "../../visual/context";
 import { TooltipsContext } from '../../visual/SVGVisual/hooks_and_modules/tooltips/context';
@@ -8,7 +8,7 @@ import { SVGDimensionsContext } from '../../visual/SVGVisual/container';
 import { ZoomContext } from '../../visual/SVGVisual/hooks_and_modules/zoomable-g/page';
 
 import renderCharts from './renderCharts';
-import { SELECT_MEASURE_TOOLTIP, LOADING_TOOLTIP } from "../constants";
+import { SELECT_MEASURE_TOOLTIP } from "../constants";
 import { ZOOM_AND_ARRANGE_TRANSITION_DURATION, CHART_IN_TRANSITION, CHART_OUT_TRANSITION } from '@/app/constants';
 
 /**
@@ -21,12 +21,12 @@ import { ZOOM_AND_ARRANGE_TRANSITION_DURATION, CHART_IN_TRANSITION, CHART_OUT_TR
 const usePerfectSquareCharts = (containerElement, data, perfectSquare, simulationIsOn) => {
   const { 
     selectedChartKey, selectedQuadrantIndex, selectedMeasureKey,
-    setSelectedChartKey, setSelectedQuadrantIndex, setSelectedMeasureKey,
+    setSelectedChartKey, setSelectedMeasureKey,
     displaySettings: { arrangeBy }
   } = useContext(VisualContext);
 
   const { 
-    setLoadingTooltipsData, setChartsViewboxTooltipsData
+    setChartsViewboxTooltipsData
   } = useContext(TooltipsContext);
 
   const { 
@@ -39,7 +39,6 @@ const usePerfectSquareCharts = (containerElement, data, perfectSquare, simulatio
     zoomTransform, 
     zoomingInProgress, 
     zoomTo, 
-    resetZoom, 
     isChartOnScreenChecker 
    } = useContext(ZoomContext);
 

@@ -267,11 +267,15 @@ export default function perfectSquare() {
     let _quadrantSummaryTextColour;
 
     /**
-     * @description an inner function that is returned to the user, and which will render/update the chart when it is called
+     * @description A D3 component that renders and updates perfect square charts for datapoints
      *
-     * @param {D3SelectionObject} selection the d3 selection of chart gs, one per datapoint
+     * @param {import('d3').Selection} selection - D3 selection of chart groups, one per datapoint
+     * @param {Object} [options={}] - Optional configuration
+     * @param {Object} [options.transitions] - Transition settings for animations
+     * @param {number} [options.transitions.delay] - Delay before transition starts
+     * @param {number} [options.transitions.duration] - Duration of the transition
      * 
-     * @returns {D3SelectionObject} the original selection that is passed to it, to support chaining
+     * @returns {import('d3').Selection} The original selection for chaining
      */
     function chart(selection, options = {}) {
         nrCharts = selection.nodes().length;
@@ -284,9 +288,10 @@ export default function perfectSquare() {
             .call(update);
 
         /**
-         * @description to each chart g in the selection, it appends some initial base elements
-         * @param {D3SelectionObject} selection  the d3 selection of chart gs, one per datapoint
-         * @returns {D3SelectionObject} the same selection is returned, as part of d3s call method, to support chaining
+         * @description Appends initial base elements to each chart group in the selection
+         * 
+         * @param {import('d3').Selection} selection - D3 selection of chart groups
+         * @returns {import('d3').Selection} The original selection for chaining
          */
         function init(selection){
             selection.each(function(){

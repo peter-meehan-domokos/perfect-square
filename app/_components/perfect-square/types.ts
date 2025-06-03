@@ -54,6 +54,7 @@ export interface SimulationDimensions {
 export interface PerfectSquareSimulationNodeDatum extends d3.SimulationNodeDatum, PerfectSquareDatapoint {}
 
 export interface SimulationData {
+    key: string;
     nodesData: PerfectSquareSimulationNodeDatum[];
     metadata: DatasetMetadata<MeasureDataSummaryItem>;
 }

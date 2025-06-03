@@ -59,16 +59,27 @@ const PerfectSquare : React.FC = () => {
   //DATA PROCESSING
   //data - control the way that a complete change of data is handled
   //@todo - move into a hook or HOC
+  /*bug -  - when zoomed in, if we change the example, it resets zoom to 0 before removing old ds, so we see the ones jump...
+    should remove them first, same problem as below
+    - when moving between examples, sim must reload..best is just to turn it off? 
+    - when zoom not =1, if user clicks simulation, we should reset zoom to 1 first,
+    or tell user to do it*/
   const cleanup = useCallback(() => {
+    //console.log("cleanup")
     setSelectedChartKey("");
     setSelectedQuadrantIndex(null);
     setSelectedMeasureKey("");
     resetZoom(false);
+    //also update simulation here to turn it off
   }, [setSelectedChartKey, setSelectedQuadrantIndex, setSelectedMeasureKey, resetZoom]);
 
   const prevDataKeyRef = useRef("")
   useEffect(() => {
     if(prevDataKeyRef.current && prevDataKeyRef.current !== data?.key){
+      //console.log("set timeout for cleanup")
+      // the issue is that at this point the charts should start to fade out but they don't start until the timeout ends
+      // we need to make a cool update with no data points... Maybe data.key needs to be in the deparr for one of the use effects that call render charts
+      // Or have a separate use effect that is triggered by data.key
       setTimeout(() => {
         //reset settings
         cleanup();
@@ -87,6 +98,7 @@ const PerfectSquare : React.FC = () => {
   const simulationData : SimulationData  | null = useMemo(() => {
     if(!perfectSquareData) { return null }
     return {
+      key : perfectSquareData.key,
       nodesData : perfectSquareData.datapoints, 
       metadata : perfectSquareData.metadata
     } 

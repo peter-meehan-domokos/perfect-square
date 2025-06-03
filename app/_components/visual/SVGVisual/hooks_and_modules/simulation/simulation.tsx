@@ -1,9 +1,8 @@
-import { RefObject, useEffect, useRef, useContext, useMemo } from "react";
+import { RefObject, useEffect, useRef, useContext } from "react";
 import * as d3 from 'd3';
 import { Container } from "@/app/_components/visual/types";
 import { 
     SimulationData, 
-    PerfectSquareSimulationNodeDatum, 
     PerfectSquareForceSimulation,
     ArrangeBy,
     PerfectSquareDatapoint,
@@ -14,7 +13,6 @@ import {
 import { VisualContext } from "../../../context";
 import { SVGDimensionsContext } from "../../container";
 import { _simulationIsOn } from "../../../helpers";
-import { isActualNumber } from "@/app/_helpers/dataHelpers";
 //constants
 const COLLISION_FORCE_RADIUS_FACTOR = 1.15;
 const EXTRA_HORIZ_MARGIN_FACTOR_FOR_FORCE = 0.15;
@@ -34,7 +32,7 @@ interface UseSimulationFn {
  * @param {Ref} containerRef a ref to the dom node on which to run the simulation
  * @param {object} data the data for the simulation, including a nodesData array
  * 
- * @return {object} an object containing getter and setter for the settings, the node dimensions, and a simulationIsOn flag
+ * @return {object} an object containing a simulationIsOn flag
  */
 export const useSimulation : UseSimulationFn = (containerRef, data) => {
   const { 
@@ -87,6 +85,13 @@ export const useSimulation : UseSimulationFn = (containerRef, data) => {
   //@todo - data on causes sim to run again when zoom changes. find a better design.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dimensions.container, dimensions.simulation, arrangeBy, data, simulationIsOn]);
+  
+  //useEffect(() => {
+    //console.log("useSimulation data key", data?.key)
+    // maybe just put data?.key into the deparray of the above use effect or one of them
+    
+    
+  //}, [data?.key])
 
   useEffect(() => {
     if(!simRef.current){ return; }

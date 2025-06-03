@@ -1,4 +1,4 @@
-import { Container, ContainerWithDatapointPositioning, Margin, PositionedDatapoint } from '@/app/common-types/data-types';
+import { Container, ContainerWithDatapointPositioning, PositionedDatapoint } from '@/app/common-types/data-types';
 import { ZoomCallbacks } from '@/app/common-types/function-types';
 import { ZoomTransform, ZoomBehavior, ZoomedElementBaseType } from "d3-zoom";
 import * as d3 from 'd3';
@@ -96,15 +96,21 @@ import * as d3 from 'd3';
   }
 
   /**
- * @description Calculates and applies basic settings to the zoom, and attaches event handlers 
+ * @description Calculates and applies basic settings to the zoom behavior, and attaches event handlers
  *
- * @param {D3ZoomBehaviourObject} zoom the d3 zoom behaviour object, initialised by d3.zoom()
- * @param {Number} contentsWidth the width of the zoom space
- * @param {Number} contentsHeight the height of zoom space
- * @param {Number} chartWidth the width of each individual chart
- * @param {Number} chartHeight the height of each individual chart
- * @param {object} options the optional event handlers to be attached
+ * @param {import('d3').ZoomBehavior<Element, unknown>} zoom - The d3 zoom behavior object
+ * @param {Object} container - Container dimensions
+ * @param {number} container.contentsWidth - The width of the zoom space
+ * @param {number} container.contentsHeight - The height of the zoom space
+ * @param {Object} chartContainer - Chart container dimensions
+ * @param {number} chartContainer.width - The width of each individual chart
+ * @param {number} chartContainer.height - The height of each individual chart
+ * @param {Object} [callbacks] - Optional event handlers
+ * @param {Function} [callbacks.onStart] - Handler for zoom start event
+ * @param {Function} [callbacks.onZoom] - Handler for zoom event
+ * @param {Function} [callbacks.onEnd] - Handler for zoom end event
  * 
+ * @returns {void}
  */
 export function setupZoom(
   zoom : ZoomBehavior<ZoomedElementBaseType, PositionedDatapoint>, 

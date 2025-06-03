@@ -5,12 +5,15 @@ import Footer from './footer/page';
 /**
  * @description Renders a wrapper for a slide child, adding controls and a footer (if applicable)
  * 
- * @param {string} containerClassNames enables to parent component to place addiotnal classnames on the container
- * @param {object} controlButtons the buttons that should be displayed for this particular slide eg Next Slide
- * @param {string} footer the content for a footer if required for the slide, expects either an image, text or both
- * @param {ReactElement} children the slide that this wrapper wraps
+ * @param {Object} props - The component props
+ * @param {string} [props.containerClassNames=""] - Additional class names to apply to the container
+ * @param {Array<{key: string, label: string, onClick: () => void}>} props.controlButtons - Control buttons configuration
+ * @param {Object} [props.footer] - Optional footer configuration
+ * @param {Object} [props.footer.image] - Image configuration for the footer
+ * @param {Array<{key: string, label: string, url?: string}>} [props.footer.items] - Footer items configuration
+ * @param {import('react').ReactNode} props.children - The slide content to wrap
  * 
- * @returns {ReactElement} A div containing the wrapper content and any children
+ * @returns {import('react').ReactElement} A div containing the wrapper content and any children
  */
 export default function SlideLayout({ containerClassNames="", controlButtons, footer, children }) {
 

@@ -1,7 +1,7 @@
 'use client'
 import { RefObject, useState, useEffect, useCallback, useContext, useMemo } from "react";
 import * as d3 from 'd3';
-import { ZoomTransform, D3ZoomEvent, ZoomBehavior } from "d3-zoom";
+import { ZoomTransform, D3ZoomEvent } from "d3-zoom";
 import { ZoomContext, ZoomingInProgress } from "./page";
 import { ContainerWithDatapointPositioning, Transition } from '@/app/_components/visual/types';
 import { HandlerFnWithNoArgs, ZoomCallbacks } from "@/app/types/function-types";
@@ -21,19 +21,24 @@ interface UseZoomFn {
   ) : ZoomContext
 }
 /**
- * @description A hook that applies zoom functionality to a container, which also includes charts
- * @param {Ref} containerRef a ref to the container on which the zoom behaviour (d3.zoom) is called
- * @param {Ref} viewRef a ref to the child of the container on which the zooom transforms are applied.
- * @param {Number} contentsWidth the width of the zoom space
- * @param {Number} contentsHeight the height of zoom space
- * @param {Number} margin the height of zoom space
- * @param {Number} chartWidth the width of each chart, needed for zoomTo 
- * @param {Number} chartHeight the height of each chart, needed for zoomTo 
- * @param {function} _chartX an accessor function to get the x position of each chart, needed for zoomTo 
- * @param {function} _chartY an accessor function to get the y position of each chart, needed for zoomTo 
- * @param {function} onStart an optional callback function for the 'start' zoom event
+ * @description A hook that applies zoom functionality to a container with charts
  * 
- * @return {object} an object containing the current zoom state, and some utility functions
+ * @param {React.RefObject<Element>} containerRef - Ref to the container for zoom behavior
+ * @param {React.RefObject<Element>} viewRef - Ref to the child element for zoom transforms
+ * @param {Object} container - Container configuration
+ * @param {number} container.contentsWidth - Width of the zoom space
+ * @param {number} container.contentsHeight - Height of zoom space
+ * @param {Object} chart - Chart configuration
+ * @param {number} chart.width - Width of each chart
+ * @param {number} chart.height - Height of each chart
+ * @param {Function} chart.x - Accessor function for chart x position
+ * @param {Function} chart.y - Accessor function for chart y position
+ * @param {Object} [callbacks] - Optional zoom event callbacks
+ * @param {Function} [callbacks.onStart] - Handler for zoom start
+ * @param {Function} [callbacks.onZoom] - Handler for zoom
+ * @param {Function} [callbacks.onEnd] - Handler for zoom end
+ * 
+ * @returns {Object} Current zoom state and utility functions
  */
 export const useZoom : UseZoomFn = (containerRef, viewRef, container, chart, callbacks) => {
   const { externallyRequiredZoomTransformObject, setExternallyRequiredZoomTransformObject } = useContext(VisualContext);
@@ -46,7 +51,6 @@ export const useZoom : UseZoomFn = (containerRef, viewRef, container, chart, cal
   useEffect(() => {
     if(!chart || !container){ return;}
     if(!containerRef || !containerRef.current){ return; }
-    console.log("zoom")
 
     // @ts-ignore - d3-zoom type inference is complex, ignoring to preserve working functionality
     setupZoom(zoom, container, chart, {

@@ -43,7 +43,7 @@ export const AppContext = createContext(initAppContext);
  * @returns {ReactElement} the context provider
  */
 const AppContextProvider : React.FC<PropsWithChildren> = ({ children }) => {
-  const [introIsDisplayed, setIntroIsDisplayed] = useState(true);
+  const [introIsDisplayed, setIntroIsDisplayed] = useState(false);
   const [device, setDevice] = useState<Device | "">("");
   const [examplesResult, setExamplesResult] = useState<ExamplesResult>(nullResult);
   const [selectedExampleKey, setSelectedExampleKey] = useState("");

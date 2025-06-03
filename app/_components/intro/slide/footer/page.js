@@ -4,10 +4,15 @@ import { robotoMonoFont } from '@/app/assets/fonts';
 /**
  * @description Renders either an image, or text lines, or both, in the form of a footer for use on a slide
  * 
- * @param {object} image an object that includes a src string for fethcing the image
- *  @param {Array} items the text items for the footer, to be rendered alongside the image
+ * @param {Object} props - The component props
+ * @param {Object} [props.image] - Image configuration object
+ * @param {string} props.image.src - Source URL for the image
+ * @param {Array<{key: string, label: string, url?: string}>} [props.items=[]] - Array of footer items to display
+ * @param {string} props.items[].key - Unique identifier for the item
+ * @param {string} props.items[].label - Display text for the item
+ * @param {string} [props.items[].url] - Optional URL for clickable items
  * 
- * @returns {ReactElement} A div containing the content
+ * @returns {import('react').ReactElement} A div containing the footer content with optional image and items list
  */
  const Footer = ({ image, items=[] }) => {
     return (
