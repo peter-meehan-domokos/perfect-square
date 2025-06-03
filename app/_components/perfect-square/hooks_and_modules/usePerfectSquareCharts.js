@@ -30,7 +30,6 @@ const usePerfectSquareCharts = (containerElement, data, perfectSquare, simulatio
   } = useContext(TooltipsContext);
 
   const { 
-      //container, 
       grid,
       chart,
   } = useContext(SVGDimensionsContext);
@@ -53,7 +52,10 @@ const usePerfectSquareCharts = (containerElement, data, perfectSquare, simulatio
   useEffect(() => {
     if(!chart){ return; }
 
+    //the cell size from the calculated grid is the base size for each chart, whereas the chart size can vary eg if simulation is on
     perfectSquare
+      .baseWidth(grid.cellWidth)
+      .baseHeight(grid.cellHeight)
       .width(chart.width)
       .height(chart.height)
       .margin(chart.margin);
@@ -62,10 +64,10 @@ const usePerfectSquareCharts = (containerElement, data, perfectSquare, simulatio
 
   useEffect(() => {
     if(!grid){ return; }
-    //use cell size to determine minlevel, as chart size reduces when simulation is on, but we dont want level to change for that
+    //use cell size to determine minlevel, as chart size reduces when simulation is on, but we dont want level to change for that as it wont be smooth
     perfectSquare.shouldUpdateMinLevelOfDetail(true);
-  }, [grid?.cellWidth, grid?.cellHeight, perfectSquare])
-  
+  }, [grid?.cellWidth, grid?.cellHeight, perfectSquare, data?.key])
+
   //apply settings
   useEffect(() => {
     if(!data){ return; }
@@ -92,10 +94,11 @@ const usePerfectSquareCharts = (containerElement, data, perfectSquare, simulatio
 
   //main render/update visual
   useEffect(() => {
-    if (!data | !containerElement) { return; }
+    if (!containerElement) { return; }
     //call charts
     //console.log("call render from mainue...")
-    renderCharts.call(containerElement, data.datapoints, perfectSquare, simulationIsOn, {
+    //if data === null, renderCharts will default to dataponts=[]
+    renderCharts.call(containerElement, data?.datapoints, perfectSquare, simulationIsOn, {
       transitions:{ enter: CHART_IN_TRANSITION, exit:CHART_OUT_TRANSITION }
     });
   }, [perfectSquare, data]);

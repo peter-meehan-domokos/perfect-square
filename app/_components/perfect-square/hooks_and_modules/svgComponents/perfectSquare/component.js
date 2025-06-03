@@ -22,11 +22,17 @@ const { BLUE, GREY, DARK_GREY } = COLOURS;
 export default function perfectSquare() {
     // settings that apply to all charts
     // Some settings need values as can be called before updateDimnsAndColourAccessors() function sets them
+    //first, we store the base dimns that apply in normla circumstances eg no simulation
+    let baseWidth;
+    let baseHeight;
+
+    //dimns, which will may vary from standard dimns eg if simulation is on
     let margin = { left:0, right:0, top: 0, bottom:0 };
     let width = 800;
     let height = 600;
     let contentsWidth;
     let contentsHeight;
+    
 
     let headerWidth;
     let headerHeight;
@@ -75,8 +81,7 @@ export default function perfectSquare() {
 
     //settings
     //semantic zoom-related (level of detail)
-    let baseSize = width;
-    let calcLevelOfDetail = calcLevelOfDetailFromBase(baseSize);
+    let calcLevelOfDetail = () => 1;
     let zoomingInProgress = null;
     let zoomK = 1;
     let arrangeBy = DEFAULT_DISPLAY_SETTINGS.arrangeBy;
@@ -128,12 +133,11 @@ export default function perfectSquare() {
         const maxContentsHeight = height - margin.top - margin.bottom;
         quadrantTitleHeight = 0;
         //withBarLabels = true;
-        //level of detail 
-        baseSize = d3.min([maxContentsWidth, maxContentsHeight]);
+        //level of detail (based on the base dimns rather than variations eg due to simulation being on)
+        const baseSize = d3.min([baseWidth - margin.left - margin.right, baseHeight - margin.top - margin.bottom]);
         const disabledLevels = getDisabledLevelsForZoom(zoomingInProgress?.initLevelOfDetail, zoomingInProgress?.targLevelOfDetail);
         //store calculation funciton so can use it elsewhere dynamically
         calcLevelOfDetail = calcLevelOfDetailFromBase(baseSize, disabledLevels);
-        //next - check this works for all the edge cases considered
         if(shouldUpdateMinLevelOfDetail){
             //must use k = 0 for this, even though k may not be 0 eg if user is zoomed in
             minLevelOfDetail = calcLevelOfDetail(1);
@@ -335,7 +339,6 @@ export default function perfectSquare() {
          * @returns {D3SelectionObject} the same selection is returned, as part of d3s call method, to support chaining
          */
         function update(selection){
-            //console.log("update", transitions)
             selection.each(function(chartData, i){
                 const container = d3.select(this);
                 //flags & values
@@ -435,6 +438,16 @@ export default function perfectSquare() {
     }
 
     //api
+    chart.baseWidth = function (value) {
+        if (!arguments.length) { return baseWidth }
+        baseWidth = value;
+        return chart;
+    };
+    chart.baseHeight = function (value) {
+        if (!arguments.length) { return baseHeight }
+        baseHeight = value;
+        return chart;
+    };
     chart.width = function (value) {
         if (!arguments.length) { return width }
         width = value;
@@ -478,13 +491,6 @@ export default function perfectSquare() {
     chart.shouldUpdateMinLevelOfDetail = function (value) {
         if (!arguments.length) { return shouldUpdateMinLevelOfDetail; }
         shouldUpdateMinLevelOfDetail = value;
-        return chart;
-    };
-    chart.levelOfDetail = function (func) {
-        if (!arguments.length) { return levelOfDetail; }
-        if(typeof func === "function"){
-            calcLevelOfDetail = func;
-        }
         return chart;
     };
     chart.zoomK = function (value) {

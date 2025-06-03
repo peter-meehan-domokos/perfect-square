@@ -59,6 +59,7 @@ export const useSimulation : UseSimulationFn = (containerRef, data) => {
   }
 
   const simRef = useRef<PerfectSquareForceSimulation>(d3.forceSimulation());
+
   //simulation
   useEffect(() => {
     if(!data){ return; }
@@ -86,15 +87,10 @@ export const useSimulation : UseSimulationFn = (containerRef, data) => {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dimensions.container, dimensions.simulation, arrangeBy, data, simulationIsOn]);
   
-  //useEffect(() => {
-    //console.log("useSimulation data key", data?.key)
-    // maybe just put data?.key into the deparray of the above use effect or one of them
-    
-    
-  //}, [data?.key])
 
+  //if data changes, data may be null at first so do nothing, then when the new data comes in, we restart if sim is on
   useEffect(() => {
-    if(!simRef.current){ return; }
+    if(!simRef.current || !data){ return; }
     //turn it on or off
     if(!simulationIsOn){
       simRef.current.stop();
@@ -103,11 +99,10 @@ export const useSimulation : UseSimulationFn = (containerRef, data) => {
       simRef.current.alpha(1).restart();
       simIsStartedRef.current = true;
     }
-  }, [simulationIsOn, arrangeBy.x, arrangeBy.y])
+  }, [simulationIsOn, arrangeBy.x, arrangeBy.y, data?.key])
   
   return { 
     simulationIsOn,
-    //simulationHasBeenTurnedOnOrOff
   }
 
 };
