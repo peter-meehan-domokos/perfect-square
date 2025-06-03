@@ -1,12 +1,13 @@
 'use client'
 import { RefObject, useState, useEffect, useCallback, useContext, useMemo } from "react";
 import * as d3 from 'd3';
-import { ZoomTransform, D3ZoomEvent, ZoomBehavior, ZoomedElementBaseType } from "d3-zoom";
+import { ZoomTransform, D3ZoomEvent, ZoomBehavior } from "d3-zoom";
 import { ZoomContext, ZoomingInProgress } from "./page";
-import { ContainerWithDatapointPositioning, PositionedDatapoint, Transition } from '@/app/common-types/data-types';
-import { HandlerFnWithNoArgs, ZoomCallbacks } from "@/app/common-types/function-types";
+import { ContainerWithDatapointPositioning, Transition } from '@/app/_components/visual/types';
+import { HandlerFnWithNoArgs, ZoomCallbacks } from "@/app/types/function-types";
 import { VisualContext } from "../../../context";
-import { Container } from '@/app/common-types/data-types';
+import { Container } from '@/app/_components/visual/types';
+import { PositionedDatapoint } from "@/app/types/data-types";
 import { isChartOnScreenCheckerFunc, calcZoomTransformFunc, setupZoom } from "./helpers";
 import { RESET_ZOOM_DURATION, ZOOM_AND_ARRANGE_TRANSITION_DURATION } from "@/app/constants";
 
@@ -36,31 +37,25 @@ interface UseZoomFn {
  */
 export const useZoom : UseZoomFn = (containerRef, viewRef, container, chart, callbacks) => {
   const { externallyRequiredZoomTransformObject, setExternallyRequiredZoomTransformObject } = useContext(VisualContext);
-  //React must also store the zoom state (even though its available on the d3.zoom behaviour object)
-  //because some React components must update inline with zoom eg Header 
   const [zoomTransform, setZoomTransform] = useState(d3.zoomIdentity);
   const [zoomingInProgress, setZoomingInProgress] = useState<ZoomingInProgress | null>(null);
-  //the d3 zoom behaviour
-  const zoom : ZoomBehavior<ZoomedElementBaseType, PositionedDatapoint> = useMemo(() => d3.zoom(), [])
-  //@todo - add flags to useEffect dep array if its a good idea, think about linting rules and why they are there
-  //this flags add clarity: they wont cause useEffects to trigger, but these will be set to true before
-  //container and chart are defined, so we can be sure they will get triggered after these are rendered
+  // @ts-ignore - d3-zoom type inference is complex, ignoring to preserve working functionality
+  const zoom = useMemo(() => d3.zoom(), []);
   const domElementsRendered = containerRef && viewRef;
 
-  //main set up
   useEffect(() => {
     if(!chart || !container){ return;}
     if(!containerRef || !containerRef.current){ return; }
 
+    // @ts-ignore - d3-zoom type inference is complex, ignoring to preserve working functionality
     setupZoom(zoom, container, chart, {
       onStart:callbacks.onStart ? callbacks.onStart : () => {},
-      // @ts-ignore
       onZoom:(e : D3ZoomEvent<SVGElement, PositionedDatapoint>) => {
+        //usng ts-ignore due to d3 type inaccuracy from definitelytyped - it doesnt recognise transform obj as acceptable param
+        //@todo - create a custom type declaration that extends the d3 type definitions to properly include ZoomTransform as a valid attribute value
         // @ts-ignore
         d3.select(viewRef.current).attr("transform", e.transform);
         //update react state so it can trigger any other changes needed
-
-        //next - check does this trigger isonscreen to run in usePSCharts? if so, is the checker updatd properly?
         setZoomTransform(e.transform);
         //callback
         if(callbacks.onZoom){ callbacks.onZoom(e); }
