@@ -1,8 +1,16 @@
 import { RefObject, useEffect, useRef, useContext, useMemo } from "react";
 import * as d3 from 'd3';
-import { PerfectSquareSimulationNodeDatum, PerfectSquareForceSimulation, SimulationData, 
-  ArrangeBy, PerfectSquareDatapoint, DatasetMetadata, MeasureDataSummaryItem,
-Container, SimulationDimensions } from "@/app/common-types/data-types";
+import { Container } from "@/app/_components/visual/types";
+import { 
+    SimulationData, 
+    PerfectSquareSimulationNodeDatum, 
+    PerfectSquareForceSimulation,
+    ArrangeBy,
+    PerfectSquareDatapoint,
+    DatasetMetadata,
+    MeasureDataSummaryItem,
+    SimulationDimensions
+} from '@/app/_components/perfect-square/types';
 import { VisualContext } from "../../../context";
 import { SVGDimensionsContext } from "../../container";
 import { _simulationIsOn } from "../../../helpers";
