@@ -3,8 +3,8 @@ import { AppContext } from "@/app/context";
 import DataLoader from "../utility/data-loader/page";
 import HomeLayout from "./home/layout";
 import Home from "./home/page";
-import { HandlerFn } from "@/app/common-types/function-types";
-import { Examples } from "@/app/common-types/data-types";
+import { HandlerFn } from "@/app/types/function-types";
+import { Examples } from "@/app/types/data-types";
 
 const GET_EXAMPLES = `
   query getExamples{

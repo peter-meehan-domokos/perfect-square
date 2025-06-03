@@ -1,6 +1,6 @@
-import { Container, Margin, LevelOfDetail } from '@/app/common-types/data-types';
+import { Container, Margin, LevelOfDetail } from '@/app/_components/visual/types';
 import * as d3 from 'd3';
-import { LEVELS_OF_DETAIL, LEVELS_OF_DETAIL_THRESHOLDS, DEFAULT_CHART_MARGIN } from "./constants";
+import { LEVELS_OF_DETAIL, LEVELS_OF_DETAIL_THRESHOLDS } from "./constants";
 
 export const calcLevelOfDetailFromBase = (
     baseSize : number

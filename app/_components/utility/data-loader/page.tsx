@@ -2,7 +2,7 @@
 'use client'
 import react, { ReactNode, useEffect } from "react";
 import { useFetch } from '@/app/_api-requests/fetch-hooks';
-import { FunctionalComponentWithNoProps, HandlerFn, QueryResultHandlerFn, Noop } from "@/app/common-types/function-types";
+import { FunctionalComponentWithNoProps, HandlerFn, QueryResultHandlerFn, Noop } from "@/app/types/function-types";
 
 /**
  * @description A wrapper that fetches data using a given query, renders a loading fallback if supplied, and saves the data

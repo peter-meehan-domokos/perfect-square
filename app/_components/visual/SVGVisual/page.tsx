@@ -1,6 +1,6 @@
 'use client'
 import { ReactElement, useContext } from 'react';
-import { ZoomCallbacks } from "@/app/common-types/function-types";
+import { ZoomCallbacks } from "@/app/types/function-types";
 import { VisualContext } from "../context";
 import SVGContainer from './container';
 import ZoomableG from './hooks_and_modules/zoomable-g/page';

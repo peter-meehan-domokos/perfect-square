@@ -1,5 +1,6 @@
-import { Container, ContainerWithDatapointPositioning, PositionedDatapoint } from '@/app/common-types/data-types';
-import { ZoomCallbacks } from '@/app/common-types/function-types';
+import { Container, ContainerWithDatapointPositioning } from '@/app/_components/visual/types';
+import { PositionedDatapoint } from '@/app/types/data-types';
+import { ZoomCallbacks } from '@/app/types/function-types';
 import { ZoomTransform, ZoomBehavior, ZoomedElementBaseType } from "d3-zoom";
 import * as d3 from 'd3';
 

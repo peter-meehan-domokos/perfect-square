@@ -3,8 +3,9 @@ import { PropsWithChildren, Dispatch, SetStateAction, createContext, useState } 
 import * as d3 from 'd3';
 import { ZoomTransform } from "d3-zoom";
 import { DEFAULT_DISPLAY_SETTINGS } from "../perfect-square/constants";
-import { HandlerFnWithNoArgs } from "@/app/common-types/function-types";
-import { DisplaySettings, Transition } from "@/app/common-types/data-types";
+import { HandlerFnWithNoArgs } from "@/app/types/function-types";
+import { DisplaySettings } from "@/app/_components/perfect-square/types";
+import { Transition } from "@/app/_components/visual/types";
 
 interface ExternallyRequiredZoomTransformObject {
     requiredTransform: ZoomTransform,

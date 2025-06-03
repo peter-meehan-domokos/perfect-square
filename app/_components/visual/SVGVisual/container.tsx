@@ -1,6 +1,7 @@
 'use client'
 import { useContext, useRef, useMemo, createContext, PropsWithChildren } from 'react';
-import { Grid, SimulationDimensions, Container, ContainerWithDatapointPositioning } from '@/app/common-types/data-types';
+import { Grid, Container, ContainerWithDatapointPositioning } from '@/app/_components/visual/types';
+import { SimulationDimensions } from '@/app/_components/perfect-square/types';
 import { AppContext } from '@/app/context';
 import { VisualContext } from "../context";
 import useContainerDimensions from './hooks_and_modules/useContainerDimensions';

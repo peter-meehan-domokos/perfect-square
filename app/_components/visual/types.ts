@@ -71,4 +71,6 @@ export interface Tooltip {
 export interface Transition {
     delay?: number;
     duration?: number;
-} 
+}
+
+export type LevelOfDetail = 1 | 2 | 3; 

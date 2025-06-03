@@ -90,7 +90,7 @@ export const useSimulation : UseSimulationFn = (containerRef, data) => {
 
   //if data changes, data may be null at first so do nothing, then when the new data comes in, we restart if sim is on
   useEffect(() => {
-    if(!simRef.current || !data){ return; }
+    if(!simRef.current || !data?.key){ return; }
     //turn it on or off
     if(!simulationIsOn){
       simRef.current.stop();

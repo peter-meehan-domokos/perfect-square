@@ -1,5 +1,5 @@
-import { LiberalNumber } from "@/app/common-types/data-types";
-import { TransformerFactory, ConvertToPercentageOptions } from "../common-types/function-types";
+import { LiberalNumber } from "@/app/types/data-types";
+import { TransformerFactory, ConvertToPercentageOptions } from "@/app/types/function-types";
 import * as d3 from 'd3';
 
 //guards against NaN for number types, and other invalid states for LiberalNumber types,

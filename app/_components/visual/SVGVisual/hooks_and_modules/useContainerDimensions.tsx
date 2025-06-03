@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { DEFAULT_CONTAINER_MARGIN } from "../../../perfect-square/constants";
 import { applyMargin } from '../../../perfect-square/helpers';
 import { getElementDimns } from '@/app/_helpers/domHelpers';
-import { Container } from "@/app/common-types/data-types";
+import { Container } from "@/app/_components/visual/types";
 
 /**
  * @description A hook that calculates the dimensions of the given element and sets up a listener for any changes to it 

@@ -1,8 +1,9 @@
 'use client'
 import ReactElement, { useRef, createContext, useContext, useMemo, PropsWithChildren } from 'react';
 import { ZoomTransform, D3ZoomEvent, ZoomedElementBaseType } from "d3-zoom";
-import { PositionedDatapoint, Transition } from '@/app/common-types/data-types';
-import { HandlerFn, HandlerFnWithNoArgs, ZoomCallbacks } from '@/app/common-types/function-types';
+import { PositionedDatapoint } from '@/app/types/data-types';
+import { Transition } from '@/app/_components/visual/types';
+import { HandlerFn, HandlerFnWithNoArgs, ZoomCallbacks } from '@/app/types/function-types';
 import { useZoom } from '@/app/_components/visual/SVGVisual/hooks_and_modules/zoomable-g/zoom';
 import * as d3 from 'd3';
 import { SVGDimensionsContext } from '../../container';

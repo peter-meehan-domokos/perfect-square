@@ -2,8 +2,8 @@
 import React, { PropsWithChildren, Dispatch, SetStateAction, useState, useEffect, createContext, useRef, useCallback } from "react";
 import { mobileAndTabletCheck, mobileCheck } from "@/app/_helpers/deviceDetectionHelpers";
 import { CHART_OUT_TRANSITION, DELAY_FOR_DOM_CLEAN_UP } from '@/app/constants';
-import { Examples, ExampleData, QueryResult } from "./common-types/data-types";
-import { HandlerFn } from "./common-types/function-types";
+import { Examples, ExampleData, QueryResult } from "./types/data-types";
+import { HandlerFn } from "./types/function-types";
 
 type ExamplesResult = QueryResult<Examples>;
 type VisualDataResult = QueryResult<ExampleData>;
@@ -43,7 +43,7 @@ export const AppContext = createContext(initAppContext);
  * @returns {ReactElement} the context provider
  */
 const AppContextProvider : React.FC<PropsWithChildren> = ({ children }) => {
-  const [introIsDisplayed, setIntroIsDisplayed] = useState(false);
+  const [introIsDisplayed, setIntroIsDisplayed] = useState(true);
   const [device, setDevice] = useState<Device | "">("");
   const [examplesResult, setExamplesResult] = useState<ExamplesResult>(nullResult);
   const [selectedExampleKey, setSelectedExampleKey] = useState("");

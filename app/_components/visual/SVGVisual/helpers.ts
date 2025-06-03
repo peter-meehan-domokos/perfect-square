@@ -1,4 +1,4 @@
-import { SimulationDimensions, ArrangeBy } from '@/app/common-types/data-types';
+import { SimulationDimensions, ArrangeBy } from '@/app/_components/perfect-square/types';
 import * as d3 from 'd3';
 
 const calcSizeReductionFactor = (nrNodes : number, arrangeBy : ArrangeBy) => {

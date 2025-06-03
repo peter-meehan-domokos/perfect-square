@@ -1,4 +1,4 @@
-import { AccessorFn } from '../common-types/function-types';
+import { AccessorFn } from '@/app/types/function-types';
 import * as d3 from 'd3';
 
 //helpers

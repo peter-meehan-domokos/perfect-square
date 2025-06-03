@@ -65,7 +65,7 @@ export interface PositionedDatapoint extends Datapoint {
     y?: number;
 }
 
-interface DataSupportingProperties {
+export interface DataSupportingProperties {
     key: string;
     title: string[];
     desc?: string[];

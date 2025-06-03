@@ -1,4 +1,4 @@
-import { ArrangeBy } from "@/app/common-types/data-types";
+import { ArrangeBy } from "@/app/_components/perfect-square/types";
 
 export const _simulationIsOn = (arrangeBySettings : ArrangeBy | null):boolean => {
     if(!arrangeBySettings) { return false; }

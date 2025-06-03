@@ -1,4 +1,5 @@
-import { Margin, Tooltip, DisplaySettings, LevelOfDetail } from "@/app/common-types/data-types";
+import { Margin, Tooltip, LevelOfDetail } from "@/app/_components/visual/types";
+import { DisplaySettings } from "./types";
 
 export const DEFAULT_CONTAINER_MARGIN : Margin = { left:10, right:10, top:10, bottom:10 };
 export const DEFAULT_CHART_MARGIN : Margin = { left:0, right:0, top:0, bottom:0 };

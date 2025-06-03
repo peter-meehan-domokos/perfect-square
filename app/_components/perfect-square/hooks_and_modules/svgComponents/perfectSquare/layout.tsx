@@ -1,8 +1,14 @@
-import { ExampleData, PerfectSquareData, Grid, DatapointQuadrantValue, 
-    PerfectSquareDatapoint, DatapointQuadrantData, 
-    DatasetMetadata, MeasureDataSummaryItem, LiberalNumber
-} from '@/app/common-types/data-types';
-import { TransformFn } from '@/app/common-types/function-types';
+import { ExampleData, LiberalNumber } from '@/app/types/data-types';
+import { Grid } from '@/app/_components/visual/types';
+import { 
+    PerfectSquareData, 
+    PerfectSquareDatapoint, 
+    DatapointQuadrantData,
+    DatapointQuadrantValue,
+    DatasetMetadata,
+    MeasureDataSummaryItem
+} from '@/app/_components/perfect-square/types';
+import { TransformFn } from '@/app/types/function-types';
 import * as d3 from 'd3';
 import { sortAscending, sortDescending } from '../../../../../_helpers/arrayHelpers';
 import { isActualNumber, percentageScoreConverterFactory } from '../../../../../_helpers/dataHelpers';

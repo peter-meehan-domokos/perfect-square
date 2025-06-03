@@ -1,6 +1,5 @@
 import { Simulation } from "d3-force";
-import { Category, DatapointInfo, DatapointCategoryValue } from "@/app/types/data-types";
-import { TransformFn } from "@/app/types/function-types";
+import { Category, DatapointInfo, DatapointCategoryValue, DataSupportingProperties } from "@/app/types/data-types";
 
 export type DatasetOrder = "low-to-high" | "high-to-low";
 
@@ -71,4 +70,9 @@ export interface ArrangeBy {
 
 export interface DisplaySettings {
     arrangeBy: ArrangeBy;
+}
+
+export interface PerfectSquareData extends DataSupportingProperties {
+    datapoints: PerfectSquareDatapoint[];
+    metadata: DatasetMetadata<MeasureDataSummaryItem>;
 } 

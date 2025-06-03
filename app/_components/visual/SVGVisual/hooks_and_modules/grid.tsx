@@ -1,7 +1,7 @@
 'use client'
 import { CALC_CELL_MARGIN } from "../../../perfect-square/constants";
-import { TransformFn, SecondOrderTransformFn } from "@/app/common-types/function-types";
-import { GridStructure, Grid, CellDimensions } from "@/app/common-types/data-types";
+import { TransformFn, SecondOrderTransformFn } from "@/app/types/function-types";
+import { GridStructure, Grid, CellDimensions } from "@/app/_components/visual/types";
 
 const _cellXCalculator : SecondOrderTransformFn<number, number> = (cellWidth) => (colNr) => colNr * cellWidth;
 const _cellYCalculator : SecondOrderTransformFn<number, number> = (cellHeight) => (rowNr) => rowNr * cellHeight;

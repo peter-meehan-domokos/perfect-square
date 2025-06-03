@@ -1,7 +1,7 @@
 /* eslint react-hooks/exhaustive-deps: 0 */
 'use client'
 import React, { useEffect, useRef, useMemo, useCallback, useContext } from 'react'
-import { PerfectSquareData, SimulationData } from '@/app/common-types/data-types';
+import { PerfectSquareData, SimulationData } from './types';
 import { AppContext } from "@/app/context";
 import { VisualContext } from "../visual/context";
 import { TooltipsContext } from '../visual/SVGVisual/hooks_and_modules/tooltips/context';
