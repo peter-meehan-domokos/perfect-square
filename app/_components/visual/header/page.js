@@ -17,7 +17,8 @@ import { RESET_ZOOM_DURATION } from "@/app/constants";
  */
 const VisualHeader = () => { 
   const { 
-    visualDataResult:{ data }={} 
+    visualDataResult:{ data }={},
+    device
   } = useContext(AppContext);
   const { 
     headerExtended, setHeaderExtended, 
@@ -73,7 +74,8 @@ const VisualHeader = () => {
           <SettingsCtrls 
             settings={displaySettings} 
             setSettings={setDisplaySettings} 
-            setHeaderTooltipsData={setHeaderTooltipsData} />
+            setHeaderTooltipsData={setHeaderTooltipsData}
+            device={device} />
         </div>
       </div>
   )

@@ -30,7 +30,7 @@ const FormControlLabelStyle = {
  * @param {string} name .....
  * @returns {ReactElement} A React element that renders....
  */
-const SettingsCtrls = ({ settings=DEFAULT_DISPLAY_SETTINGS, setSettings, setHeaderTooltipsData }) => {
+const SettingsCtrls = ({ settings=DEFAULT_DISPLAY_SETTINGS, setSettings, setHeaderTooltipsData, device="desktop" }) => {
   const mouseOverRef = useRef("");
   const handleSettingsChange = (checkboxKey, checkboxValue) => {
     //remove tooltip as it has been clicked
@@ -54,7 +54,12 @@ const SettingsCtrls = ({ settings=DEFAULT_DISPLAY_SETTINGS, setSettings, setHead
   }
 
   const handleMouseOver = optKey => {
+    //@todo - handle showing and hiding tooltips on select with mobile  
+    // - this line prevents mouseover on tap atm because we would need to trigger a mouseout too, which gets messy
+    if(device === "mobile" || device === "tablet"){ return; }
+
     mouseOverRef.current = optKey;
+
     setTimeout(() => {
       if(!mouseOverRef.current === optKey) { return; }
       //note - tooltip key is same for all 3 so it doesnt disappear when going from one to the other
