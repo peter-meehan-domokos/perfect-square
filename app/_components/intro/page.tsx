@@ -1,6 +1,7 @@
 //@ts-nocheck
 'use client'
 import { ReactElement, useRef, useContext, useCallback } from 'react';
+import * as d3 from 'd3';
 import { AppContext } from '@/app/context';
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
@@ -26,6 +27,7 @@ const playButtonStyle = {
 const Intro : React.FC = () => {
     const { setIntroIsDisplayed } = useContext(AppContext);
     const sliderRef = useRef<Slider | null> (null);
+    const skipIntroBtnRef = useRef<HTMLButtonElement | null>(null);
     const settings = {
         dots: true,
         infinite: true,
@@ -33,10 +35,12 @@ const Intro : React.FC = () => {
         slidesToShow: 1,
         slidesToScroll: 1,
       };
-
+      
     const closeIntro = useCallback(() => setIntroIsDisplayed(false), [setIntroIsDisplayed])
 
-    const goToNextSlide = () => {  sliderRef.current?.slickNext(); }
+    const goToNextSlide = () => {  
+        sliderRef.current?.slickNext();
+    }
 
     const _isLastSlide = (i : number) => i === INTRO_SLIDES.length - 1;
 
@@ -47,13 +51,18 @@ const Intro : React.FC = () => {
         style:isLastSlide ? playButtonStyle : nextSlideButtonStyle
     }]
 
+    const handleChange = (currentSlide: number, nextSlide: number) => {
+        d3.select(skipIntroBtnRef.current)
+            .classed("display-none", nextSlide === INTRO_SLIDES.length - 1);
+    }
+
     return (
         <div className="intro">
-            <button className="skip-intro-btn" onClick={closeIntro}>
+            <button className="skip-intro-btn" onClick={closeIntro} ref={skipIntroBtnRef}>
               Skip intro
            </button>
             <div className="intro-slider-container">
-                <Slider {...settings} ref={sliderRef} arrows={false}>
+                <Slider {...settings} ref={sliderRef} arrows={false} beforeChange={handleChange}>
                     {INTRO_SLIDES.map((slide, i) => 
                         <SlideLayout 
                             key={`slide-${i}`}

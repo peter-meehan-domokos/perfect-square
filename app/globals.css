@@ -79,6 +79,10 @@ body {
   }
 }
 
+.intro .skip-intro-btn.display-none{
+  display:none;
+}
+
 .intro-slider-container{
   /*border:solid;*/
   width:80%;

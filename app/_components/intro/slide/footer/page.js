@@ -16,10 +16,10 @@ import { robotoMonoFont } from '@/app/assets/fonts';
  */
  const Footer = ({ image, items=[] }) => {
     return (
-        <div className="slide-footer-container" style={{ border : "1px solid red" }}>
-            <div className="slide-footer" style={{ border : "1px solid blue" }}>
+        <div className="slide-footer-container">
+            <div className="slide-footer">
                 {image &&
-                    <div className="slide-footer-visual" style={{ border : "1px solid green" }}>
+                    <div className="slide-footer-visual">
                         <Image 
                             className="image" 
                             src={image.src} 
