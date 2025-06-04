@@ -2,9 +2,6 @@
 
 [Live demo here](https://peter-meehan-domokos.github.io/perfect-square/) 
 
-Typescript migration in progress. For typescript code so far, see [this branch](https://github.com/peter-meehan-domokos/perfect-square/tree/typescript).
-
-
 ## Overview
 
 A novel 2D view of multivariate data, or n-dimensional vectors. It places particular focus on the shape of each datapoint, and how far away that shape is from an ideal standard. You can easily compare and group thousands of datapoints. Especially good at showing comparison against an ideal state. Also for visualising clustering and similarity ML algorithms, and for product quantization in a vector database search.
@@ -59,7 +56,7 @@ User can click a particular bar (which represents a measure or a dimension) to h
 
 ### Development Stack and set-up
 
-This is a client app built with Next.js, React and D3. (Currently Javascript but typescript migration release is imminent).
+This is a client app built with Next.js, React, D3, Typescript, and Javascript. (Some non-react components are not currently typed. A fully typed version will be available soon).
 
 It uses GraphQL to communicate with a server to retrieve data. GraphQL is a good choice as it provides a clean way to avoid over-fetching of data, which will be an issue when a larger number of datapoints are involved.
 
