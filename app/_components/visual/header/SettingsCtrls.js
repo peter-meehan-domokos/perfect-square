@@ -3,7 +3,7 @@ import React, { useRef } from 'react';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormGroup from '@mui/material/FormGroup';
 import Checkbox from '@mui/material/Checkbox';
-import { DEFAULT_DISPLAY_SETTINGS, SETTINGS_OPTIONS, ARRANGEMENT_OPTIONS } from "../../perfect-square/constants.js";
+import { DEFAULT_DISPLAY_SETTINGS, SETTINGS_OPTIONS, ARRANGEMENT_OPTIONS } from "../../perfect-square/constants";
 
 //these objects are applied to the checkbox and label roots, using the sx prop
 //see https://www.youtube.com/watch?v=gw30zyh3Irw&t=806s
@@ -28,9 +28,9 @@ const FormControlLabelStyle = {
  * @description This component renders....
  *
  * @param {string} name .....
- * @returns {ReactNode} A React element that renders....
+ * @returns {ReactElement} A React element that renders....
  */
-const SettingsCtrls = ({ settings=DEFAULT_DISPLAY_SETTINGS, setSettings, setHeaderTooltipsData }) => {
+const SettingsCtrls = ({ settings=DEFAULT_DISPLAY_SETTINGS, setSettings, setHeaderTooltipsData, device="desktop" }) => {
   const mouseOverRef = useRef("");
   const handleSettingsChange = (checkboxKey, checkboxValue) => {
     //remove tooltip as it has been clicked
@@ -54,16 +54,26 @@ const SettingsCtrls = ({ settings=DEFAULT_DISPLAY_SETTINGS, setSettings, setHead
   }
 
   const handleMouseOver = optKey => {
+    //@todo - handle showing and hiding tooltips on select with mobile  
+    // - this line prevents mouseover on tap atm because we would need to trigger a mouseout too, which gets messy
+    if(device === "mobile" || device === "tablet"){ return; }
+
     mouseOverRef.current = optKey;
+
     setTimeout(() => {
       if(!mouseOverRef.current === optKey) { return; }
       //note - tooltip key is same for all 3 so it doesnt disappear when going from one to the other
       const option = SETTINGS_OPTIONS.arrangeBy.find(opt => opt.key === optKey);
-      const newTooltipDatum = { key:"setting", area:"header", title:option.label, paragraphs:option.desc };
+      const newTooltipDatum = { 
+        type:"header", 
+        position: "top-right",
+        title:option.label, 
+        paragraphs:option.desc 
+      };
       setHeaderTooltipsData(prevState => {
-        const currentSettingsTooltip = prevState.find(d => d.key === "setting");
-        if(currentSettingsTooltip){
-          return prevState.map(d => d.key !== "setting" ? d : newTooltipDatum)
+        const currentHeaderTooltip = prevState.find(d => d.type === "header");
+        if(currentHeaderTooltip){
+          return prevState.map(d => d.type !== "header" ? d : newTooltipDatum)
         }else{
           return [...prevState, newTooltipDatum]
         }
@@ -75,7 +85,7 @@ const SettingsCtrls = ({ settings=DEFAULT_DISPLAY_SETTINGS, setSettings, setHead
     mouseOverRef.current = "";
     setTimeout(() => {
       if(mouseOverRef.current) { return; }
-      setHeaderTooltipsData(prevState => prevState.filter(d => d.key !== "setting"))
+      setHeaderTooltipsData(prevState => prevState.filter(d => d.type !== "header"))
     }, 500)
   }
 

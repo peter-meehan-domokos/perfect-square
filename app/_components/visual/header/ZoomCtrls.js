@@ -8,10 +8,10 @@ const { BLUE, GREY } = COLOURS;
  * @description This component renders....
  *
  * @param {string} name .....
- * @returns {ReactNode} A React element that renders....
+ * @returns {ReactElement} A React element that renders....
  */
-const ZoomCtrls = ({ zoomTransformState={}, resetZoom }) => { 
-  const { x, y, k } = zoomTransformState;
+const ZoomCtrls = ({ zoomTransform={}, resetZoom }) => { 
+  const { x, y, k } = zoomTransform;
   const isZoomedOrPanned = x || y || k > 1;
   return (
     <div className="zoom-ctrls">

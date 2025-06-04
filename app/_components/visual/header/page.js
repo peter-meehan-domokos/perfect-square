@@ -13,17 +13,18 @@ import { RESET_ZOOM_DURATION } from "@/app/constants";
 /**
  * @description 
  *
- * @returns {HTMLElement} 
+ * @returns {ReactElement} 
  */
 const VisualHeader = () => { 
   const { 
-    visualData:{ data }={} 
+    visualDataResult:{ data }={},
+    device
   } = useContext(AppContext);
   const { 
     headerExtended, setHeaderExtended, 
     selectedQuadrantIndex, setSelectedQuadrantIndex,
     displaySettings, setDisplaySettings,
-    zoomTransformState, setExternallyRequiredZoomTransformObject
+    zoomTransform, setExternallyRequiredZoomTransformObject
   } = useContext(VisualContext);
 
   const { 
@@ -68,12 +69,13 @@ const VisualHeader = () => {
                 <svg ref={containerRef}></svg>
               </div>
             </div>
-            <ZoomCtrls zoomTransformState={zoomTransformState} resetZoom={handleExternalResetZoom} />
+            <ZoomCtrls zoomTransform={zoomTransform} resetZoom={handleExternalResetZoom} />
           </div>
           <SettingsCtrls 
             settings={displaySettings} 
             setSettings={setDisplaySettings} 
-            setHeaderTooltipsData={setHeaderTooltipsData} />
+            setHeaderTooltipsData={setHeaderTooltipsData}
+            device={device} />
         </div>
       </div>
   )

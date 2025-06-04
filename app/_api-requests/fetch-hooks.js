@@ -11,15 +11,16 @@ export const useFetch = (query) => {
   const [error, setError] = useState(null);
 
   const stringifiedQuery = JSON.stringify({ query });
+  const _q = query.includes("getExamples") ? "get-examples" : query
 
   useEffect(() => {
     //check if fetched previously
     if(data[stringifiedQuery]) { return; }
+    if(loading){ return; }
 
     const fetchData = async () => {
       setLoading(true);
       try {
-        //@todo - learn how to add the graphql query to the request as data
         const response = await fetch(URL, { 
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -37,7 +38,7 @@ export const useFetch = (query) => {
       }
     };
     fetchData();
-  }, [stringifiedQuery, data]);
+  }, [stringifiedQuery, data, loading]);
 
   return { data:data[stringifiedQuery] || null, loading, error };
 };

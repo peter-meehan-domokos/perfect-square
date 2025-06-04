@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { isNumber } from '../../../_helpers/dataHelpers';
+import { isActualNumber } from '../../../_helpers/dataHelpers';
 import { remove, fadeIn } from '../../../_helpers/domHelpers';
 import { COLOURS } from "../../../constants";
 import { CHART_IN_TRANSITION } from '../../../constants';
@@ -137,7 +137,7 @@ export default function quadrantCtrls() {
             quadrantContainerG.exit().call(remove);
 
             //reset icon
-            const resetIconData = isNumber(selectedQuadrantIndex) ? [1] : [];
+            const resetIconData = isActualNumber(selectedQuadrantIndex) ? [1] : [];
             const resetG = contentsG.selectAll("g.reset-icon").data(resetIconData);
             resetG.enter()
                 .append("g")

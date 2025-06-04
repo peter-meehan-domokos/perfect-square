@@ -52,7 +52,7 @@ export const INTRO_SLIDES = [
         footer:{
             key:"contact",
             image:{
-                key:"photo", src:"/profile.png"
+                key:"photo", src:"./profile.png"
             },
             items:[
                 { key:"github", label:"Project Github", url:"https://github.com/peter-meehan-domokos/perfect-square" },
