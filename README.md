@@ -2,9 +2,8 @@
 
 [Live demo here](https://peter-meehan-domokos.github.io/perfect-square/) 
 
-Typescript migration under way. See [this branch](https://github.com/peter-meehan-domokos/perfect-square/tree/typescript).
+Typescript migration in progress. For typescript code so far, see [this branch](https://github.com/peter-meehan-domokos/perfect-square/tree/typescript).
 
-Note: still under development. 
 
 ## Overview
 
