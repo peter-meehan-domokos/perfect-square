@@ -1,6 +1,8 @@
 # The Perfect Square
 
-[Live demo here](https://peter-meehan-domokos.github.io/perfect-square/) 
+[Live demo here](https://peter-meehan-domokos.github.io/tebostudio/projects/perfectsquare/)
+
+(Note - This is a detailed README, but latest code is now [here](https://github.com/peter-meehan-domokos/tebostudio/tree/main/app/components/visualisations/perfect-square)
 
 ## Overview
 
